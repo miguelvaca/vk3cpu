@@ -1,0 +1,57 @@
+body {
+    background: rgb(196, 122, 77);
+    margin: 0px;
+}
+header {
+    background: black;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+}
+canvas {
+    background: white;
+    width: 100%;
+    height: 200px;
+    margin: auto;
+    border: 3px solid #ff0000;
+    display: block;
+    box-sizing: border-box;
+}
+section.spreadsheet {
+    background: grey;
+    display: flex;
+    flex-direction: row;
+}
+
+section.spreadsheet div {
+    background: lightblue;
+    display: inline-block;
+    margin: auto;
+    margin-top: 0%;
+    width: auto;
+    text-align: center;
+}
+section.spreadsheet div.first-col {
+    text-align: right;
+}
+
+section.controls div {
+    background:yellow;
+}
+
+section.controls div label {
+    background:rgb(94, 245, 94);
+    display: inline-block;
+    width: 180px;
+    text-align: right;
+}
+
+section.controls div input {
+    background:lightsalmon;
+    display: inline-block;
+    width: 300px;
+}
+
+footer {
+    background: white;
+}
