@@ -12,9 +12,8 @@ header {
 svg {
     background: white;
     width: 100%;
-    height: 400px;
     margin: auto;
-    border: 3px solid #000000;
+    border: 2px solid #000000;
     display: block;
     box-sizing: border-box;
 }
@@ -22,9 +21,8 @@ svg {
 canvas {
     background: white;
     width: 100%;
-    height: 400px;
     margin: auto;
-    border: 3px solid #000000;
+    border: 2px solid #000000;
     display: block;
     box-sizing: border-box;
 }
