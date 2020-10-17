@@ -8,15 +8,27 @@ header {
     font-family: 'Courier New', Courier, monospace;
     text-align: center;
 }
-canvas {
+
+svg {
     background: white;
     width: 100%;
-    height: 200px;
+    height: 400px;
     margin: auto;
-    border: 3px solid #ff0000;
+    border: 3px solid #000000;
     display: block;
     box-sizing: border-box;
 }
+
+canvas {
+    background: white;
+    width: 100%;
+    height: 400px;
+    margin: auto;
+    border: 3px solid #000000;
+    display: block;
+    box-sizing: border-box;
+}
+
 section.spreadsheet {
     background: grey;
     display: flex;
@@ -43,6 +55,7 @@ section.controls div label {
     background:rgb(94, 245, 94);
     display: inline-block;
     width: 180px;
+    font-size: 0.8em;
     text-align: right;
 }
 

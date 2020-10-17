@@ -8,10 +8,17 @@
     </head>
     <body>
         <header>Miguel VK3CPU - Magloop Antenna Calculator</header>
+        <!--
         <canvas id="3Dantenna" height="200px">
             3D Antenna Radiation Pattern Canvas
         </canvas>
-        <canvas id="chartCanvas" height="200px">
+        -->
+        <svg height="400px">
+            <circle cx="50%" cy="50%" r="30%" stroke="black" stroke-width="4" fill="white"/>
+            <circle cx="50%" cy="50%" r="25%" stroke="black" stroke-width="4" fill="white"/>
+            <text x="78%" y="50%" style="fill:black;">Capacitance</text>
+        </svg>
+        <canvas id="chartCanvas" height="400px">
             2D Chart Canvas
         </canvas>
         <section class="controls">
@@ -122,6 +129,13 @@
                 }
             });
             return retval;
+        }
+
+        function getProximityResFromSpacing(b_conductor_radius, c_loop_spacing) {
+            var retval = 0.0;
+            const lut = { 1:[],
+                2:[],
+            }
         }
 
         function calculateLossResistance() {
