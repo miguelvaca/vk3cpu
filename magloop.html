@@ -57,10 +57,7 @@
     </body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script>
-        var frequencies = [
-            1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
-            //1.8, 2.2, 2.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
-        ];
+        var frequencies = [];
 
         var loop_diameter_slider = document.getElementById("loop_diameter_slider");
         var loop_diameter_value = document.getElementById("loop_diameter_value");
@@ -89,7 +86,7 @@
         function updateFrequencies() {
             const hamFrequencies = [
                 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
-                //1.8, 2.2, 2.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
+                //1.8, 2.2, 2.8, 3.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.1, 12.0, 14.0, 16.0, 18.068, 21.0, 24.89, 28.0
             ];
             frequencies = [];
             hamFrequencies.forEach(freq => {
@@ -268,7 +265,7 @@
         function calculateCapacitorVoltage() {
             var retval = [];
             frequencies.forEach(freq => {
-                const Vcap = capacitorVoltage(freq);
+                const Vcap = 0.001 * capacitorVoltage(freq);
                 retval.push({x:freq, y:Vcap});
             });
             return retval;
@@ -345,7 +342,7 @@
             data: {
                 datasets: [
                 {
-                    label: 'Tuning Capacitance',
+                    label: 'Tuning Capacitor (pF)',
                     fill: false,
                     borderColor: 'green',
                     backgroundColor: 'green',
@@ -354,7 +351,7 @@
                     yAxisID: 'pfID'
                 },
                 {
-                    label: 'BW kHz',
+                    label: 'BW (kHz)',
                     fill: false,
                     borderColor: 'brown',
                     backgroundColor: 'brown',
@@ -363,7 +360,7 @@
                     yAxisID: 'bwID'
                 },
                 {
-                    label: 'Efficiency',
+                    label: 'Efficiency (%)',
                     fill: false,
                     borderColor: 'black',
                     backgroundColor: 'black',
@@ -372,7 +369,7 @@
                     yAxisID: 'effID'
                 },
                 {
-                    label: 'Radiation Resistance \u03A9',
+                    label: 'Radiation Resistance (\u03A9)',
                     fill: false,
                     borderColor: 'red',
                     backgroundColor: 'red',
@@ -381,7 +378,7 @@
                     yAxisID: 'mohmsID'
                 },
                 {
-                    label: 'Reactance j\u03A9',
+                    label: 'Reactance (j\u03A9)',
                     fill: false,
                     borderColor: 'blue',
                     backgroundColor: 'blue',
@@ -390,7 +387,7 @@
                     yAxisID: 'ohmsID'
                 },
                 {
-                    label: 'Loss Resistance \u03A9',
+                    label: 'Loss Resistance (\u03A9)',
                     fill: false,
                     borderColor: 'orange',
                     backgroundColor: 'orange',
@@ -408,7 +405,7 @@
                     yAxisID: 'qID'
                 },
                 {
-                    label: 'V cap',
+                    label: 'V cap (kV)',
                     fill: false,
                     borderColor: 'rgb(150, 150, 0)',
                     backgroundColor: 'rgb(150, 150, 0)',
@@ -499,7 +496,7 @@
                         display: true,
                         scaleLabel: {
                             display: true,
-                            labelString: 'Volts',
+                            labelString: 'kV',
                             fontColor: 'rgb(150, 150, 0)',
                             fontStyle: 'bold'
                         },
