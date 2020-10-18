@@ -260,57 +260,77 @@
             return retval;
         }
 
+        function capacitorVoltage(frequency) {
+            const Vcap = Math.sqrt(transmit_power_slider.value * inductiveReactance(frequency) * qualityFactor(frequency));
+            return Vcap;
+        }
+
+        function calculateCapacitorVoltage() {
+            var retval = [];
+            frequencies.forEach(freq => {
+                const Vcap = capacitorVoltage(freq);
+                retval.push({x:freq, y:Vcap});
+            });
+            return retval;
+        }
+
         loop_diameter_slider.oninput = function() {
             loop_diameter_value.innerHTML = this.value;
             updateFrequencies();
-            myChart.data.datasets[0].data = calculateRadiationResistance();
-            myChart.data.datasets[1].data = calculateInductiveReactance();
-            myChart.data.datasets[2].data = calculateTuningCapacitor();
-            myChart.data.datasets[3].data = calculateLossResistance();
-            myChart.data.datasets[4].data = calculateEfficiencyFactor();
-            myChart.data.datasets[5].data = calculateQualityFactor();
-            myChart.data.datasets[6].data = calculateBandwidth();
+            myChart.data.datasets[0].data = calculateTuningCapacitor();
+            myChart.data.datasets[1].data = calculateBandwidth();
+            myChart.data.datasets[2].data = calculateEfficiencyFactor();
+            myChart.data.datasets[3].data = calculateRadiationResistance();
+            myChart.data.datasets[4].data = calculateInductiveReactance();
+            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[6].data = calculateQualityFactor();
+            myChart.data.datasets[7].data = calculateCapacitorVoltage();
             myChart.update();
         }
 
         conductor_diameter_slider.oninput = function() {
             conductor_diameter_value.innerHTML = this.value;
-            myChart.data.datasets[0].data = calculateRadiationResistance();
-            myChart.data.datasets[1].data = calculateInductiveReactance();
-            // myChart.data.datasets[2].data = calculateTuningCapacitor();
-            myChart.data.datasets[3].data = calculateLossResistance();
-            myChart.data.datasets[4].data = calculateEfficiencyFactor();
-            myChart.data.datasets[5].data = calculateQualityFactor();
-            myChart.data.datasets[6].data = calculateBandwidth();
+            myChart.data.datasets[0].data = calculateTuningCapacitor();
+            myChart.data.datasets[1].data = calculateBandwidth();
+            myChart.data.datasets[2].data = calculateEfficiencyFactor();
+            myChart.data.datasets[3].data = calculateRadiationResistance();
+            myChart.data.datasets[4].data = calculateInductiveReactance();
+            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[6].data = calculateQualityFactor();
+            myChart.data.datasets[7].data = calculateCapacitorVoltage();
             myChart.update();
         }
 
         loop_turns_slider.oninput = function() {
             loop_turns_value.innerHTML = this.value;
-            myChart.data.datasets[0].data = calculateRadiationResistance();
-            myChart.data.datasets[1].data = calculateInductiveReactance();
-            myChart.data.datasets[2].data = calculateTuningCapacitor();
-            myChart.data.datasets[3].data = calculateLossResistance();
-            myChart.data.datasets[4].data = calculateEfficiencyFactor();
-            myChart.data.datasets[5].data = calculateQualityFactor();
-            myChart.data.datasets[6].data = calculateBandwidth();
+            myChart.data.datasets[0].data = calculateTuningCapacitor();
+            myChart.data.datasets[1].data = calculateBandwidth();
+            myChart.data.datasets[2].data = calculateEfficiencyFactor();
+            myChart.data.datasets[3].data = calculateRadiationResistance();
+            myChart.data.datasets[4].data = calculateInductiveReactance();
+            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[6].data = calculateQualityFactor();
+            myChart.data.datasets[7].data = calculateCapacitorVoltage();
             myChart.update();
         }
 
         loop_spacing_slider.oninput = function() {
             loop_spacing_value.innerHTML = loop_spacing_slider.value;
-            myChart.data.datasets[0].data = calculateRadiationResistance();
-            myChart.data.datasets[1].data = calculateInductiveReactance();
-            myChart.data.datasets[2].data = calculateTuningCapacitor();
-            myChart.data.datasets[3].data = calculateLossResistance();
-            myChart.data.datasets[4].data = calculateEfficiencyFactor();
-            myChart.data.datasets[5].data = calculateQualityFactor();
-            myChart.data.datasets[6].data = calculateBandwidth();
+            myChart.data.datasets[0].data = calculateTuningCapacitor();
+            myChart.data.datasets[1].data = calculateBandwidth();
+            myChart.data.datasets[2].data = calculateEfficiencyFactor();
+            myChart.data.datasets[3].data = calculateRadiationResistance();
+            myChart.data.datasets[4].data = calculateInductiveReactance();
+            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[6].data = calculateQualityFactor();
+            myChart.data.datasets[7].data = calculateCapacitorVoltage();
             myChart.update();
         }
 
         transmit_power_slider.oninput = function() {
             transmit_power_value.innerHTML = this.value;
+            myChart.data.datasets[7].data = calculateCapacitorVoltage();
+            myChart.update();
         }
 
         heightAboveGround_slider.oninput = function() {
@@ -386,6 +406,15 @@
                     data: calculateQualityFactor(),
                     borderWidth: 1,
                     yAxisID: 'qID'
+                },
+                {
+                    label: 'V cap',
+                    fill: false,
+                    borderColor: 'rgb(150, 150, 0)',
+                    backgroundColor: 'rgb(150, 150, 0)',
+                    data: calculateCapacitorVoltage(),
+                    borderWidth: 1,
+                    yAxisID: 'vID'
                 }]
             },
             options: {
@@ -465,6 +494,17 @@
                         },
                         position: 'right',
                         id: 'qID'
+                    },{
+                        type: 'linear',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Volts',
+                            fontColor: 'rgb(150, 150, 0)',
+                            fontStyle: 'bold'
+                        },
+                        position: 'right',
+                        id: 'vID'
                     }]
                 },
                 showLines: true
