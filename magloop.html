@@ -58,7 +58,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script>
         const frequencies = [
-            1.8, 2.2, 2.5, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
+            1.8, 2.2, 2.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
         ];
         
         var loop_diameter_slider = document.getElementById("loop_diameter_slider");
@@ -196,12 +196,13 @@
         }
 
         function calculateQualityFactor() {
-            const RL = calculateLossResistance();
-            const RR = calculateRadiationResistance();
+            const Xl = calculateInductiveReactance();
+            const Rl = calculateLossResistance();
+            const Rr = calculateRadiationResistance();
             var retval = [];
-            for (let index = 0; index < RR.length; index++) {
-                const Q = 1.0 / (1.0 + (RL[index].y / RR[index].y));
-                retval.push({x:RL[index].x, y:Q});
+            for (let index = 0; index < Xl.length; index++) {
+                const Q = Xl[index].y / (Rl[index].y + Rr[index].y);
+                retval.push({x:Xl[index].x, y:Q});
             }
             return retval;
         }
@@ -212,7 +213,8 @@
             myChart.data.datasets[1].data = calculateInductiveReactance();
             myChart.data.datasets[2].data = calculateTuningCapacitor();
             myChart.data.datasets[3].data = calculateLossResistance();
-            myChart.data.datasets[4].data = calculateQualityFactor();
+            myChart.data.datasets[4].data = calculateEfficiencyFactor();
+            myChart.data.datasets[5].data = calculateQualityFactor();
             myChart.update();
         }
 
@@ -222,7 +224,8 @@
             myChart.data.datasets[1].data = calculateInductiveReactance();
             // myChart.data.datasets[2].data = calculateTuningCapacitor();
             myChart.data.datasets[3].data = calculateLossResistance();
-            myChart.data.datasets[4].data = calculateQualityFactor();
+            myChart.data.datasets[4].data = calculateEfficiencyFactor();
+            myChart.data.datasets[5].data = calculateQualityFactor();
             myChart.update();
         }
 
@@ -232,7 +235,8 @@
             myChart.data.datasets[1].data = calculateInductiveReactance();
             myChart.data.datasets[2].data = calculateTuningCapacitor();
             myChart.data.datasets[3].data = calculateLossResistance();
-            myChart.data.datasets[4].data = calculateQualityFactor();
+            myChart.data.datasets[4].data = calculateEfficiencyFactor();
+            myChart.data.datasets[5].data = calculateQualityFactor();
             myChart.update();
         }
 
@@ -242,7 +246,8 @@
             myChart.data.datasets[1].data = calculateInductiveReactance();
             myChart.data.datasets[2].data = calculateTuningCapacitor();
             myChart.data.datasets[3].data = calculateLossResistance();
-            myChart.data.datasets[4].data = calculateQualityFactor();
+            myChart.data.datasets[4].data = calculateEfficiencyFactor();
+            myChart.data.datasets[5].data = calculateQualityFactor();
             myChart.update();
         }
 
@@ -302,9 +307,18 @@
                     fill: false,
                     borderColor: 'black',
                     backgroundColor: 'black',
-                    data: calculateQualityFactor(),
+                    data: calculateEfficiencyFactor(),
                     borderWidth: 1,
                     yAxisID: 'effID'
+                },
+                {
+                    label: 'Q Factor',
+                    fill: false,
+                    borderColor: 'purple',
+                    backgroundColor: 'purple',
+                    data: calculateQualityFactor(),
+                    borderWidth: 1,
+                    yAxisID: 'qID'
                 }]
             },
             options: {
@@ -340,7 +354,7 @@
                             fontStyle: 'bold'
                         },
                         position: 'left',
-                        id: 'mohmsID'
+                        id: 'mohmsID',
                     },{
                         type: 'linear',
                         display: true,
@@ -363,6 +377,17 @@
                         },
                         position: 'right',
                         id: 'effID'
+                    },{
+                        type: 'linear',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Quality',
+                            fontColor: 'purple',
+                            fontStyle: 'bold'
+                        },
+                        position: 'right',
+                        id: 'qID'
                     }]
                 },
                 showLines: true

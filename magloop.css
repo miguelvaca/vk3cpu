@@ -54,7 +54,7 @@ section.controls div {
 section.controls div label {
     background:rgb(94, 245, 94);
     display: inline-block;
-    width: 150px;
+    width: 20%;
     font-size: 0.8em;
     text-align: right;
 }
