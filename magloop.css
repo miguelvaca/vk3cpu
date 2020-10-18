@@ -6,6 +6,7 @@ header {
     background: black;
     color: white;
     font-family: 'Courier New', Courier, monospace;
+    font-size: smaller;
     text-align: center;
 }
 
@@ -47,12 +48,13 @@ section.spreadsheet div.first-col {
 
 section.controls div {
     background:yellow;
+    font-size: smaller;
 }
 
 section.controls div label {
     background:rgb(94, 245, 94);
     display: inline-block;
-    width: 180px;
+    width: 150px;
     font-size: 0.8em;
     text-align: right;
 }
@@ -60,7 +62,7 @@ section.controls div label {
 section.controls div input {
     background:lightsalmon;
     display: inline-block;
-    width: 300px;
+    width: 60%;
 }
 
 footer {
