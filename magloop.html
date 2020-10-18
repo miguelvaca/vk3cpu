@@ -57,10 +57,11 @@
     </body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script>
-        const frequencies = [
-            1.8, 2.2, 2.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
+        var frequencies = [
+            1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
+            //1.8, 2.2, 2.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
         ];
-        
+
         var loop_diameter_slider = document.getElementById("loop_diameter_slider");
         var loop_diameter_value = document.getElementById("loop_diameter_value");
         loop_diameter_value.innerHTML = loop_diameter_slider.value;
@@ -85,6 +86,24 @@
         var heightAboveGround_value = document.getElementById("heightAboveGround_value");
         heightAboveGround_value.innerHTML = heightAboveGround_slider.value;
         
+        function updateFrequencies() {
+            const hamFrequencies = [
+                1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
+                //1.8, 2.2, 2.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
+            ];
+            frequencies = [];
+            hamFrequencies.forEach(freq => {
+                const wavelength = 3e8 / (freq * 1e6);
+                const l = (Math.PI * loop_diameter_slider.value) / wavelength;
+                if (l <= 0.20) {
+                    frequencies.push(freq);
+                }
+            });
+        }
+        
+        // Update the frequencies, now that we have the sliders available:
+        updateFrequencies();
+
         function getInductance() {
             const a_coil_radius = loop_diameter_slider.value * 0.5;
             const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
@@ -105,12 +124,8 @@
         function calculateRadiationResistance() {
             var retval = [];
             frequencies.forEach(freq => {
-                //const wavelength = 3e8 / (freq * 1e6);
-                //const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-                //if (l <= 0.25) {
-                    const rr = radiationResistance(freq);
-                    retval.push({x:freq, y:rr});
-                //}
+                const rr = radiationResistance(freq);
+                retval.push({x:freq, y:rr});
             });
             return retval;
         }
@@ -126,12 +141,8 @@
         function calculateInductiveReactance() {
             var retval = [];
             frequencies.forEach(freq => {
-                //const wavelength = 3e8 / (freq * 1e6);
-                //const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-                //if (l <= 0.25) {
                 const reactance = inductiveReactance(freq);
                 retval.push({x:freq, y:reactance});
-                //}
             });
             return retval;
         }
@@ -148,10 +159,8 @@
         function calculateTuningCapacitor() {
             var retval = [];
             frequencies.forEach(freq => {
-                //if (l <= 0.25) {
-                    const capacitor = tuningCapacitance(freq);
-                    retval.push({x:freq, y:capacitor});
-                //}
+                const capacitor = tuningCapacitance(freq);
+                retval.push({x:freq, y:capacitor});
             });
             return retval;
         }
@@ -253,6 +262,7 @@
 
         loop_diameter_slider.oninput = function() {
             loop_diameter_value.innerHTML = this.value;
+            updateFrequencies();
             myChart.data.datasets[0].data = calculateRadiationResistance();
             myChart.data.datasets[1].data = calculateInductiveReactance();
             myChart.data.datasets[2].data = calculateTuningCapacitor();
@@ -315,24 +325,6 @@
             data: {
                 datasets: [
                 {
-                    label: 'Radiation Resistance \u03A9',
-                    fill: false,
-                    borderColor: 'red',
-                    backgroundColor: 'red',
-                    data: calculateRadiationResistance(),
-                    borderWidth: 1,
-                    yAxisID: 'mohmsID'
-                },
-                {
-                    label: 'Inductive Reactance \u03A9',
-                    fill: false,
-                    borderColor: 'blue',
-                    backgroundColor: 'blue',
-                    data: calculateInductiveReactance(),
-                    borderWidth: 1,
-                    yAxisID: 'ohmsID'
-                },
-                {
                     label: 'Tuning Capacitance',
                     fill: false,
                     borderColor: 'green',
@@ -342,13 +334,13 @@
                     yAxisID: 'pfID'
                 },
                 {
-                    label: 'Loss Resistance \u03A9',
+                    label: 'BW kHz',
                     fill: false,
-                    borderColor: 'orange',
-                    backgroundColor: 'orange',
-                    data: calculateLossResistance(),
+                    borderColor: 'brown',
+                    backgroundColor: 'brown',
+                    data: calculateBandwidth(),
                     borderWidth: 1,
-                    yAxisID: 'mohmsID'
+                    yAxisID: 'bwID'
                 },
                 {
                     label: 'Efficiency',
@@ -360,22 +352,40 @@
                     yAxisID: 'effID'
                 },
                 {
-                    label: 'Q Factor',
+                    label: 'Radiation Resistance \u03A9',
+                    fill: false,
+                    borderColor: 'red',
+                    backgroundColor: 'red',
+                    data: calculateRadiationResistance(),
+                    borderWidth: 1,
+                    yAxisID: 'mohmsID'
+                },
+                {
+                    label: 'Reactance j\u03A9',
+                    fill: false,
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    data: calculateInductiveReactance(),
+                    borderWidth: 1,
+                    yAxisID: 'ohmsID'
+                },
+                {
+                    label: 'Loss Resistance \u03A9',
+                    fill: false,
+                    borderColor: 'orange',
+                    backgroundColor: 'orange',
+                    data: calculateLossResistance(),
+                    borderWidth: 1,
+                    yAxisID: 'mohmsID'
+                },
+                {
+                    label: 'Q',
                     fill: false,
                     borderColor: 'purple',
                     backgroundColor: 'purple',
                     data: calculateQualityFactor(),
                     borderWidth: 1,
                     yAxisID: 'qID'
-                },
-                {
-                    label: 'BW kHz',
-                    fill: false,
-                    borderColor: 'brown',
-                    backgroundColor: 'brown',
-                    data: calculateBandwidth(),
-                    borderWidth: 1,
-                    yAxisID: 'bwID'
                 }]
             },
             options: {
@@ -394,57 +404,12 @@
                         display: true,
                         scaleLabel: {
                             display: true,
-                            labelString: 'j\u03A9',
-                            fontColor: 'blue',
-                            fontStyle: 'bold'
-                        },
-                        position: 'left',
-                        id: 'ohmsID'
-                    },
-                    {
-                        type: 'linear',
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: '\u03A9',
-                            fontColor: 'red',
-                            fontStyle: 'bold'
-                        },
-                        position: 'left',
-                        id: 'mohmsID',
-                    },{
-                        type: 'linear',
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'pF',
-                            fontColor: 'green',
-                            fontStyle: 'bold'
-                        },
-                        position: 'right',
-                        id: 'pfID'
-                    },{
-                        type: 'linear',
-                        display: true,
-                        scaleLabel: {
-                            display: true,
                             labelString: 'Efficiency %',
                             fontColor: 'black',
                             fontStyle: 'bold'
                         },
-                        position: 'right',
+                        position: 'left',
                         id: 'effID'
-                    },{
-                        type: 'linear',
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Quality',
-                            fontColor: 'purple',
-                            fontStyle: 'bold'
-                        },
-                        position: 'right',
-                        id: 'qID'
                     },{
                         type: 'linear',
                         display: true,
@@ -456,6 +421,50 @@
                         },
                         position: 'left',
                         id: 'bwID'
+                    },{
+                        type: 'linear',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: '\u03A9',
+                            fontColor: 'red',
+                            fontStyle: 'bold'
+                        },
+                        position: 'right',
+                        id: 'mohmsID',
+                    },{
+                        type: 'linear',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'pF',
+                            fontColor: 'green',
+                            fontStyle: 'bold'
+                        },
+                        position: 'left',
+                        id: 'pfID'
+                    },{
+                        type: 'linear',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'j\u03A9',
+                            fontColor: 'blue',
+                            fontStyle: 'bold'
+                        },
+                        position: 'right',
+                        id: 'ohmsID'
+                    },{
+                        type: 'linear',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Q',
+                            fontColor: 'purple',
+                            fontStyle: 'bold'
+                        },
+                        position: 'right',
+                        id: 'qID'
                     }]
                 },
                 showLines: true
