@@ -44,7 +44,7 @@
                 <span id="loop_spacing_value"></span>
             </div>
             <div>
-                <label for="transmit_power_slider">Tx Power:</label>
+                <label for="transmit_power_slider">Tx power:</label>
                 <input type="range" id="transmit_power_slider" min="25" max="1500" value="400" step="25">
                 <span id="transmit_power_value"></span> (W)
             </div>
@@ -342,7 +342,13 @@
             myChart.data.datasets[7].data = calculateCapacitorVoltage();
             myChart.update();
         }
-
+/*
+        window.onresize = function() {
+            chartCanvas.width = window.innerWidth;
+            chartCanvas.height = 200;
+            console.log(window.innerWidth, window.innerHeight);
+        }
+*/
         /*
         heightAboveGround_slider.oninput = function() {
             heightAboveGround_value.innerHTML = this.value;
@@ -358,65 +364,68 @@
             ctx.clearRect(0, 0, win_width, win_height);
             const loop_radius = 75; // loop_diameter_slider.value * 80;
             const cond_radius = conductor_diameter_slider.value / 4;
+            const loopx = win_width/4; 
+            const loopy = win_height/2;
 
             // Draw loop:
             ctx.beginPath();
-            ctx.arc(win_width/4, win_height/2, loop_radius + cond_radius, 0.5 * Math.PI + 0.02, 0.5 * Math.PI - 0.02, false);
-            ctx.arc(win_width/4, win_height/2, loop_radius - cond_radius, 0.5 * Math.PI - 0.025, 0.5 * Math.PI + 0.025, true);
+            ctx.arc(loopx, loopy, loop_radius + cond_radius, 0.5 * Math.PI + 0.02, 0.5 * Math.PI - 0.02, false);
+            ctx.arc(loopx, loopy, loop_radius - cond_radius, 0.5 * Math.PI - 0.025, 0.5 * Math.PI + 0.025, true);
             ctx.closePath();
             ctx.fill();
             
             // Draw cap:
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(win_width/4 - 3, win_height/2 + loop_radius - 3*cond_radius);
-            ctx.lineTo(win_width/4 - 3, win_height/2 + loop_radius + 3*cond_radius);
-            ctx.moveTo(win_width/4 + 3, win_height/2 + loop_radius - 3*cond_radius);
-            ctx.lineTo(win_width/4 + 3, win_height/2 + loop_radius + 3*cond_radius);
+            ctx.moveTo(loopx - 3, loopy + loop_radius - 3*cond_radius);
+            ctx.lineTo(loopx - 3, loopy + loop_radius + 3*cond_radius);
+            ctx.moveTo(loopx + 3, loopy + loop_radius - 3*cond_radius);
+            ctx.lineTo(loopx + 3, loopy + loop_radius + 3*cond_radius);
             ctx.stroke();
             ctx.lineWidth = 1;
             
             // Draw loop diameter arrow:
             ctx.beginPath();
-            ctx.moveTo(win_width/4 - loop_radius, win_height/2);
-            ctx.lineTo(win_width/4 - loop_radius + 2*cond_radius, win_height/2 - 2*cond_radius);
-            ctx.lineTo(win_width/4 - loop_radius + 2*cond_radius, win_height/2 + 2*cond_radius);
-            ctx.lineTo(win_width/4 - loop_radius, win_height/2);
-            ctx.lineTo(win_width/4 + loop_radius, win_height/2);
-            ctx.lineTo(win_width/4 + loop_radius - 2*cond_radius, win_height/2 + 2*cond_radius);
-            ctx.lineTo(win_width/4 + loop_radius - 2*cond_radius, win_height/2 - 2*cond_radius);
-            ctx.lineTo(win_width/4 + loop_radius, win_height/2);
+            ctx.moveTo(loopx - loop_radius, loopy);
+            ctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy - 2*cond_radius);
+            ctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy + 2*cond_radius);
+            ctx.lineTo(loopx - loop_radius, loopy);
+            ctx.lineTo(loopx + loop_radius, loopy);
+            ctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy + 2*cond_radius);
+            ctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy - 2*cond_radius);
+            ctx.lineTo(loopx + loop_radius, loopy);
             ctx.stroke();
             
             // Write loop diameter symbol:
             ctx.font = "14px arial";
             ctx.textAlign = "center";
-            ctx.fillText("\u2300a = " + loop_diameter_slider.value.toString() + "m", win_width/4, win_height/2 - 5);
+            const dia = 1.0 * loop_diameter_slider.value;
+            ctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 5);
 
             // Draw conductor diameter arrow:
             ctx.beginPath();
-            var p1x = win_width/4 + 0.4 * (loop_radius - cond_radius);
-            var p1y = win_height/2 + 0.4 * (loop_radius - cond_radius);
-            var p2x = win_width/4 + 0.707 * (loop_radius - cond_radius);
-            var p2y = win_height/2 + 0.707 * (loop_radius - cond_radius);
-            var p3x = win_width/4 + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
-            var p3y = win_height/2 + 0.707 * (loop_radius - cond_radius);
-            var p4x = win_width/4 + 0.707 * (loop_radius - cond_radius);
-            var p4y = win_height/2 + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
+            var p1x = loopx + 0.4 * (loop_radius - cond_radius);
+            var p1y = loopy + 0.4 * (loop_radius - cond_radius);
+            var p2x = loopx + 0.707 * (loop_radius - cond_radius);
+            var p2y = loopy + 0.707 * (loop_radius - cond_radius);
+            var p3x = loopx + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
+            var p3y = loopy + 0.707 * (loop_radius - cond_radius);
+            var p4x = loopx + 0.707 * (loop_radius - cond_radius);
+            var p4y = loopy + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
             ctx.moveTo(p1x, p1y);
             ctx.lineTo(p2x, p2y);
             ctx.lineTo(p3x, p3y);
             ctx.lineTo(p4x, p4y);
             ctx.lineTo(p2x, p2y);
 
-            p1x = win_width/4 + 1.0 * (loop_radius + cond_radius);
-            p1y = win_height/2 + 1.0 * (loop_radius + cond_radius);
-            p2x = win_width/4 + 0.707 * (loop_radius + cond_radius);
-            p2y = win_height/2 + 0.707 * (loop_radius + cond_radius);
-            p3x = win_width/4 + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
-            p3y = win_height/2 + 0.707 * (loop_radius + cond_radius);
-            p4x = win_width/4 + 0.707 * (loop_radius + cond_radius);
-            p4y = win_height/2 + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+            p1x = loopx + 1.0 * (loop_radius + cond_radius);
+            p1y = loopy + 1.0 * (loop_radius + cond_radius);
+            p2x = loopx + 0.707 * (loop_radius + cond_radius);
+            p2y = loopy + 0.707 * (loop_radius + cond_radius);
+            p3x = loopx + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+            p3y = loopy + 0.707 * (loop_radius + cond_radius);
+            p4x = loopx + 0.707 * (loop_radius + cond_radius);
+            p4y = loopy + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
             ctx.moveTo(p1x, p1y);
             ctx.lineTo(p2x, p2y);
             ctx.lineTo(p3x, p3y);
@@ -424,8 +433,8 @@
             ctx.lineTo(p2x, p2y);
             ctx.stroke();
 
-            p1x = win_width/4 + 0.4 * (loop_radius - cond_radius);
-            p1y = win_height/2 + 0.4 * (loop_radius - cond_radius) - 5;
+            p1x = loopx + 0.4 * (loop_radius - cond_radius);
+            p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
             ctx.fillText("\u2300b = " + conductor_diameter_slider.value.toString() + "mm", p1x, p1y);
 
             const start_x = win_width/2;
@@ -478,7 +487,8 @@
         }
         drawDesign();
 
-        const chartCanvasContext = document.getElementById("chartCanvas").getContext('2d');
+        const chartCanvas = document.getElementById("chartCanvas");
+        const chartCanvasContext = chartCanvas.getContext('2d');
 
         var myChart = new Chart(chartCanvasContext, {
             type: 'line',
