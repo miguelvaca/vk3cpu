@@ -311,6 +311,7 @@
 
         loop_turns_slider.oninput = function() {
             loop_turns_value.innerHTML = this.value;
+            drawDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
             myChart.data.datasets[1].data = calculateBandwidth();
             myChart.data.datasets[2].data = calculateEfficiencyFactor();
@@ -324,6 +325,7 @@
 
         loop_spacing_slider.oninput = function() {
             loop_spacing_value.innerHTML = loop_spacing_slider.value;
+            drawDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
             myChart.data.datasets[1].data = calculateBandwidth();
             myChart.data.datasets[2].data = calculateEfficiencyFactor();
@@ -417,6 +419,22 @@
             var p1x = win_width/4 + 0.4 * (loop_radius - cond_radius);
             var p1y = win_height/2 + 0.4 * (loop_radius - cond_radius) - 5;
             ctx.fillText("\u2300b = " + conductor_diameter_slider.value.toString() + "mm", p1x, p1y);
+
+            const start_x = win_width/2;
+            const top_y = win_height * 0.2;
+            const bot_y = win_height * 0.8;
+            //const cond_radius = conductor_diameter_slider.value;
+            const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
+            for (let i = 0; i < loop_turns_slider.value; i++) {
+                ctx.moveTo(start_x + i * cond_spacing + cond_radius, bot_y);
+                ctx.arc(start_x + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
+                //ctx.moveTo(start_x + i * cond_spacing - cond_radius, bot_y);
+                //ctx.lineTo(start_x + cond_spacing * 0.5 + i * cond_spacing - cond_radius, top_y);
+                //ctx.stroke();
+                ctx.arc(start_x + cond_spacing * 0.5 + i * cond_spacing, top_y, cond_radius, Math.PI, 0);
+                ctx.lineTo(start_x + i * cond_spacing + cond_radius, bot_y);
+                ctx.stroke();
+            }
         }
         drawDesign();
 
