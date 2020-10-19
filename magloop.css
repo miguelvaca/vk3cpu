@@ -23,7 +23,7 @@ canvas {
     background: white;
     width: 100%;
     margin: auto;
-    border: 2px solid white;
+    border: 1px solid rgb(0, 0, 0);
     display: block;
     box-sizing: border-box;
 }
@@ -48,7 +48,7 @@ section.spreadsheet div.first-col {
 
 section.controls div {
     background:white;
-    font-size: smaller;
+    font-size: medium;
 }
 
 section.controls div label {
