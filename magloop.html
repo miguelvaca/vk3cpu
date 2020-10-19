@@ -360,18 +360,21 @@
             const cond_radius = conductor_diameter_slider.value / 4;
             // Draw loop:
             ctx.beginPath();
-            ctx.arc(win_width/4, win_height/2, loop_radius + cond_radius, 0.5 * Math.PI + 0.02, 0.5 * Math.PI - 0.02);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(win_width/4, win_height/2, loop_radius - cond_radius, 0.5 * Math.PI + 0.025, 0.5 * Math.PI - 0.025);
-            ctx.stroke();
+            ctx.arc(win_width/4, win_height/2, loop_radius + cond_radius, 0.5 * Math.PI + 0.02, 0.5 * Math.PI - 0.02, false);
+            //ctx.stroke();
+            //ctx.beginPath();
+            ctx.arc(win_width/4, win_height/2, loop_radius - cond_radius, 0.5 * Math.PI - 0.025, 0.5 * Math.PI + 0.025, true);
+            ctx.closePath();
+            ctx.fill();
             // Draw cap:
+            ctx.beginPath();
             ctx.moveTo(win_width/4 - 3, win_height/2 + loop_radius - 3*cond_radius);
             ctx.lineTo(win_width/4 - 3, win_height/2 + loop_radius + 3*cond_radius);
             ctx.moveTo(win_width/4 + 3, win_height/2 + loop_radius - 3*cond_radius);
             ctx.lineTo(win_width/4 + 3, win_height/2 + loop_radius + 3*cond_radius);
             ctx.stroke();
             // Draw loop diameter arrow:
+            ctx.beginPath();
             ctx.moveTo(win_width/4 - loop_radius, win_height/2);
             ctx.lineTo(win_width/4 - loop_radius + 2*cond_radius, win_height/2 - 2*cond_radius);
             ctx.lineTo(win_width/4 - loop_radius + 2*cond_radius, win_height/2 + 2*cond_radius);
@@ -399,7 +402,7 @@
             ctx.lineTo(p3x, p3y);
             ctx.lineTo(p4x, p4y);
             ctx.lineTo(p2x, p2y);
-            ctx.stroke();
+            //ctx.stroke();
 
             var p1x = win_width/4 + 1.0 * (loop_radius + cond_radius);
             var p1y = win_height/2 + 1.0 * (loop_radius + cond_radius);
@@ -426,15 +429,24 @@
             //const cond_radius = conductor_diameter_slider.value;
             const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
             for (let i = 0; i < loop_turns_slider.value; i++) {
-                ctx.moveTo(start_x + i * cond_spacing + cond_radius, bot_y);
+                ctx.beginPath();
+                //ctx.moveTo(start_x + i * cond_spacing + cond_radius, bot_y);
                 ctx.arc(start_x + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
                 //ctx.moveTo(start_x + i * cond_spacing - cond_radius, bot_y);
                 //ctx.lineTo(start_x + cond_spacing * 0.5 + i * cond_spacing - cond_radius, top_y);
                 //ctx.stroke();
                 ctx.arc(start_x + cond_spacing * 0.5 + i * cond_spacing, top_y, cond_radius, Math.PI, 0);
                 ctx.lineTo(start_x + i * cond_spacing + cond_radius, bot_y);
+                ctx.fill();
+                //ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(start_x + cond_spacing * 0.5 + i * cond_spacing + cond_radius, top_y);
+                ctx.lineTo(start_x + (i+1) * cond_spacing + cond_radius, bot_y);
+                ctx.arc(start_x + (i+1) * cond_spacing, bot_y, cond_radius, 0, Math.PI, false);
+                ctx.lineTo(start_x + cond_spacing * 0.5 + i * cond_spacing - cond_radius, top_y);
                 ctx.stroke();
             }
+            ctx.stroke();
         }
         drawDesign();
 
