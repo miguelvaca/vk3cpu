@@ -34,17 +34,17 @@
                 <span id="conductor_diameter_value"></span> (mm)
             </div>
             <div>
-                <label for="loop_turns_slider">Loop turns:</label>
+                <label for="loop_turns_slider">N turns:</label>
                 <input type="range" id="loop_turns_slider" min="1" max="8" value="1.0" step="1.0">
                 <span id="loop_turns_value"></span>
             </div>
             <div>
-                <label for="loop_spacing_slider">Loop spacing ratio:</label>
+                <label for="loop_spacing_slider">Spacing ratio:</label>
                 <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.05">
                 <span id="loop_spacing_value"></span>
             </div>
             <div>
-                <label for="transmit_power_slider">Transmit Power:</label>
+                <label for="transmit_power_slider">Tx Power:</label>
                 <input type="range" id="transmit_power_slider" min="25" max="1500" value="400" step="25">
                 <span id="transmit_power_value"></span> (W)
             </div>
@@ -358,21 +358,24 @@
             ctx.clearRect(0, 0, win_width, win_height);
             const loop_radius = 75; // loop_diameter_slider.value * 80;
             const cond_radius = conductor_diameter_slider.value / 4;
+
             // Draw loop:
             ctx.beginPath();
             ctx.arc(win_width/4, win_height/2, loop_radius + cond_radius, 0.5 * Math.PI + 0.02, 0.5 * Math.PI - 0.02, false);
-            //ctx.stroke();
-            //ctx.beginPath();
             ctx.arc(win_width/4, win_height/2, loop_radius - cond_radius, 0.5 * Math.PI - 0.025, 0.5 * Math.PI + 0.025, true);
             ctx.closePath();
             ctx.fill();
+            
             // Draw cap:
+            ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(win_width/4 - 3, win_height/2 + loop_radius - 3*cond_radius);
             ctx.lineTo(win_width/4 - 3, win_height/2 + loop_radius + 3*cond_radius);
             ctx.moveTo(win_width/4 + 3, win_height/2 + loop_radius - 3*cond_radius);
             ctx.lineTo(win_width/4 + 3, win_height/2 + loop_radius + 3*cond_radius);
             ctx.stroke();
+            ctx.lineWidth = 1;
+            
             // Draw loop diameter arrow:
             ctx.beginPath();
             ctx.moveTo(win_width/4 - loop_radius, win_height/2);
@@ -405,16 +408,15 @@
             ctx.lineTo(p3x, p3y);
             ctx.lineTo(p4x, p4y);
             ctx.lineTo(p2x, p2y);
-            //ctx.stroke();
 
-            var p1x = win_width/4 + 1.0 * (loop_radius + cond_radius);
-            var p1y = win_height/2 + 1.0 * (loop_radius + cond_radius);
-            var p2x = win_width/4 + 0.707 * (loop_radius + cond_radius);
-            var p2y = win_height/2 + 0.707 * (loop_radius + cond_radius);
-            var p3x = win_width/4 + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
-            var p3y = win_height/2 + 0.707 * (loop_radius + cond_radius);
-            var p4x = win_width/4 + 0.707 * (loop_radius + cond_radius);
-            var p4y = win_height/2 + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+            p1x = win_width/4 + 1.0 * (loop_radius + cond_radius);
+            p1y = win_height/2 + 1.0 * (loop_radius + cond_radius);
+            p2x = win_width/4 + 0.707 * (loop_radius + cond_radius);
+            p2y = win_height/2 + 0.707 * (loop_radius + cond_radius);
+            p3x = win_width/4 + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+            p3y = win_height/2 + 0.707 * (loop_radius + cond_radius);
+            p4x = win_width/4 + 0.707 * (loop_radius + cond_radius);
+            p4y = win_height/2 + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
             ctx.moveTo(p1x, p1y);
             ctx.lineTo(p2x, p2y);
             ctx.lineTo(p3x, p3y);
@@ -422,26 +424,21 @@
             ctx.lineTo(p2x, p2y);
             ctx.stroke();
 
-            var p1x = win_width/4 + 0.4 * (loop_radius - cond_radius);
-            var p1y = win_height/2 + 0.4 * (loop_radius - cond_radius) - 5;
+            p1x = win_width/4 + 0.4 * (loop_radius - cond_radius);
+            p1y = win_height/2 + 0.4 * (loop_radius - cond_radius) - 5;
             ctx.fillText("\u2300b = " + conductor_diameter_slider.value.toString() + "mm", p1x, p1y);
 
             const start_x = win_width/2;
             const top_y = win_height * 0.2;
             const bot_y = win_height * 0.8;
-            //const cond_radius = conductor_diameter_slider.value;
             const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
             for (let i = 0; i < loop_turns_slider.value; i++) {
                 ctx.beginPath();
-                //ctx.moveTo(start_x + i * cond_spacing + cond_radius, bot_y);
                 ctx.arc(start_x + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
-                //ctx.moveTo(start_x + i * cond_spacing - cond_radius, bot_y);
-                //ctx.lineTo(start_x + cond_spacing * 0.5 + i * cond_spacing - cond_radius, top_y);
-                //ctx.stroke();
                 ctx.arc(start_x + cond_spacing * 0.5 + i * cond_spacing, top_y, cond_radius, Math.PI, 0);
                 ctx.lineTo(start_x + i * cond_spacing + cond_radius, bot_y);
                 ctx.fill();
-                //ctx.stroke();
+
                 ctx.beginPath();
                 ctx.moveTo(start_x + cond_spacing * 0.5 + i * cond_spacing + cond_radius, top_y);
                 ctx.lineTo(start_x + (i+1) * cond_spacing + cond_radius, bot_y);
@@ -470,6 +467,10 @@
             ctx.moveTo(start_x + cond_spacing, dim_y - 10);
             ctx.lineTo(start_x + cond_spacing, dim_y + 10);
             ctx.stroke();
+
+            // Draw turns number text:
+            ctx.fillText("N = " + loop_turns_slider.value.toString(), start_x + 0.5 * cond_spacing, win_height * 0.1 + 5);
+            
             // Draw spacing text:
             ctx.textAlign = "left";
             const spc = loop_spacing_slider.value * conductor_diameter_slider.value;

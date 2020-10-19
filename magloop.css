@@ -48,21 +48,21 @@ section.spreadsheet div.first-col {
 
 section.controls div {
     background:white;
-    font-size: medium;
+    font-size: small;
 }
 
 section.controls div label {
     background:white;
     display: inline-block;
-    width: 20%;
-    font-size: 0.8em;
+    width: 12%;
+    font-size: small;
     text-align: right;
 }
 
 section.controls div input {
     background:lightsalmon;
     display: inline-block;
-    width: 60%;
+    width: 75%;
 }
 
 footer {
