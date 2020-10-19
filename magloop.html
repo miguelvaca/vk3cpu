@@ -48,11 +48,13 @@
                 <input type="range" id="transmit_power_slider" min="25" max="1500" value="400" step="25">
                 <span id="transmit_power_value"></span> (W)
             </div>
+            <!--
             <div>
                 <label for="heightAboveGround_slider">Height above ground:</label>
                 <input type="range" id="heightAboveGround_slider" min="0.0" max="10.0" value="1.0" step="0.1">
                 <span id="heightAboveGround_value"></span> (m)
             </div>
+            -->
         </section>
     </body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
@@ -79,10 +81,12 @@
         var transmit_power_value = document.getElementById("transmit_power_value");
         transmit_power_value.innerHTML = transmit_power_slider.value;
 
+        /*
         var heightAboveGround_slider = document.getElementById("heightAboveGround_slider");
         var heightAboveGround_value = document.getElementById("heightAboveGround_value");
         heightAboveGround_value.innerHTML = heightAboveGround_slider.value;
-        
+        */
+
         function updateFrequencies() {
             const hamFrequencies = [
                 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0
@@ -330,9 +334,11 @@
             myChart.update();
         }
 
+        /*
         heightAboveGround_slider.oninput = function() {
             heightAboveGround_value.innerHTML = this.value;
         }
+        */
 
         const chartCanvasContext = document.getElementById("chartCanvas").getContext('2d');
         console.log(chartCanvasContext);
