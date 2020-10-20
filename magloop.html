@@ -8,53 +8,51 @@
     </head>
     <body>
         <header>Miguel VK3CPU - Small Loop Antenna Calculator</header>
-        <canvas id="3Dantenna" width="800" height="200">
-            3D Antenna Radiation Pattern Canvas
-        </canvas>
-        <!--
-        <svg >
-            <circle cx="25%" cy="50%" r="40" stroke="black" stroke-width="2" fill="white"/>
-            <circle cx="25%" cy="50%" r="35" stroke="black" stroke-width="2" fill="white"/>
-            <text x="08%" y="50%" style="fill:black;">&#8960 1</text>
-        <line x1="40" y1="50%" x2="80" y2="50%" style="stroke:rgb(0,0,0);stroke-width:2" />
-        </svg>
-        -->
-        <canvas id="chartCanvas">
-            2D Chart Canvas
-        </canvas>
-        <section class="controls">
-            <div>
-                <label for="loop_diameter_slider">&#8960a:</label>
-                <input type="range" id="loop_diameter_slider" min="0.5" max="3.0" value="1.0" step="0.05">
-                <span id="loop_diameter_value"></span> (m)
-            </div>
-            <div>
-                <label for="conductor_diameter_slider">&#8960b:</label>
-                <input type="range" id="conductor_diameter_slider" min="5" max="30" value="19" step="1">
-                <span id="conductor_diameter_value"></span> (mm)
-            </div>
-            <div>
-                <label for="loop_turns_slider">N turns:</label>
-                <input type="range" id="loop_turns_slider" min="1" max="8" value="1.0" step="1.0">
-                <span id="loop_turns_value"></span>
-            </div>
-            <div>
-                <label for="loop_spacing_slider">Spacing ratio:</label>
-                <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.05">
-                <span id="loop_spacing_value"></span>
-            </div>
-            <div>
-                <label for="transmit_power_slider">Tx power:</label>
-                <input type="range" id="transmit_power_slider" min="25" max="1500" value="400" step="25">
-                <span id="transmit_power_value"></span> (W)
-            </div>
-            <!--
-            <div>
-                <label for="heightAboveGround_slider">Height above ground:</label>
-                <input type="range" id="heightAboveGround_slider" min="0.0" max="10.0" value="1.0" step="0.1">
-                <span id="heightAboveGround_value"></span> (m)
-            </div>
-            -->
+        <section class="flexLayoutClass">
+            <section class="chart-container" style="position: relative; height:60vh;">
+            <canvas id="chartCanvas" class="chartCanvasClass">
+                2D Chart Canvas
+            </canvas>
+        </section>
+            <section class="controls">
+                <div class="slider_container">
+                    <div class="sliders">
+                        <label for="loop_diameter_slider">&#8960a:</label>
+                        <input type="range" id="loop_diameter_slider" min="0.5" max="3.0" value="1.0" step="0.05">
+                        <span id="loop_diameter_value"></span> (m)
+                    </div>
+                    <div class="sliders">
+                        <label for="conductor_diameter_slider">&#8960b:</label>
+                        <input type="range" id="conductor_diameter_slider" min="5" max="30" value="19" step="1">
+                        <span id="conductor_diameter_value"></span> (mm)
+                    </div>
+                    <div class="sliders">
+                        <label for="loop_turns_slider">N turns:</label>
+                        <input type="range" id="loop_turns_slider" min="1" max="8" value="1.0" step="1.0">
+                        <span id="loop_turns_value"></span>
+                    </div>
+                    <div class="sliders">
+                        <label for="loop_spacing_slider">Spacing ratio:</label>
+                        <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.05">
+                        <span id="loop_spacing_value"></span>
+                    </div>
+                    <div class="sliders">
+                        <label for="transmit_power_slider">Tx power:</label>
+                        <input type="range" id="transmit_power_slider" min="25" max="1500" value="400" step="25">
+                        <span id="transmit_power_value"></span> (W)
+                    </div>
+                    <!--
+                    <div>
+                        <label for="heightAboveGround_slider">Height above ground:</label>
+                        <input type="range" id="heightAboveGround_slider" min="0.0" max="10.0" value="1.0" step="0.1">
+                        <span id="heightAboveGround_value"></span> (m)
+                    </div>
+                    -->
+                </div>
+                <canvas id="3Dantenna" class="antennaClass" width="250" height="500">
+                    3D Antenna Radiation Pattern Canvas
+                </canvas>    
+            </section>
         </section>
     </body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
@@ -342,13 +340,13 @@
             myChart.data.datasets[7].data = calculateCapacitorVoltage();
             myChart.update();
         }
-/*
+
         window.onresize = function() {
             chartCanvas.width = window.innerWidth;
             chartCanvas.height = 200;
             console.log(window.innerWidth, window.innerHeight);
         }
-*/
+
         /*
         heightAboveGround_slider.oninput = function() {
             heightAboveGround_value.innerHTML = this.value;
@@ -364,8 +362,8 @@
             ctx.clearRect(0, 0, win_width, win_height);
             const loop_radius = 75; // loop_diameter_slider.value * 80;
             const cond_radius = conductor_diameter_slider.value / 4;
-            const loopx = win_width/4; 
-            const loopy = win_height/2;
+            const loopx = win_width/2; 
+            const loopy = win_height/4;
 
             // Draw loop:
             ctx.beginPath();
@@ -400,7 +398,7 @@
             ctx.font = "14px arial";
             ctx.textAlign = "center";
             const dia = 1.0 * loop_diameter_slider.value;
-            ctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 5);
+            ctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 8);
 
             // Draw conductor diameter arrow:
             ctx.beginPath();
@@ -437,10 +435,10 @@
             p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
             ctx.fillText("\u2300b = " + conductor_diameter_slider.value.toString() + "mm", p1x, p1y);
 
-            const start_x = win_width/2;
-            const top_y = win_height * 0.2;
-            const bot_y = win_height * 0.8;
             const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
+            const start_x = win_width/2 - loop_turns_slider.value * cond_spacing * 0.5;
+            const top_y = win_height * 0.6;
+            const bot_y = win_height * 0.9;
             for (let i = 0; i < loop_turns_slider.value; i++) {
                 ctx.beginPath();
                 ctx.arc(start_x + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
@@ -456,7 +454,7 @@
                 ctx.stroke();
             }
             // Draw left spacing arrow:
-            const dim_y = win_height * 0.9;
+            const dim_y = win_height * 0.95;
             ctx.beginPath();
             ctx.moveTo(start_x - 30, dim_y);
             ctx.lineTo(start_x, dim_y);
@@ -478,7 +476,7 @@
             ctx.stroke();
 
             // Draw turns number text:
-            ctx.fillText("N = " + loop_turns_slider.value.toString(), start_x + 0.5 * cond_spacing, win_height * 0.1 + 5);
+            ctx.fillText("N = " + loop_turns_slider.value.toString(), loopx, win_height * 0.6 - 10);
             
             // Draw spacing text:
             ctx.textAlign = "left";
@@ -568,6 +566,7 @@
                 }]
             },
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     xAxes: [{
                         type: 'linear',
@@ -586,6 +585,10 @@
                             labelString: 'Efficiency %',
                             fontColor: 'black',
                             fontStyle: 'bold'
+                        },
+                        ticks: {
+                            min: 0,
+                            max: 100,
                         },
                         position: 'left',
                         id: 'effID'

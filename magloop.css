@@ -10,44 +10,42 @@ header {
     text-align: center;
 }
 
-svg {
-    background: white;
-    width: 100%;
-    margin: auto;
-    border: 2px solid #000000;
-    display: block;
-    box-sizing: border-box;
+section.flexLayoutClass {
+    display: flex;
+    flex-direction: column;
 }
 
-canvas {
-    background: white;
-    width: 100%;
+canvas.chartCanvasClass {
+    background: rgb(255, 255, 255);
+    /*width: 100%;*/
     margin: auto;
     border: 1px solid rgb(0, 0, 0);
-    display: block;
-    box-sizing: border-box;
+    /* display: block; */
+    /*box-sizing: border-box; */
 }
 
-section.spreadsheet {
-    background: grey;
+section.controls {
     display: flex;
-    flex-direction: row;
 }
-
-section.spreadsheet div {
-    background: lightblue;
+section.controls div.slider_container {
+    width: 70%;
+    border: 1px solid rgb(0, 0, 0);
+    /*display: flex;*/
+    /*flex-direction: column;*/
     display: inline-block;
-    margin: auto;
-    margin-top: 0%;
-    width: auto;
-    text-align: center;
-}
-section.spreadsheet div.first-col {
-    text-align: right;
 }
 
-section.controls div {
-    background:white;
+section.controls canvas.antennaClass {
+    background: white;
+    width: 30%;
+    margin: auto;
+    border: 1px solid rgb(0, 0, 0);
+    /*display: block;*/
+    /*box-sizing: border-box;*/
+}
+
+section.controls div.sliders {
+    background:rgb(255, 255, 255);
     font-size: small;
 }
 
