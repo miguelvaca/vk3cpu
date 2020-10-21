@@ -20,6 +20,7 @@ section.gridLayoutClass {
 canvas.chartCanvasClass {
     background: rgb(255, 255, 255);
     /*width: 100%;*/
+    height: 100vh;
     margin: 0;
     border: 1px solid rgb(0, 0, 0);
     display: block; 
@@ -30,14 +31,14 @@ section div.chart-container {
     grid-column-start: 1; 
     grid-column-end: 7; 
     grid-row-start: 1; 
-    grid-row-end: 5;
+    grid-row-end: 6;
 }
 
 section div.slider_container {
     grid-column-start: 7; 
     grid-column-end: 11; 
-    grid-row-start: 3; 
-    grid-row-end: 5;
+    grid-row-start: 4; 
+    grid-row-end: 6;
     width: 100%;
     height: 100%;
     background: rgb(255, 255, 255);
@@ -50,7 +51,7 @@ section div.antennaFront-container {
     grid-column-start: 7; 
     grid-column-end: 9; 
     grid-row-start: 1; 
-    grid-row-end: 3;
+    grid-row-end: 4;
     width: 100%;
     height: 100%;
     display: block; 
@@ -82,14 +83,14 @@ div label {
 div input {
     background:lightsalmon;
     display: inline-block;
-    width: 70%;
+    width: auto;
 }
 
 section div.antennaSide-container {
     grid-column-start: 9; 
     grid-column-end: 11; 
     grid-row-start: 1; 
-    grid-row-end: 3;
+    grid-row-end: 4;
     width: 100%;
     height: 100%;
     display: block;
@@ -114,6 +115,7 @@ section div.antennaSide-container {
         grid-column-end: 6; 
         grid-row-start: 1; 
         grid-row-end: 7;
+        height: 100%;
     }
     
     section div.slider_container {

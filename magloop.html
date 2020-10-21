@@ -40,13 +40,6 @@
                     <input type="range" id="transmit_power_slider" min="5" max="1500" value="400" step="5">
                     <span id="transmit_power_value"></span>W
                 </div>
-                <!--
-                <div>
-                    <label for="heightAboveGround_slider">Height above ground:</label>
-                    <input type="range" id="heightAboveGround_slider" min="0.0" max="10.0" value="1.0" step="0.1">
-                    <span id="heightAboveGround_value"></span> (m)
-                </div>
-                -->
             </div>
             <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
                 <canvas id="antennaFront2D" class="antennaFrontClass" width="50" height="50">
@@ -353,6 +346,11 @@
             drawSideDesign();
         }
 
+        window.onorientationchange = function() {
+            drawFrontDesign();
+            drawSideDesign();
+        }
+
         /*
         heightAboveGround_slider.oninput = function() {
             heightAboveGround_value.innerHTML = this.value;
@@ -372,7 +370,7 @@
 
             fctx.clearRect(0, 0, win_width, win_height);
             const loop_radius = win_width < win_height ? 0.40 * win_width : 0.40 * win_height; //  100; // loop_diameter_slider.value * 80;
-            const cond_radius = conductor_diameter_slider.value / 4;
+            const cond_radius = conductor_diameter_slider.value / 5;
             const loopx = win_width/2; 
             const loopy = win_height/2;
 
@@ -414,7 +412,7 @@
             fctx.font = "12px arial";
             fctx.textAlign = "center";
             const dia = 1.0 * loop_diameter_slider.value;
-            fctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 8);
+            fctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 6);
 
             // Draw conductor diameter arrow:
             fctx.beginPath();
@@ -426,7 +424,8 @@
             var p3y = loopy + 0.707 * (loop_radius - cond_radius);
             var p4x = loopx + 0.707 * (loop_radius - cond_radius);
             var p4y = loopy + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
-            fctx.moveTo(p1x, p1y);
+            fctx.moveTo(win_width-p1x, p1y);
+            fctx.lineTo(p1x, p1y);
             fctx.lineTo(p2x, p2y);
             fctx.lineTo(p3x, p3y);
             fctx.lineTo(p4x, p4y);
@@ -449,7 +448,7 @@
             p1x = loopx + 0.4 * (loop_radius - cond_radius);
             p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
             //fctx.textAlign = "right";
-            fctx.fillText("\u2300b = " + conductor_diameter_slider.value.toString() + "mm", p1x, p1y);
+            fctx.fillText("\u2300b = " + conductor_diameter_slider.value.toString() + "mm", loopx, p1y+2);
         }
         
         const aside_canvas = document.getElementById("antennaSide2D");
@@ -467,7 +466,7 @@
             //const win_height = aside_canvas.height; 
             sctx.clearRect(0, 0, win_width, win_height);
 
-            const cond_radius = conductor_diameter_slider.value / 4;
+            const cond_radius = conductor_diameter_slider.value / 5;
             const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
             const start_x = win_width/2 - loop_turns_slider.value * cond_spacing * 0.5;
             const top_y = win_height * 0.2;
@@ -489,34 +488,34 @@
             // Draw left spacing arrow:
             const dim_y = win_height * 0.9;
             sctx.beginPath();
-            sctx.moveTo(start_x - 30, dim_y);
+            sctx.moveTo(start_x - 20, dim_y);
             sctx.lineTo(start_x, dim_y);
-            sctx.lineTo(start_x - 10, dim_y + 10)
-            sctx.lineTo(start_x - 10, dim_y - 10)
+            sctx.lineTo(start_x - 7, dim_y + 7)
+            sctx.lineTo(start_x - 7, dim_y - 7)
             sctx.lineTo(start_x, dim_y);
-            sctx.moveTo(start_x, dim_y - 10);
-            sctx.lineTo(start_x, dim_y + 10);
+            sctx.moveTo(start_x, dim_y - 7);
+            sctx.lineTo(start_x, dim_y + 7);
             sctx.stroke();
             // Draw right spacing arrow:
             sctx.beginPath();
-            sctx.moveTo(start_x + cond_spacing + 30, dim_y);
+            sctx.moveTo(start_x + cond_spacing + 20, dim_y);
             sctx.lineTo(start_x + cond_spacing, dim_y);
-            sctx.lineTo(start_x + cond_spacing + 10, dim_y + 10)
-            sctx.lineTo(start_x + cond_spacing + 10, dim_y - 10)
+            sctx.lineTo(start_x + cond_spacing + 7, dim_y + 7)
+            sctx.lineTo(start_x + cond_spacing + 7, dim_y - 7)
             sctx.lineTo(start_x + cond_spacing, dim_y);
-            sctx.moveTo(start_x + cond_spacing, dim_y - 10);
-            sctx.lineTo(start_x + cond_spacing, dim_y + 10);
+            sctx.moveTo(start_x + cond_spacing, dim_y - 7);
+            sctx.lineTo(start_x + cond_spacing, dim_y + 7);
             sctx.stroke();
 
             // Draw turns number text:
-            sctx.font = "14px arial";
+            sctx.font = "12px arial";
             sctx.textAlign = "center";
             sctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.1);
             
             // Draw spacing text:
             sctx.textAlign = "left";
             const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
-            sctx.fillText("c = " + spc.toPrecision(3).toString() + "mm", start_x + cond_spacing + 35, dim_y + 5);
+            sctx.fillText("c = " + spc.toPrecision(3).toString() + "mm", start_x + cond_spacing + 25, dim_y + 5);
         }
         drawFrontDesign();
         drawSideDesign();
