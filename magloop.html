@@ -58,7 +58,7 @@
         var loop_diameter_slider = document.getElementById("loop_diameter_slider");
         var loop_diameter_value = document.getElementById("loop_diameter_value");
         //loop_diameter_value.innerHTML = loop_diameter_slider.value;
-        const val = loop_diameter_slider.value * 1.0;
+        var val = loop_diameter_slider.value * 1.0;
         loop_diameter_value.innerHTML = val.toPrecision(3).toString();
 
         var conductor_diameter_slider = document.getElementById("conductor_diameter_slider");
@@ -71,7 +71,8 @@
 
         var loop_spacing_slider = document.getElementById("loop_spacing_slider");
         var loop_spacing_value = document.getElementById("loop_spacing_value");
-        loop_spacing_value.innerHTML = loop_spacing_slider.value;
+        val = loop_spacing_slider.value * 1.0;
+        loop_spacing_value.innerHTML = val.toPrecision(3).toString();
 
         var transmit_power_slider = document.getElementById("transmit_power_slider");
         var transmit_power_value = document.getElementById("transmit_power_value");
@@ -322,7 +323,8 @@
         }
 
         loop_spacing_slider.oninput = function() {
-            loop_spacing_value.innerHTML = loop_spacing_slider.value;
+            const val = loop_spacing_slider.value * 1.0;
+            loop_spacing_value.innerHTML = val.toPrecision(3).toString();
             drawSideDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
             myChart.data.datasets[1].data = calculateBandwidth();
@@ -365,7 +367,7 @@
             const win_height = document.getElementById("antenna-front-container").offsetHeight; 
             //const win_width  = afront_canvas.getBoundingClientRect().width; 
             //const win_height = afront_canvas.getBoundingClientRect().height; 
-            afront_canvas.width = win_width; 
+            afront_canvas.width = win_width-2; 
             afront_canvas.height = win_height-6; 
 
             fctx.clearRect(0, 0, win_width, win_height);
@@ -460,7 +462,7 @@
             //const win_width  = aside_canvas.getBoundingClientRect().width; 
             //const win_height = aside_canvas.getBoundingClientRect().height; 
             //console.log(win_width, win_height);
-            aside_canvas.width = win_width; 
+            aside_canvas.width = win_width-2; 
             aside_canvas.height = win_height-6; 
             //const win_width  = aside_canvas.width; 
             //const win_height = aside_canvas.height; 
