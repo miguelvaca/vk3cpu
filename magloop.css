@@ -10,35 +10,15 @@ header {
     text-align: center;
 }
 
-section.gridLayoutClass {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    justify-items: stretch;
-}
-
 canvas.chartCanvasClass {
     background: rgb(255, 255, 255);
-    /*width: 100%;*/
-    height: 100vh;
     margin: 0;
     border: 1px solid rgb(0, 0, 0);
     display: block; 
     box-sizing: border-box; 
 }
 
-section div.chart-container {
-    grid-column-start: 1; 
-    grid-column-end: 7; 
-    grid-row-start: 1; 
-    grid-row-end: 6;
-}
-
 section div.slider_container {
-    grid-column-start: 7; 
-    grid-column-end: 11; 
-    grid-row-start: 4; 
-    grid-row-end: 6;
     width: 100%;
     height: 100%;
     background: rgb(255, 255, 255);
@@ -48,15 +28,10 @@ section div.slider_container {
 }
 
 section div.antennaFront-container {
-    grid-column-start: 7; 
-    grid-column-end: 9; 
-    grid-row-start: 1; 
-    grid-row-end: 4;
     width: 100%;
     height: 100%;
     display: block; 
     box-sizing: border-box; 
-    /*display: block;*/
     margin: 0;
     padding: 0;
     background: white;
@@ -83,14 +58,10 @@ div label {
 div input {
     background:lightsalmon;
     display: inline-block;
-    width: auto;
+    width: 60%;
 }
 
 section div.antennaSide-container {
-    grid-column-start: 9; 
-    grid-column-end: 11; 
-    grid-row-start: 1; 
-    grid-row-end: 4;
     width: 100%;
     height: 100%;
     display: block;
@@ -105,35 +76,73 @@ section div.antennaSide-container {
 @media (orientation: portrait) {
     section.gridLayoutClass {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        grid-template-rows: repeat(10, 1fr);
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(5, 1fr);
         justify-items: stretch;
     }
 
     section div.chart-container {
         grid-column-start: 1; 
-        grid-column-end: 6; 
+        grid-column-end: 3; 
         grid-row-start: 1; 
-        grid-row-end: 7;
+        grid-row-end: 4;
         height: 100vh;
+        width: 100vw;
+    }
+    
+    section div.antennaFront-container {
+        grid-column-start: 1; 
+        grid-column-end: 2; 
+        grid-row-start: 4; 
+        grid-row-end: 5;
+    }
+    section div.antennaSide-container {
+        grid-column-start: 2; 
+        grid-column-end: 3; 
+        grid-row-start: 4; 
+        grid-row-end: 5;
+    }
+    section div.slider_container {
+        grid-column-start: 1; 
+        grid-column-end: 3; 
+        grid-row-start: 5; 
+        grid-row-end: 6;
+    }
+}    
+
+@media (orientation: landscape) {
+    section.gridLayoutClass {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        justify-items: stretch;
+    }
+
+    section div.chart-container {
+        grid-column-start: 1; 
+        grid-column-end: 5; 
+        grid-row-start: 1; 
+        grid-row-end: 3;
+        height: 100vh;
+        width: 100vw;
     }
     
     section div.slider_container {
         grid-column-start: 1; 
-        grid-column-end: 6; 
-        grid-row-start: 9; 
-        grid-row-end: 11;
+        grid-column-end: 3; 
+        grid-row-start: 3; 
+        grid-row-end: 4;
     }
     section div.antennaFront-container {
-        grid-column-start: 1; 
-        grid-column-end: 3; 
-        grid-row-start: 7; 
-        grid-row-end: 9;
+        grid-column-start: 3; 
+        grid-column-end: 4; 
+        grid-row-start: 3; 
+        grid-row-end: 4;
     }
     section div.antennaSide-container {
-        grid-column-start: 3; 
-        grid-column-end: 6; 
-        grid-row-start: 7; 
-        grid-row-end: 9;
+        grid-column-start: 4; 
+        grid-column-end: 5; 
+        grid-row-start: 3; 
+        grid-row-end: 4;
     }
 }    
