@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>VK3CPU Magloop Solver</title>
+        <title>VK3CPU Magloop Calculator</title>
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
@@ -18,27 +18,27 @@
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960a:</label>
                     <input type="range" id="loop_diameter_slider" min="0.5" max="3.0" value="1.0" step="0.05">
-                    <span id="loop_diameter_value"></span> (m)
+                    <span id="loop_diameter_value"></span>m
                 </div>
                 <div class="sliders">
                     <label for="conductor_diameter_slider">&#8960b:</label>
                     <input type="range" id="conductor_diameter_slider" min="5" max="30" value="19" step="1">
-                    <span id="conductor_diameter_value"></span> (mm)
+                    <span id="conductor_diameter_value"></span>mm
                 </div>
                 <div class="sliders">
-                    <label for="loop_turns_slider">N turns:</label>
+                    <label for="loop_turns_slider">N:</label>
                     <input type="range" id="loop_turns_slider" min="1" max="8" value="1.0" step="1.0">
                     <span id="loop_turns_value"></span>
                 </div>
                 <div class="sliders">
-                    <label for="loop_spacing_slider">Spacing ratio:</label>
+                    <label for="loop_spacing_slider">c/b:</label>
                     <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.05">
                     <span id="loop_spacing_value"></span>
                 </div>
                 <div class="sliders">
-                    <label for="transmit_power_slider">Tx power:</label>
-                    <input type="range" id="transmit_power_slider" min="25" max="1500" value="400" step="25">
-                    <span id="transmit_power_value"></span> (W)
+                    <label for="transmit_power_slider">Tx:</label>
+                    <input type="range" id="transmit_power_slider" min="5" max="1500" value="400" step="5">
+                    <span id="transmit_power_value"></span>W
                 </div>
                 <!--
                 <div>
@@ -64,7 +64,9 @@
 
         var loop_diameter_slider = document.getElementById("loop_diameter_slider");
         var loop_diameter_value = document.getElementById("loop_diameter_value");
-        loop_diameter_value.innerHTML = loop_diameter_slider.value;
+        //loop_diameter_value.innerHTML = loop_diameter_slider.value;
+        const val = loop_diameter_slider.value * 1.0;
+        loop_diameter_value.innerHTML = val.toPrecision(3).toString();
 
         var conductor_diameter_slider = document.getElementById("conductor_diameter_slider");
         var conductor_diameter_value = document.getElementById("conductor_diameter_value");
@@ -282,7 +284,8 @@
         }
 
         loop_diameter_slider.oninput = function() {
-            loop_diameter_value.innerHTML = this.value;
+            const val = this.value * 1.0;
+            loop_diameter_value.innerHTML = val.toPrecision(3).toString();
             drawFrontDesign();
             updateFrequencies();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
@@ -368,7 +371,7 @@
             afront_canvas.height = win_height-6; 
 
             fctx.clearRect(0, 0, win_width, win_height);
-            const loop_radius = win_width < win_height ? 0.45 * win_width : 0.45 * win_height; //  100; // loop_diameter_slider.value * 80;
+            const loop_radius = win_width < win_height ? 0.40 * win_width : 0.40 * win_height; //  100; // loop_diameter_slider.value * 80;
             const cond_radius = conductor_diameter_slider.value / 4;
             const loopx = win_width/2; 
             const loopy = win_height/2;
@@ -408,7 +411,7 @@
             fctx.stroke();
             
             // Write loop diameter symbol:
-            fctx.font = "14px arial";
+            fctx.font = "12px arial";
             fctx.textAlign = "center";
             const dia = 1.0 * loop_diameter_slider.value;
             fctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 8);
@@ -445,6 +448,7 @@
             fctx.stroke();
             p1x = loopx + 0.4 * (loop_radius - cond_radius);
             p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
+            //fctx.textAlign = "right";
             fctx.fillText("\u2300b = " + conductor_diameter_slider.value.toString() + "mm", p1x, p1y);
         }
         
@@ -456,7 +460,7 @@
             const win_height = document.getElementById("antenna-side-container").offsetHeight; 
             //const win_width  = aside_canvas.getBoundingClientRect().width; 
             //const win_height = aside_canvas.getBoundingClientRect().height; 
-            console.log(win_width, win_height);
+            //console.log(win_width, win_height);
             aside_canvas.width = win_width; 
             aside_canvas.height = win_height-6; 
             //const win_width  = aside_canvas.width; 
@@ -512,7 +516,7 @@
             // Draw spacing text:
             sctx.textAlign = "left";
             const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
-            sctx.fillText(spc.toPrecision(3).toString() + "mm", start_x + cond_spacing + 35, dim_y + 5);
+            sctx.fillText("c = " + spc.toPrecision(3).toString() + "mm", start_x + cond_spacing + 35, dim_y + 5);
         }
         drawFrontDesign();
         drawSideDesign();
@@ -525,7 +529,7 @@
             data: {
                 datasets: [
                 {
-                    label: 'Tuning Capacitor (pF)',
+                    label: 'Tuning Cap (pF)',
                     fill: false,
                     borderColor: 'green',
                     backgroundColor: 'green',
@@ -552,7 +556,7 @@
                     yAxisID: 'effID'
                 },
                 {
-                    label: 'Radiation Resistance (\u03A9)',
+                    label: 'R-radiation (\u03A9)',
                     fill: false,
                     borderColor: 'red',
                     backgroundColor: 'red',
@@ -570,7 +574,7 @@
                     yAxisID: 'ohmsID'
                 },
                 {
-                    label: 'Loss Resistance (\u03A9)',
+                    label: 'R-loss (\u03A9)',
                     fill: false,
                     borderColor: 'orange',
                     backgroundColor: 'orange',
