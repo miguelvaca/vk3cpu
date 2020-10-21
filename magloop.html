@@ -7,53 +7,56 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel VK3CPU - Small Loop Antenna Calculator</header>
-        <section class="flexLayoutClass">
-            <section class="chart-container" style="position: relative; height:60vh;">
-            <canvas id="chartCanvas" class="chartCanvasClass">
-                2D Chart Canvas
-            </canvas>
-        </section>
-            <section class="controls">
-                <div class="slider_container">
-                    <div class="sliders">
-                        <label for="loop_diameter_slider">&#8960a:</label>
-                        <input type="range" id="loop_diameter_slider" min="0.5" max="3.0" value="1.0" step="0.05">
-                        <span id="loop_diameter_value"></span> (m)
-                    </div>
-                    <div class="sliders">
-                        <label for="conductor_diameter_slider">&#8960b:</label>
-                        <input type="range" id="conductor_diameter_slider" min="5" max="30" value="19" step="1">
-                        <span id="conductor_diameter_value"></span> (mm)
-                    </div>
-                    <div class="sliders">
-                        <label for="loop_turns_slider">N turns:</label>
-                        <input type="range" id="loop_turns_slider" min="1" max="8" value="1.0" step="1.0">
-                        <span id="loop_turns_value"></span>
-                    </div>
-                    <div class="sliders">
-                        <label for="loop_spacing_slider">Spacing ratio:</label>
-                        <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.05">
-                        <span id="loop_spacing_value"></span>
-                    </div>
-                    <div class="sliders">
-                        <label for="transmit_power_slider">Tx power:</label>
-                        <input type="range" id="transmit_power_slider" min="25" max="1500" value="400" step="25">
-                        <span id="transmit_power_value"></span> (W)
-                    </div>
-                    <!--
-                    <div>
-                        <label for="heightAboveGround_slider">Height above ground:</label>
-                        <input type="range" id="heightAboveGround_slider" min="0.0" max="10.0" value="1.0" step="0.1">
-                        <span id="heightAboveGround_value"></span> (m)
-                    </div>
-                    -->
+        <header>Miguel VK3CPU - Small Loop (Magloop) Antenna Calculator</header>
+        <section class="gridLayoutClass">
+            <div class="chart-container" style="position: relative; height: 95vh;">
+                <canvas id="chartCanvas" class="chartCanvasClass">
+                    2D Chart Canvas
+                </canvas>
+            </div>
+            <div class="slider_container">
+                <div class="sliders">
+                    <label for="loop_diameter_slider">&#8960a:</label>
+                    <input type="range" id="loop_diameter_slider" min="0.5" max="3.0" value="1.0" step="0.05">
+                    <span id="loop_diameter_value"></span> (m)
                 </div>
-                <canvas id="3Dantenna" class="antennaClass" width="250" height="500">
-                    3D Antenna Radiation Pattern Canvas
+                <div class="sliders">
+                    <label for="conductor_diameter_slider">&#8960b:</label>
+                    <input type="range" id="conductor_diameter_slider" min="5" max="30" value="19" step="1">
+                    <span id="conductor_diameter_value"></span> (mm)
+                </div>
+                <div class="sliders">
+                    <label for="loop_turns_slider">N turns:</label>
+                    <input type="range" id="loop_turns_slider" min="1" max="8" value="1.0" step="1.0">
+                    <span id="loop_turns_value"></span>
+                </div>
+                <div class="sliders">
+                    <label for="loop_spacing_slider">Spacing ratio:</label>
+                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.05">
+                    <span id="loop_spacing_value"></span>
+                </div>
+                <div class="sliders">
+                    <label for="transmit_power_slider">Tx power:</label>
+                    <input type="range" id="transmit_power_slider" min="25" max="1500" value="400" step="25">
+                    <span id="transmit_power_value"></span> (W)
+                </div>
+                <!--
+                <div>
+                    <label for="heightAboveGround_slider">Height above ground:</label>
+                    <input type="range" id="heightAboveGround_slider" min="0.0" max="10.0" value="1.0" step="0.1">
+                    <span id="heightAboveGround_value"></span> (m)
+                </div>
+                -->
+            </div>
+            <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
+                <canvas id="antennaFront2D" class="antennaFrontClass" width="50" height="50">
                 </canvas>    
-            </section>
-        </section>
+            </div>
+            <div id="antenna-side-container" class="antennaSide-container" style="position: relative;">
+                <canvas id="antennaSide2D" class="antennaSideClass" width="50" height="50">
+                </canvas>
+            </div>
+    </section>
     </body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script>
@@ -280,7 +283,7 @@
 
         loop_diameter_slider.oninput = function() {
             loop_diameter_value.innerHTML = this.value;
-            drawDesign();
+            drawFrontDesign();
             updateFrequencies();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
             myChart.data.datasets[1].data = calculateBandwidth();
@@ -295,7 +298,8 @@
 
         conductor_diameter_slider.oninput = function() {
             conductor_diameter_value.innerHTML = this.value;
-            drawDesign();
+            drawFrontDesign();
+            drawSideDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
             myChart.data.datasets[1].data = calculateBandwidth();
             myChart.data.datasets[2].data = calculateEfficiencyFactor();
@@ -309,7 +313,7 @@
 
         loop_turns_slider.oninput = function() {
             loop_turns_value.innerHTML = this.value;
-            drawDesign();
+            drawSideDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
             myChart.data.datasets[1].data = calculateBandwidth();
             myChart.data.datasets[2].data = calculateEfficiencyFactor();
@@ -323,7 +327,7 @@
 
         loop_spacing_slider.oninput = function() {
             loop_spacing_value.innerHTML = loop_spacing_slider.value;
-            drawDesign();
+            drawSideDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
             myChart.data.datasets[1].data = calculateBandwidth();
             myChart.data.datasets[2].data = calculateEfficiencyFactor();
@@ -342,9 +346,8 @@
         }
 
         window.onresize = function() {
-            chartCanvas.width = window.innerWidth;
-            chartCanvas.height = 200;
-            console.log(window.innerWidth, window.innerHeight);
+            drawFrontDesign();
+            drawSideDesign();
         }
 
         /*
@@ -353,55 +356,65 @@
         }
         */
 
-        const plan_canvas = document.getElementById("3Dantenna");
-        const ctx = plan_canvas.getContext('2d');
+        const afront_canvas = document.getElementById("antennaFront2D");
+        const fctx = afront_canvas.getContext('2d');
 
-        function drawDesign() {
-            const win_width  = plan_canvas.width; 
-            const win_height = plan_canvas.height; 
-            ctx.clearRect(0, 0, win_width, win_height);
-            const loop_radius = 75; // loop_diameter_slider.value * 80;
+        function drawFrontDesign() {
+            const win_width  = document.getElementById("antenna-front-container").offsetWidth; 
+            const win_height = document.getElementById("antenna-front-container").offsetHeight; 
+            //const win_width  = afront_canvas.getBoundingClientRect().width; 
+            //const win_height = afront_canvas.getBoundingClientRect().height; 
+            afront_canvas.width = win_width; 
+            afront_canvas.height = win_height-6; 
+
+            fctx.clearRect(0, 0, win_width, win_height);
+            const loop_radius = win_width < win_height ? 0.45 * win_width : 0.45 * win_height; //  100; // loop_diameter_slider.value * 80;
             const cond_radius = conductor_diameter_slider.value / 4;
             const loopx = win_width/2; 
-            const loopy = win_height/4;
+            const loopy = win_height/2;
 
             // Draw loop:
-            ctx.beginPath();
-            ctx.arc(loopx, loopy, loop_radius + cond_radius, 0.5 * Math.PI + 0.02, 0.5 * Math.PI - 0.02, false);
-            ctx.arc(loopx, loopy, loop_radius - cond_radius, 0.5 * Math.PI - 0.025, 0.5 * Math.PI + 0.025, true);
-            ctx.closePath();
-            ctx.fill();
+            fctx.beginPath();
+            fctx.arc(loopx, loopy, loop_radius + cond_radius, 0.5 * Math.PI + 0.02, 0.5 * Math.PI - 0.02, false);
+            fctx.arc(loopx, loopy, loop_radius - cond_radius, 0.5 * Math.PI - 0.025, 0.5 * Math.PI + 0.025, true);
+            fctx.closePath();
+            fctx.fill();
             
             // Draw cap:
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(loopx - 3, loopy + loop_radius - 3*cond_radius);
-            ctx.lineTo(loopx - 3, loopy + loop_radius + 3*cond_radius);
-            ctx.moveTo(loopx + 3, loopy + loop_radius - 3*cond_radius);
-            ctx.lineTo(loopx + 3, loopy + loop_radius + 3*cond_radius);
-            ctx.stroke();
-            ctx.lineWidth = 1;
+            fctx.lineWidth = 3;
+            fctx.beginPath();
+            fctx.moveTo(loopx - 3, loopy + loop_radius - 3*cond_radius);
+            fctx.lineTo(loopx - 3, loopy + loop_radius + 3*cond_radius);
+            fctx.moveTo(loopx + 3, loopy + loop_radius - 3*cond_radius);
+            fctx.lineTo(loopx + 3, loopy + loop_radius + 3*cond_radius);
+            fctx.stroke();
+            fctx.lineWidth = 1;
             
+            // Draw coupling loop:
+            fctx.beginPath();
+            fctx.arc(loopx, loopy - (loop_radius - loop_radius/5) + cond_radius , loop_radius/5, 0, 2*Math.PI, true);
+            fctx.stroke();
+
             // Draw loop diameter arrow:
-            ctx.beginPath();
-            ctx.moveTo(loopx - loop_radius, loopy);
-            ctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy - 2*cond_radius);
-            ctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy + 2*cond_radius);
-            ctx.lineTo(loopx - loop_radius, loopy);
-            ctx.lineTo(loopx + loop_radius, loopy);
-            ctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy + 2*cond_radius);
-            ctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy - 2*cond_radius);
-            ctx.lineTo(loopx + loop_radius, loopy);
-            ctx.stroke();
+            fctx.beginPath();
+            fctx.moveTo(loopx - loop_radius, loopy);
+            fctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy - 2*cond_radius);
+            fctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy + 2*cond_radius);
+            fctx.lineTo(loopx - loop_radius, loopy);
+            fctx.lineTo(loopx + loop_radius, loopy);
+            fctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy + 2*cond_radius);
+            fctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy - 2*cond_radius);
+            fctx.lineTo(loopx + loop_radius, loopy);
+            fctx.stroke();
             
             // Write loop diameter symbol:
-            ctx.font = "14px arial";
-            ctx.textAlign = "center";
+            fctx.font = "14px arial";
+            fctx.textAlign = "center";
             const dia = 1.0 * loop_diameter_slider.value;
-            ctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 8);
+            fctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 8);
 
             // Draw conductor diameter arrow:
-            ctx.beginPath();
+            fctx.beginPath();
             var p1x = loopx + 0.4 * (loop_radius - cond_radius);
             var p1y = loopy + 0.4 * (loop_radius - cond_radius);
             var p2x = loopx + 0.707 * (loop_radius - cond_radius);
@@ -410,11 +423,11 @@
             var p3y = loopy + 0.707 * (loop_radius - cond_radius);
             var p4x = loopx + 0.707 * (loop_radius - cond_radius);
             var p4y = loopy + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
-            ctx.moveTo(p1x, p1y);
-            ctx.lineTo(p2x, p2y);
-            ctx.lineTo(p3x, p3y);
-            ctx.lineTo(p4x, p4y);
-            ctx.lineTo(p2x, p2y);
+            fctx.moveTo(p1x, p1y);
+            fctx.lineTo(p2x, p2y);
+            fctx.lineTo(p3x, p3y);
+            fctx.lineTo(p4x, p4y);
+            fctx.lineTo(p2x, p2y);
 
             p1x = loopx + 1.0 * (loop_radius + cond_radius);
             p1y = loopy + 1.0 * (loop_radius + cond_radius);
@@ -424,66 +437,85 @@
             p3y = loopy + 0.707 * (loop_radius + cond_radius);
             p4x = loopx + 0.707 * (loop_radius + cond_radius);
             p4y = loopy + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
-            ctx.moveTo(p1x, p1y);
-            ctx.lineTo(p2x, p2y);
-            ctx.lineTo(p3x, p3y);
-            ctx.lineTo(p4x, p4y);
-            ctx.lineTo(p2x, p2y);
-            ctx.stroke();
-
+            fctx.moveTo(p1x, p1y);
+            fctx.lineTo(p2x, p2y);
+            fctx.lineTo(p3x, p3y);
+            fctx.lineTo(p4x, p4y);
+            fctx.lineTo(p2x, p2y);
+            fctx.stroke();
             p1x = loopx + 0.4 * (loop_radius - cond_radius);
             p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
-            ctx.fillText("\u2300b = " + conductor_diameter_slider.value.toString() + "mm", p1x, p1y);
+            fctx.fillText("\u2300b = " + conductor_diameter_slider.value.toString() + "mm", p1x, p1y);
+        }
+        
+        const aside_canvas = document.getElementById("antennaSide2D");
+        const sctx = aside_canvas.getContext('2d');
 
+        function drawSideDesign() {
+            const win_width  = document.getElementById("antenna-side-container").offsetWidth; 
+            const win_height = document.getElementById("antenna-side-container").offsetHeight; 
+            //const win_width  = aside_canvas.getBoundingClientRect().width; 
+            //const win_height = aside_canvas.getBoundingClientRect().height; 
+            console.log(win_width, win_height);
+            aside_canvas.width = win_width; 
+            aside_canvas.height = win_height-6; 
+            //const win_width  = aside_canvas.width; 
+            //const win_height = aside_canvas.height; 
+            sctx.clearRect(0, 0, win_width, win_height);
+
+            const cond_radius = conductor_diameter_slider.value / 4;
             const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
             const start_x = win_width/2 - loop_turns_slider.value * cond_spacing * 0.5;
-            const top_y = win_height * 0.6;
-            const bot_y = win_height * 0.9;
+            const top_y = win_height * 0.2;
+            const bot_y = win_height * 0.8;
             for (let i = 0; i < loop_turns_slider.value; i++) {
-                ctx.beginPath();
-                ctx.arc(start_x + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
-                ctx.arc(start_x + cond_spacing * 0.5 + i * cond_spacing, top_y, cond_radius, Math.PI, 0);
-                ctx.lineTo(start_x + i * cond_spacing + cond_radius, bot_y);
-                ctx.fill();
+                sctx.beginPath();
+                sctx.arc(start_x + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
+                sctx.arc(start_x + cond_spacing * 0.5 + i * cond_spacing, top_y, cond_radius, Math.PI, 0);
+                sctx.lineTo(start_x + i * cond_spacing + cond_radius, bot_y);
+                sctx.fill();
 
-                ctx.beginPath();
-                ctx.moveTo(start_x + cond_spacing * 0.5 + i * cond_spacing + cond_radius, top_y);
-                ctx.lineTo(start_x + (i+1) * cond_spacing + cond_radius, bot_y);
-                ctx.arc(start_x + (i+1) * cond_spacing, bot_y, cond_radius, 0, Math.PI, false);
-                ctx.lineTo(start_x + cond_spacing * 0.5 + i * cond_spacing - cond_radius, top_y);
-                ctx.stroke();
+                sctx.beginPath();
+                sctx.moveTo(start_x + cond_spacing * 0.5 + i * cond_spacing + cond_radius, top_y);
+                sctx.lineTo(start_x + (i+1) * cond_spacing + cond_radius, bot_y);
+                sctx.arc(start_x + (i+1) * cond_spacing, bot_y, cond_radius, 0, Math.PI, false);
+                sctx.lineTo(start_x + cond_spacing * 0.5 + i * cond_spacing - cond_radius, top_y);
+                sctx.stroke();
             }
             // Draw left spacing arrow:
-            const dim_y = win_height * 0.95;
-            ctx.beginPath();
-            ctx.moveTo(start_x - 30, dim_y);
-            ctx.lineTo(start_x, dim_y);
-            ctx.lineTo(start_x - 10, dim_y + 10)
-            ctx.lineTo(start_x - 10, dim_y - 10)
-            ctx.lineTo(start_x, dim_y);
-            ctx.moveTo(start_x, dim_y - 10);
-            ctx.lineTo(start_x, dim_y + 10);
-            ctx.stroke();
+            const dim_y = win_height * 0.9;
+            sctx.beginPath();
+            sctx.moveTo(start_x - 30, dim_y);
+            sctx.lineTo(start_x, dim_y);
+            sctx.lineTo(start_x - 10, dim_y + 10)
+            sctx.lineTo(start_x - 10, dim_y - 10)
+            sctx.lineTo(start_x, dim_y);
+            sctx.moveTo(start_x, dim_y - 10);
+            sctx.lineTo(start_x, dim_y + 10);
+            sctx.stroke();
             // Draw right spacing arrow:
-            ctx.beginPath();
-            ctx.moveTo(start_x + cond_spacing + 30, dim_y);
-            ctx.lineTo(start_x + cond_spacing, dim_y);
-            ctx.lineTo(start_x + cond_spacing + 10, dim_y + 10)
-            ctx.lineTo(start_x + cond_spacing + 10, dim_y - 10)
-            ctx.lineTo(start_x + cond_spacing, dim_y);
-            ctx.moveTo(start_x + cond_spacing, dim_y - 10);
-            ctx.lineTo(start_x + cond_spacing, dim_y + 10);
-            ctx.stroke();
+            sctx.beginPath();
+            sctx.moveTo(start_x + cond_spacing + 30, dim_y);
+            sctx.lineTo(start_x + cond_spacing, dim_y);
+            sctx.lineTo(start_x + cond_spacing + 10, dim_y + 10)
+            sctx.lineTo(start_x + cond_spacing + 10, dim_y - 10)
+            sctx.lineTo(start_x + cond_spacing, dim_y);
+            sctx.moveTo(start_x + cond_spacing, dim_y - 10);
+            sctx.lineTo(start_x + cond_spacing, dim_y + 10);
+            sctx.stroke();
 
             // Draw turns number text:
-            ctx.fillText("N = " + loop_turns_slider.value.toString(), loopx, win_height * 0.6 - 10);
+            sctx.font = "14px arial";
+            sctx.textAlign = "center";
+            sctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.1);
             
             // Draw spacing text:
-            ctx.textAlign = "left";
+            sctx.textAlign = "left";
             const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
-            ctx.fillText(spc.toPrecision(2).toString() + "mm", start_x + cond_spacing + 35, dim_y + 5);
+            sctx.fillText(spc.toPrecision(3).toString() + "mm", start_x + cond_spacing + 35, dim_y + 5);
         }
-        drawDesign();
+        drawFrontDesign();
+        drawSideDesign();
 
         const chartCanvas = document.getElementById("chartCanvas");
         const chartCanvasContext = chartCanvas.getContext('2d');
@@ -566,6 +598,7 @@
                 }]
             },
             options: {
+                //responsive: true,
                 maintainAspectRatio: false,
                 scales: {
                     xAxes: [{

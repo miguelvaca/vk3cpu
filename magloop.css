@@ -10,9 +10,11 @@ header {
     text-align: center;
 }
 
-section.flexLayoutClass {
-    display: flex;
-    flex-direction: column;
+section.gridLayoutClass {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    justify-items: stretch;
 }
 
 canvas.chartCanvasClass {
@@ -20,36 +22,56 @@ canvas.chartCanvasClass {
     /*width: 100%;*/
     margin: auto;
     border: 1px solid rgb(0, 0, 0);
-    /* display: block; */
-    /*box-sizing: border-box; */
+    display: block; 
+    box-sizing: border-box; 
 }
 
-section.controls {
-    display: flex;
+section div.chart-container {
+    grid-column-start: 1; 
+    grid-column-end: 7; 
+    grid-row-start: 1; 
+    grid-row-end: 5;
 }
-section.controls div.slider_container {
-    width: 70%;
-    border: 1px solid rgb(0, 0, 0);
-    /*display: flex;*/
-    /*flex-direction: column;*/
+
+section div.slider_container {
+    grid-column-start: 7; 
+    grid-column-end: 11; 
+    grid-row-start: 3; 
+    grid-row-end: 5;
+    width: 100%;
+    height: 100%;
+    background: rgb(255, 255, 255);
+    border: 0px solid rgb(0, 0, 0);
+    margin: 0%;
     display: inline-block;
 }
 
-section.controls canvas.antennaClass {
-    background: white;
-    width: 30%;
-    margin: auto;
-    border: 1px solid rgb(0, 0, 0);
+section div.antennaFront-container {
+    grid-column-start: 7; 
+    grid-column-end: 9; 
+    grid-row-start: 1; 
+    grid-row-end: 3;
+    width: 100%;
+    height: 100%;
+    display: block; 
+    box-sizing: border-box; 
     /*display: block;*/
-    /*box-sizing: border-box;*/
+    margin: 0;
+    padding: 0;
+    background: white;
+    border: 0px solid rgb(0, 0, 0);
+    position: absolute;
 }
 
-section.controls div.sliders {
+section div.sliders {
     background:rgb(255, 255, 255);
     font-size: small;
+    margin: auto;
+    width: auto;
+    height: auto;
 }
 
-section.controls div label {
+div label {
     background:white;
     display: inline-block;
     width: 12%;
@@ -57,12 +79,59 @@ section.controls div label {
     text-align: right;
 }
 
-section.controls div input {
+div input {
     background:lightsalmon;
     display: inline-block;
-    width: 75%;
+    width: 70%;
 }
 
-footer {
+section div.antennaSide-container {
+    grid-column-start: 9; 
+    grid-column-end: 11; 
+    grid-row-start: 1; 
+    grid-row-end: 3;
+    width: 100%;
+    height: 100%;
+    display: block;
+    box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
     background: white;
+    border: 0px solid rgb(0, 0, 0);
+    position: absolute;
 }
+
+@media (orientation: portrait) {
+    section.gridLayoutClass {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(10, 1fr);
+        justify-items: stretch;
+    }
+
+    section div.chart-container {
+        grid-column-start: 1; 
+        grid-column-end: 6; 
+        grid-row-start: 1; 
+        grid-row-end: 7;
+    }
+    
+    section div.slider_container {
+        grid-column-start: 1; 
+        grid-column-end: 6; 
+        grid-row-start: 7; 
+        grid-row-end: 9;
+    }
+    section div.antennaFront-container {
+        grid-column-start: 1; 
+        grid-column-end: 3; 
+        grid-row-start: 9; 
+        grid-row-end: 11;
+    }
+    section div.antennaSide-container {
+        grid-column-start: 3; 
+        grid-column-end: 6; 
+        grid-row-start: 9; 
+        grid-row-end: 11;
+    }
+}    
