@@ -115,7 +115,7 @@ section div.antennaSide-container {
         grid-column-end: 6; 
         grid-row-start: 1; 
         grid-row-end: 7;
-        height: 100%;
+        height: 100vh;
     }
     
     section div.slider_container {
