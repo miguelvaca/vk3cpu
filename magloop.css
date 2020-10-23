@@ -118,7 +118,7 @@ section div.antennaSide-container {
 }    
 
 @media (orientation: landscape) {
-        section.gridLayoutClass {
+    section.gridLayoutClass {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         grid-template-rows: repeat(2, 1fr) 150px;
@@ -153,3 +153,36 @@ section div.antennaSide-container {
         grid-row-end: 4;
     }
 }    
+/*
+@media print (orientation: landscape) {
+    section.gridLayoutClass {
+        display: grid;
+        grid-template-columns: repeat(4, 300px);
+        grid-template-rows: repeat(1, 300px) 150px;
+        justify-items: stretch;
+    }
+    section div.chart-container {
+        min-height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        height: auto;
+        width: auto;
+    }
+}
+
+@media print (orientation: portrait) {
+    section.gridLayoutClass {
+        display: grid;
+        grid-template-columns: repeat(2, 300px);
+        grid-template-rows: repeat(2, 300px) 150px 120px;
+        justify-items: stretch;
+    }
+    section div.chart-container {
+        min-height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        height: auto;
+        width: auto;
+    }
+}
+*/

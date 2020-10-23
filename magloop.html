@@ -49,7 +49,7 @@
                 <canvas id="antennaSide2D" class="antennaSideClass" width="150" height="150">
                 </canvas>
             </div>
-    </section>
+        </section>
     </body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script>
@@ -57,7 +57,6 @@
 
         var loop_diameter_slider = document.getElementById("loop_diameter_slider");
         var loop_diameter_value = document.getElementById("loop_diameter_value");
-        //loop_diameter_value.innerHTML = loop_diameter_slider.value;
         var val = loop_diameter_slider.value * 1.0;
         loop_diameter_value.innerHTML = val.toPrecision(3).toString();
 
@@ -78,19 +77,10 @@
         var transmit_power_value = document.getElementById("transmit_power_value");
         transmit_power_value.innerHTML = transmit_power_slider.value;
 
-        /*
-        var heightAboveGround_slider = document.getElementById("heightAboveGround_slider");
-        var heightAboveGround_value = document.getElementById("heightAboveGround_value");
-        heightAboveGround_value.innerHTML = heightAboveGround_slider.value;
-        */
-
         function updateFrequencies() {
             const hamFrequencies = [
-                //1.6, 2.0, 4.0, 6.0, 8.0
                 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
                 //0.1357, 0.1378, 0.472, 0.479, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
-                //1.8, 2.2, 2.8, 3.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.1, 12.0, 14.0, 16.0, 18.068, 21.0, 24.89, 28.0
-                //1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
             ];
             frequencies = [];
             hamFrequencies.forEach(freq => {
@@ -122,7 +112,7 @@
             const rr = (n_turns ** 2.0) * k * (l ** 4.0);
             return rr;
         }
-
+        
         function calculateRadiationResistance() {
             var retval = [];
             frequencies.forEach(freq => {
@@ -364,11 +354,12 @@
             drawSideDesign();
         }
 
-        /*
-        heightAboveGround_slider.oninput = function() {
-            heightAboveGround_value.innerHTML = this.value;
+        window.onbeforeprint = function() {
+            console.log("onbeforeprint");
+            myChart.resize();
+            drawFrontDesign();
+            drawSideDesign();
         }
-        */
 
         const afront_canvas = document.getElementById("antennaFront2D");
         const fctx = afront_canvas.getContext('2d');
@@ -378,8 +369,8 @@
             const win_height = document.getElementById("antenna-front-container").offsetHeight; 
             //const win_width  = afront_canvas.getBoundingClientRect().width; 
             //const win_height = afront_canvas.getBoundingClientRect().height; 
-            afront_canvas.width = win_width; 
-            afront_canvas.height = win_height; 
+            afront_canvas.width = win_width-2; 
+            afront_canvas.height = win_height-2; 
 
             fctx.clearRect(0, 0, win_width, win_height);
             const loop_radius = win_width < win_height ? 0.35 * win_width : 0.35 * win_height; //  100; // loop_diameter_slider.value * 80;
@@ -478,8 +469,8 @@
             //const win_width  = aside_canvas.getBoundingClientRect().width; 
             //const win_height = aside_canvas.getBoundingClientRect().height; 
             //console.log(win_width, win_height);
-            aside_canvas.width = win_width; 
-            aside_canvas.height = win_height; 
+            aside_canvas.width = win_width-2; 
+            aside_canvas.height = win_height-2; 
             //const win_width  = aside_canvas.width; 
             //const win_height = aside_canvas.height; 
             sctx.clearRect(0, 0, win_width, win_height);
