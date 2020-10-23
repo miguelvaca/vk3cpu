@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel VK3CPU - Interactive Magloop Antenna Calculator (v0.8)</header>
+        <header>Miguel VK3CPU - Interactive Magloop Antenna Calculator (v0.9)</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -376,7 +376,7 @@
             afront_canvas.height = win_height-2; 
 
             fctx.clearRect(0, 0, win_width, win_height);
-            const loop_radius = win_width < win_height ? 0.40 * win_width : 0.40 * win_height; //  100; // loop_diameter_slider.value * 80;
+            const loop_radius = win_width < win_height ? 0.35 * win_width : 0.35 * win_height; //  100; // loop_diameter_slider.value * 80;
             const cond_radius = conductor_diameter_slider.value / 5;
             const loopx = win_width/2; 
             const loopy = win_height/2;
@@ -415,10 +415,12 @@
             fctx.lineTo(loopx + loop_radius, loopy);
             fctx.stroke();
             
-            // Write loop diameter symbol:
-            fctx.font = "14px arial";
+            // Write loop inductance:
+            fctx.font = "12px arial";
             const L = getInductance() * 1.0e+6;
             fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
+
+            // Write loop diameter symbol:
             fctx.font = "12px arial";
             fctx.textAlign = "center";
             const dia = 1.0 * loop_diameter_slider.value;
@@ -482,7 +484,7 @@
             const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
             const start_x = win_width/2 - loop_turns_slider.value * cond_spacing * 0.5;
             const top_y = win_height * 0.2;
-            const bot_y = win_height * 0.8;
+            const bot_y = win_height * 0.7;
             for (let i = 0; i < loop_turns_slider.value; i++) {
                 sctx.beginPath();
                 sctx.arc(start_x + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
@@ -498,7 +500,7 @@
                 sctx.stroke();
             }
             // Draw left spacing arrow:
-            const dim_y = win_height * 0.9;
+            const dim_y = win_height * 0.8;
             sctx.beginPath();
             sctx.moveTo(start_x - 20, dim_y);
             sctx.lineTo(start_x, dim_y);
@@ -525,9 +527,9 @@
             sctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.1 + 3);
             
             // Draw spacing text:
-            sctx.textAlign = "left";
+            sctx.textAlign = "center";
             const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
-            sctx.fillText("c = " + spc.toPrecision(3).toString() + "mm", start_x + cond_spacing + 25, dim_y + 5);
+            sctx.fillText("c = " + spc.toPrecision(3).toString() + "mm", start_x + cond_spacing, dim_y + 20);
         }
         drawFrontDesign();
         drawSideDesign();
