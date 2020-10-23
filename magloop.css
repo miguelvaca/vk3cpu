@@ -2,6 +2,7 @@ body {
     background: rgb(201, 201, 201);
     margin: 0px;
 }
+
 header {
     background: black;
     color: white;
@@ -23,8 +24,12 @@ section div.slider_container {
     height: 100%;
     background: rgb(255, 255, 255);
     border: 1px solid rgb(0, 0, 0);
-    margin: 0%;
-    display: inline-block;
+    margin: 0px;
+    padding: 0px;
+    /*display: inline-block;*/
+    box-sizing: border-box; 
+    display: flex;
+    flex-direction: column;
 }
 
 section div.antennaFront-container {
@@ -32,8 +37,8 @@ section div.antennaFront-container {
     height: 100%;
     display: block; 
     box-sizing: border-box; 
-    margin: 0;
-    padding: 0;
+    margin: 0px;
+    padding: 0px;
     background: white;
     border: 1px solid rgb(0, 0, 0);
     position: absolute;
@@ -41,6 +46,7 @@ section div.antennaFront-container {
 
 section div.sliders {
     background:rgb(255, 255, 255);
+    display: inline-block;
     font-size: small;
     margin: 0px;
     padding: 0px;
@@ -116,7 +122,7 @@ section div.antennaSide-container {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         grid-template-rows: repeat(2, 1fr) 150px;
-        justify-items: auto;
+        justify-items: stretch;
     }
 
     section div.chart-container {
