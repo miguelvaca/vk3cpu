@@ -32,7 +32,7 @@
                 </div>
                 <div class="sliders">
                     <label for="loop_spacing_slider">c/b:</label>
-                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.05">
+                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.01">
                     <span id="loop_spacing_value"></span>
                 </div>
                 <div class="sliders">
@@ -87,7 +87,7 @@
         function updateFrequencies() {
             const hamFrequencies = [
                 //1.6, 2.0, 4.0, 6.0, 8.0
-                0.1357, 0.1378, 0.472, 0.479, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 50.0, 52.0
+                0.1357, 0.1378, 0.472, 0.479, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
                 //1.8, 2.2, 2.8, 3.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.1, 12.0, 14.0, 16.0, 18.068, 21.0, 24.89, 28.0
                 //1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
             ];
@@ -310,6 +310,7 @@
 
         loop_turns_slider.oninput = function() {
             loop_turns_value.innerHTML = this.value;
+            drawFrontDesign();
             drawSideDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
             myChart.data.datasets[1].data = calculateBandwidth();
@@ -325,6 +326,7 @@
         loop_spacing_slider.oninput = function() {
             const val = loop_spacing_slider.value * 1.0;
             loop_spacing_value.innerHTML = val.toPrecision(3).toString();
+            drawFrontDesign();
             drawSideDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
             myChart.data.datasets[1].data = calculateBandwidth();
@@ -414,6 +416,9 @@
             fctx.stroke();
             
             // Write loop diameter symbol:
+            fctx.font = "14px arial";
+            const L = getInductance() * 1.0e+6;
+            fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
             fctx.font = "12px arial";
             fctx.textAlign = "center";
             const dia = 1.0 * loop_diameter_slider.value;
