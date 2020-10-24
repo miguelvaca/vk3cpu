@@ -86,7 +86,7 @@
             hamFrequencies.forEach(freq => {
                 const wavelength = 3e8 / (freq * 1e6);
                 const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-                if (l <= 0.20) {
+                if (l <= 0.30) {
                     frequencies.push(freq);
                 }
             });
@@ -112,7 +112,7 @@
             const rr = (n_turns ** 2.0) * k * (l ** 4.0);
             return rr;
         }
-        
+
         function calculateRadiationResistance() {
             var retval = [];
             frequencies.forEach(freq => {
@@ -148,7 +148,7 @@
             const h = loop_spacing_slider.value * conductor_diameter_slider.value;
             const a = conductor_diameter_slider.value * 0.5;
             const multiloop_capacitance = (loop_turns_slider.value > 1) ? 
-                (2.0*Math.PI*e0) / Math.log((h + Math.sqrt(h**2 - a**2))/a) * Math.PI * loop_diameter_slider.value * loop_turns_slider.value : 0.0;
+                ((2.0*Math.PI*e0) / Math.log((h + Math.sqrt(h**2 - a**2))/a)) * Math.PI * loop_diameter_slider.value * (loop_turns_slider.value-1) : 0.0;
             const capacitance = 1e12 * ((1.0 / (2.0 * Math.PI * frequency * 1e6 * reactance)) - multiloop_capacitance);
             return capacitance; // in picofarads
         }
