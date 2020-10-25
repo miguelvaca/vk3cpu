@@ -156,7 +156,7 @@ section div.antennaSide-container {
         grid-row-end: 4;
     }
 }    
-/*
+
 @media print (orientation: landscape) {
     section.gridLayoutClass {
         display: grid;
@@ -168,8 +168,8 @@ section div.antennaSide-container {
         min-height: 100%;
         max-width: 100%;
         max-height: 100%;
-        height: auto;
-        width: auto;
+        height: auto!important;
+        width: auto!important;
     }
 }
 
@@ -184,8 +184,7 @@ section div.antennaSide-container {
         min-height: 100%;
         max-width: 100%;
         max-height: 100%;
-        height: auto;
-        width: auto;
+        height: auto!important;
+        width: auto!important;
     }
 }
-*/

@@ -107,7 +107,7 @@
         function radiationResistance(frequency) {
             const n_turns = loop_turns_slider.value;
             const k = 20.0 * (Math.PI ** 2.0);
-            const wavelength = 3e8 / (frequency * 1e6);
+            const wavelength = 3e8 / frequency;
             const l = (Math.PI * loop_diameter_slider.value) / wavelength;
             const rr = (n_turns ** 2.0) * k * (l ** 4.0);
             return rr;
@@ -116,7 +116,7 @@
         function calculateRadiationResistance() {
             var retval = [];
             frequencies.forEach(freq => {
-                const rr = radiationResistance(freq);
+                const rr = radiationResistance(freq * 1e6);
                 retval.push({x:freq, y:rr});
             });
             return retval;
@@ -124,39 +124,75 @@
 
         function inductiveReactance(frequency) {
             const inductance = getInductance();
-            const wavelength = 3e8 / (frequency * 1e6);
-            const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-            const reactance = 2.0 * Math.PI * (frequency * 1e6) * inductance;
+            const reactance = 2.0 * Math.PI * frequency * inductance;
             return reactance;
         }
 
         function calculateInductiveReactance() {
             var retval = [];
             frequencies.forEach(freq => {
-                const reactance = inductiveReactance(freq);
+                const reactance = inductiveReactance(freq * 1e6);
                 retval.push({x:freq, y:reactance});
             });
             return retval;
         }
 
-        function tuningCapacitance(frequency) {
-            const inductance = getInductance();
-            const wavelength = 3e8 / (frequency * 1e6);
-            const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-            const reactance = 2.0 * Math.PI * frequency * 1e6 * inductance;
+        function nagaokaCoefficient() {
+            // From Knight's 2016 paper on coil self-resonance, attributed to Wheeler's 1982 eqn as modified by Bob Weaver
+            var retval;
+            const c_spacing = 1e-3 * loop_spacing_slider.value * conductor_diameter_slider.value;
+            const corr_factor = Math.sqrt(1.0 + (c_spacing**2 / loop_diameter_slider.value**2));
+            const conductor_length = Math.PI * loop_diameter_slider.value * loop_turns_slider.value * corr_factor;
+            const x = loop_diameter_slider.value / conductor_length;
+            const zk = 2.0 / (Math.PI * x);
+            const k0 = 1.0 / (Math.log(8.0 / Math.PI) - 0.5);
+            const k2 = 24.0 / (3.0 * Math.PI**2 - 16.0);
+            const w = -0.47 / (0.755 + x)**1.44;
+            const p = k0 + 3.437/x + k2/x**2 + w;
+            retval = zk * (Math.log(1 + 1/zk) + 1/p);
+            return retval;
+        }
+
+        function ctdw(ff, ei, ex) {
+            // From Knight's 2016 paper
+            const kL = nagaokaCoefficient();
+            const kct = 1.0/kL - 1.0;
+            return 11.27350207 * ex * ff * (1.0 + kct * (1.0 + ei/ex) / 2.0);
+        }
+
+        function ciae(ff, ei, ex) {
+            // From Knight's 2016 paper
+            return 17.70837564 * (ei+ex) / Math.log(1.0 + Math.PI**2 * ff);
+        }
+
+        function multiloopCapacitance() {
             const e0 =  8.854187e-12;
-            const h = loop_spacing_slider.value * conductor_diameter_slider.value;
-            const a = conductor_diameter_slider.value * 0.5;
-            const multiloop_capacitance = (loop_turns_slider.value > 1) ? 
-                ((2.0*Math.PI*e0) / Math.log((h + Math.sqrt(h**2 - a**2))/a)) * Math.PI * loop_diameter_slider.value * (loop_turns_slider.value-1) : 0.0;
-            const capacitance = 1e12 * ((1.0 / (2.0 * Math.PI * frequency * 1e6 * reactance)) - multiloop_capacitance);
+            const h = 1e-3 * loop_spacing_slider.value * conductor_diameter_slider.value;
+            const ei = 1.0; // Assume internal epsilon is air 
+            const ex = 1.0; // Assume external epsilon is air
+            const solenoid_length = loop_turns_slider.value * h;
+            const ff = solenoid_length / loop_diameter_slider.value;
+            var multiloop_capacitance = 1e-12 * (ctdw(ff, ei, ex) / Math.sqrt(1 - h**2 / loop_diameter_slider.value**2) + ciae(ff, ei, ex)) * loop_diameter_slider.value;
+            //console.log(multiloop_capacitance * 1e12);
+            return multiloop_capacitance; // in Farads
+        }
+
+        function tuningCapacitance(frequency) {
+            // frequency is in Hertz
+            const reactance = inductiveReactance(frequency);
+            var multiloop_capacitance = 0.0;
+            if(loop_turns_slider.value > 1) {
+                // Only compensate for multiloop capacitance when we have more than 1 turn:
+                multiloop_capacitance = multiloopCapacitance();
+            }
+            const capacitance = 1e12 * ((1.0 / (2.0 * Math.PI * frequency * reactance)) - multiloop_capacitance);
             return capacitance; // in picofarads
         }
 
         function calculateTuningCapacitor() {
             var retval = [];
             frequencies.forEach(freq => {
-                const capacitor = tuningCapacitance(freq);
+                const capacitor = tuningCapacitance(freq * 1e6);
                 retval.push({x:freq, y:capacitor});
             });
             return retval;
@@ -192,6 +228,7 @@
         }
 
         function lossResistance(frequency) {
+            // Frequency in Hertz
             const a_coil_radius = loop_diameter_slider.value * 0.5;
             const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
             const n_turns = loop_turns_slider.value;
@@ -200,7 +237,7 @@
             const k = (n_turns * a_coil_radius / b_conductor_radius);
             const cu_sigma = 58e6; // Copper conductance value
             const Rp = getProximityResFromSpacing(loop_spacing_ratio);
-            const Rs = Math.sqrt(Math.PI * frequency * 1e6 * mu0 / cu_sigma);
+            const Rs = Math.sqrt(Math.PI * frequency * mu0 / cu_sigma);
             const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
             const R_ohmic = k * Rs * (Rp / R0 + 1.0);
             return R_ohmic;
@@ -209,7 +246,7 @@
         function calculateLossResistance() {
             var retval = [];
             frequencies.forEach(freq => {
-                const R_ohmic = lossResistance(freq);
+                const R_ohmic = lossResistance(freq * 1e6);
                 retval.push({x:freq, y:R_ohmic});
             });
             return retval;
@@ -218,8 +255,8 @@
         function calculateEfficiencyFactor() {
             var retval = [];
             frequencies.forEach(freq => {
-                const R_ohmic = lossResistance(freq);
-                const R_rad = radiationResistance(freq);
+                const R_ohmic = lossResistance(freq * 1e6);
+                const R_rad = radiationResistance(freq * 1e6);
                 const efficiency = 100.0 / (1.0 + (R_ohmic / R_rad));
                 //const efficiency = 10.0 * Math.log10(1.0 / (1.0 + (R_ohmic / R_rad))); // for Efficiency in dB
                 retval.push({x:freq, y:efficiency});
@@ -238,7 +275,7 @@
         function calculateQualityFactor() {
             var retval = [];
             frequencies.forEach(freq => {
-                const Q = qualityFactor(freq);
+                const Q = qualityFactor(freq * 1e6);
                 retval.push({x:freq, y:Q});
             });
             return retval;
@@ -246,14 +283,14 @@
 
         function bandwidth(frequency) {
             const Q = qualityFactor(frequency);
-            const bw = frequency * 1e3 / Q; // in kiloHertz, remember that frequency comes in as MHz. Conversion between MHz and kHz is why the 1e3 exists.
+            const bw = frequency * 1e-3 / Q; // in kiloHertz, remember that frequency comes in as Hz. Conversion between Hz and kHz is why the 1e-3 exists.
             return bw;
         }
 
         function calculateBandwidth() {
             var retval = [];
             frequencies.forEach(freq => {
-                const bw = bandwidth(freq);
+                const bw = bandwidth(freq * 1e6);
                 retval.push({x:freq, y:bw});
             });
             return retval;
@@ -267,7 +304,7 @@
         function calculateCapacitorVoltage() {
             var retval = [];
             frequencies.forEach(freq => {
-                const Vcap = 0.001 * capacitorVoltage(freq);
+                const Vcap = 0.001 * capacitorVoltage(freq * 1e6);
                 retval.push({x:freq, y:Vcap});
             });
             return retval;
@@ -277,6 +314,7 @@
             const val = this.value * 1.0;
             loop_diameter_value.innerHTML = val.toPrecision(3).toString();
             drawFrontDesign();
+            drawSideDesign();
             updateFrequencies();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
             myChart.data.datasets[1].data = calculateBandwidth();
@@ -518,10 +556,19 @@
             sctx.lineTo(start_x + cond_spacing, dim_y + 7);
             sctx.stroke();
 
-            // Draw turns number text:
             sctx.font = "12px arial";
-            sctx.textAlign = "center";
-            sctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.1 + 3);
+            if(loop_turns_slider.value > 1) {
+                const L = multiloopCapacitance() * 1e+12;
+                sctx.textAlign = "right";
+                sctx.fillText("C = " + L.toPrecision(3).toString() + " pF", win_width-8, 18);
+                sctx.textAlign = "left";
+                sctx.fillText("N = " + loop_turns_slider.value.toString(), 8, win_height * 0.1 + 3);
+            } else {
+                // Draw turns number text:
+                //sctx.font = "12px arial";
+                sctx.textAlign = "center";
+                sctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.1 + 3);
+            }
             
             // Draw spacing text:
             sctx.textAlign = "center";
