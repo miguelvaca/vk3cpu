@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Interactive Magloop Antenna Calculator (v1.0a)</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Interactive Magloop Antenna Calculator</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -52,6 +52,7 @@
         </section>
     </body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.1.2"></script>
     <script>
         var frequencies = [];
 
@@ -79,8 +80,8 @@
 
         function updateFrequencies() {
             const hamFrequencies = [
-                //1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
-                0.1365, 0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
+                1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
+                //0.1365, 0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
                 //0.1357, 0.1378, 0.472, 0.479, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
             ];
             frequencies = [];
@@ -716,7 +717,7 @@
                         position: 'right',
                         id: 'mohmsID',
                     },{
-                        type: 'logarithmic',
+                        type: 'linear',
                         display: 'auto',
                         scaleLabel: {
                             display: true,
@@ -746,6 +747,7 @@
                             fontColor: 'purple',
                             fontStyle: 'bold'
                         },
+                        min: 0.0,
                         position: 'right',
                         id: 'qID'
                     },{
@@ -757,11 +759,58 @@
                             fontColor: 'rgb(150, 150, 0)',
                             fontStyle: 'bold'
                         },
+                        min: 0.0,
                         position: 'right',
                         id: 'vID'
                     }]
                 },
-                showLines: true
+                showLines: true,
+                tooltips: {
+                    mode: 'interpolate',
+                    intersect: false,
+                    callbacks: {
+                        title: function(tooltipItem, data) {
+                            var label = '' + tooltipItem[0].xLabel.toFixed(3).toString();
+                            label += ' MHz ';
+                            return label;
+                        },
+                        label: function(tooltipItem, data) {
+                            var label = data.datasets[tooltipItem.datasetIndex].label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += Math.round(tooltipItem.yLabel * 1000) / 1000;
+                            return label;
+                        }
+                    }
+                },
+                plugins: {
+                    crosshair: {
+                        line: {
+                            color: 'red',  // crosshair line color
+                            width: 1        // crosshair line width
+                        },
+                        sync: {
+                            enabled: true,            // enable trace line syncing with other charts
+                            group: 1,                 // chart group
+                            suppressTooltips: true   // suppress tooltips when showing a synced tracer
+                        },
+                        zoom: {
+                            enabled: false,                                      // enable zooming
+                            zoomboxBackgroundColor: 'rgba(66,133,244,0.2)',     // background color of zoom box 
+                            zoomboxBorderColor: '#48F',                         // border color of zoom box
+                            zoomButtonText: 'Reset Zoom',                       // reset zoom button text
+                            zoomButtonClass: 'reset-zoom',                      // reset zoom button class
+                        },
+                        callbacks: {
+                            beforeZoom: function(start, end) {                  // called before zoom, return false to prevent zoom
+                                return false;                                   // return true to enable zooming
+                            },
+                            afterZoom: function(start, end) {                   // called after zoom
+                            }
+                        }
+                    }
+                }
             }
         });
     </script>
