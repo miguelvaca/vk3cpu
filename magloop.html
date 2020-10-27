@@ -630,15 +630,6 @@
                     yAxisID: 'mohmsID'
                 },
                 {
-                    label: 'Reactance (j\u03A9)',
-                    fill: false,
-                    borderColor: 'blue',
-                    backgroundColor: 'blue',
-                    data: calculateInductiveReactance(),
-                    borderWidth: 1,
-                    yAxisID: 'ohmsID'
-                },
-                {
                     label: 'R-loss (\u03A9)',
                     fill: false,
                     borderColor: 'orange',
@@ -646,6 +637,15 @@
                     data: calculateLossResistance(),
                     borderWidth: 1,
                     yAxisID: 'mohmsID'
+                },
+                {
+                    label: 'Reactance (j\u03A9)',
+                    fill: false,
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    data: calculateInductiveReactance(),
+                    borderWidth: 1,
+                    yAxisID: 'ohmsID'
                 },
                 {
                     label: 'Q',
