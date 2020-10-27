@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Interactive Magloop Antenna Calculator</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Interactive Magloop Antenna Calculator v2</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -81,6 +81,7 @@
         function updateFrequencies() {
             const hamFrequencies = [
                 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
+                //0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
                 //0.1365, 0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
                 //0.1357, 0.1378, 0.472, 0.479, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
             ];
@@ -703,6 +704,9 @@
                             fontColor: 'brown',
                             fontStyle: 'bold'
                         },
+                        ticks: {
+                            beginAtZero: true,
+                        },
                         position: 'left',
                         id: 'bwID'
                     },{
@@ -725,6 +729,9 @@
                             fontColor: 'green',
                             fontStyle: 'bold'
                         },
+                        ticks: {
+                            max: 3000.0,
+                        },
                         position: 'left',
                         id: 'pfID'
                     },{
@@ -735,6 +742,9 @@
                             labelString: 'j\u03A9',
                             fontColor: 'blue',
                             fontStyle: 'bold'
+                        },
+                        ticks: {
+                            beginAtZero: true,
                         },
                         position: 'right',
                         id: 'ohmsID'
@@ -747,7 +757,9 @@
                             fontColor: 'purple',
                             fontStyle: 'bold'
                         },
-                        min: 0.0,
+                        ticks: {
+                            beginAtZero: true,
+                        },
                         position: 'right',
                         id: 'qID'
                     },{
@@ -759,6 +771,9 @@
                             fontColor: 'rgb(150, 150, 0)',
                             fontStyle: 'bold'
                         },
+                        ticks: {
+                            beginAtZero: true,
+                        },
                         min: 0.0,
                         position: 'right',
                         id: 'vID'
@@ -768,6 +783,7 @@
                 tooltips: {
                     mode: 'interpolate',
                     intersect: false,
+                    position: 'nearest',
                     callbacks: {
                         title: function(tooltipItem, data) {
                             var label = '' + tooltipItem[0].xLabel.toFixed(3).toString();
