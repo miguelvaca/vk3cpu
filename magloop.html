@@ -417,7 +417,7 @@
 
             fctx.clearRect(0, 0, win_width, win_height);
             const loop_radius = win_width < win_height ? 0.32 * win_width : 0.32 * win_height; //  100; // loop_diameter_slider.value * 80;
-            const cond_radius = conductor_diameter_slider.value / 5;
+            const cond_radius = conductor_diameter_slider.value / 6;
             const loopx = win_width/2; 
             const loopy = win_height/2;
 
@@ -461,7 +461,7 @@
             fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
 
             // Write Tx power text:
-            fctx.fillText("P = " + transmit_power_slider.value + "W", 8, win_height * 0.8 + 20);
+            fctx.fillText("Tx = " + transmit_power_slider.value + "W", 8, win_height * 0.8 + 20);
 
             // Write loop diameter symbol:
             fctx.font = "12px arial";
@@ -523,7 +523,7 @@
 
             //const loop_radius = win_width < win_height ? 0.40 * win_width : 0.40 * win_height; 
 
-            const cond_radius = conductor_diameter_slider.value / 5;
+            const cond_radius = conductor_diameter_slider.value / 6;
             const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
             const start_x = win_width/2 - loop_turns_slider.value * cond_spacing * 0.5;
             const top_y = win_height * 0.2;
