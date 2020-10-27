@@ -14,8 +14,8 @@ header {
 
 canvas.chartCanvasClass {
     background: rgb(255, 255, 255);
-    margin: 0;
-    padding: 0;
+    margin: 0px;
+    padding: 5px;
     border: 1px solid rgb(0, 0, 0);
     display: block; 
     box-sizing: border-box; 
@@ -157,7 +157,7 @@ section div.antennaSide-container {
         grid-row-end: 4;
     }
 }    
-
+/*
 @media print (orientation: landscape) {
     section.gridLayoutClass {
         display: grid;
@@ -189,3 +189,4 @@ section div.antennaSide-container {
         width: auto!important;
     }
 }
+*/
