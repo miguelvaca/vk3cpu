@@ -322,8 +322,8 @@
             myChart.data.datasets[1].data = calculateBandwidth();
             myChart.data.datasets[2].data = calculateEfficiencyFactor();
             myChart.data.datasets[3].data = calculateRadiationResistance();
-            myChart.data.datasets[4].data = calculateInductiveReactance();
-            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[4].data = calculateLossResistance();
+            myChart.data.datasets[5].data = calculateInductiveReactance();
             myChart.data.datasets[6].data = calculateQualityFactor();
             myChart.data.datasets[7].data = calculateCapacitorVoltage();
             myChart.update();
@@ -337,8 +337,8 @@
             myChart.data.datasets[1].data = calculateBandwidth();
             myChart.data.datasets[2].data = calculateEfficiencyFactor();
             myChart.data.datasets[3].data = calculateRadiationResistance();
-            myChart.data.datasets[4].data = calculateInductiveReactance();
-            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[4].data = calculateLossResistance();
+            myChart.data.datasets[5].data = calculateInductiveReactance();
             myChart.data.datasets[6].data = calculateQualityFactor();
             myChart.data.datasets[7].data = calculateCapacitorVoltage();
             myChart.update();
@@ -352,8 +352,8 @@
             myChart.data.datasets[1].data = calculateBandwidth();
             myChart.data.datasets[2].data = calculateEfficiencyFactor();
             myChart.data.datasets[3].data = calculateRadiationResistance();
-            myChart.data.datasets[4].data = calculateInductiveReactance();
-            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[4].data = calculateLossResistance();
+            myChart.data.datasets[5].data = calculateInductiveReactance();
             myChart.data.datasets[6].data = calculateQualityFactor();
             myChart.data.datasets[7].data = calculateCapacitorVoltage();
             myChart.update();
@@ -368,8 +368,8 @@
             myChart.data.datasets[1].data = calculateBandwidth();
             myChart.data.datasets[2].data = calculateEfficiencyFactor();
             myChart.data.datasets[3].data = calculateRadiationResistance();
-            myChart.data.datasets[4].data = calculateInductiveReactance();
-            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[4].data = calculateLossResistance();
+            myChart.data.datasets[5].data = calculateInductiveReactance();
             myChart.data.datasets[6].data = calculateQualityFactor();
             myChart.data.datasets[7].data = calculateCapacitorVoltage();
             myChart.update();
@@ -787,11 +787,12 @@
                 plugins: {
                     crosshair: {
                         line: {
-                            color: 'red',  // crosshair line color
-                            width: 1        // crosshair line width
+                            color: 'red',   // crosshair line color
+                            width: 1,       // crosshair line width
+                            dashPattern: [100, 100]
                         },
                         sync: {
-                            enabled: true,            // enable trace line syncing with other charts
+                            enabled: false,            // enable trace line syncing with other charts
                             group: 1,                 // chart group
                             suppressTooltips: true   // suppress tooltips when showing a synced tracer
                         },
