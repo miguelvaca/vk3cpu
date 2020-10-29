@@ -22,7 +22,7 @@
                 </div>
                 <div class="sliders">
                     <label for="conductor_diameter_slider">&#8960b:</label>
-                    <input type="range" id="conductor_diameter_slider" min="5" max="40" value="19" step="1">
+                    <input type="range" id="conductor_diameter_slider" min="5" max="40" value="19" step="0.5">
                     <!-- <span id="conductor_diameter_value"></span>mm -->
                 </div>
                 <div class="sliders">
@@ -313,6 +313,20 @@
             return retval;
         }
 
+        function circulatingCurrent(frequency) {
+            const cc = Math.sqrt(transmit_power_slider.value * qualityFactor(frequency) /  inductiveReactance(frequency));
+            return cc;
+        }
+
+        function calculateCirculatingCurrent() {
+            var retval = [];
+            frequencies.forEach(freq => {
+                const cc = circulatingCurrent(freq * 1e6);
+                retval.push({x:freq, y:cc});
+            });
+            return retval;
+        }
+
         loop_diameter_slider.oninput = function() {
             //const val = this.value * 1.0;
             //loop_diameter_value.innerHTML = val.toPrecision(3).toString();
@@ -320,13 +334,14 @@
             drawSideDesign();
             updateFrequencies();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
-            myChart.data.datasets[1].data = calculateBandwidth();
-            myChart.data.datasets[2].data = calculateEfficiencyFactor();
-            myChart.data.datasets[3].data = calculateRadiationResistance();
-            myChart.data.datasets[4].data = calculateLossResistance();
-            myChart.data.datasets[5].data = calculateInductiveReactance();
-            myChart.data.datasets[6].data = calculateQualityFactor();
-            myChart.data.datasets[7].data = calculateCapacitorVoltage();
+            myChart.data.datasets[1].data = calculateCapacitorVoltage();
+            myChart.data.datasets[2].data = calculateBandwidth();
+            myChart.data.datasets[3].data = calculateEfficiencyFactor();
+            myChart.data.datasets[4].data = calculateRadiationResistance();
+            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[6].data = calculateInductiveReactance();
+            myChart.data.datasets[7].data = calculateQualityFactor();
+            myChart.data.datasets[8].data = calculateCirculatingCurrent();
             myChart.update();
         }
 
@@ -335,13 +350,14 @@
             drawFrontDesign();
             drawSideDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
-            myChart.data.datasets[1].data = calculateBandwidth();
-            myChart.data.datasets[2].data = calculateEfficiencyFactor();
-            myChart.data.datasets[3].data = calculateRadiationResistance();
-            myChart.data.datasets[4].data = calculateLossResistance();
-            myChart.data.datasets[5].data = calculateInductiveReactance();
-            myChart.data.datasets[6].data = calculateQualityFactor();
-            myChart.data.datasets[7].data = calculateCapacitorVoltage();
+            myChart.data.datasets[1].data = calculateCapacitorVoltage();
+            myChart.data.datasets[2].data = calculateBandwidth();
+            myChart.data.datasets[3].data = calculateEfficiencyFactor();
+            myChart.data.datasets[4].data = calculateRadiationResistance();
+            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[6].data = calculateInductiveReactance();
+            myChart.data.datasets[7].data = calculateQualityFactor();
+            myChart.data.datasets[8].data = calculateCirculatingCurrent();
             myChart.update();
         }
 
@@ -350,13 +366,14 @@
             drawFrontDesign();
             drawSideDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
-            myChart.data.datasets[1].data = calculateBandwidth();
-            myChart.data.datasets[2].data = calculateEfficiencyFactor();
-            myChart.data.datasets[3].data = calculateRadiationResistance();
-            myChart.data.datasets[4].data = calculateLossResistance();
-            myChart.data.datasets[5].data = calculateInductiveReactance();
-            myChart.data.datasets[6].data = calculateQualityFactor();
-            myChart.data.datasets[7].data = calculateCapacitorVoltage();
+            myChart.data.datasets[1].data = calculateCapacitorVoltage();
+            myChart.data.datasets[2].data = calculateBandwidth();
+            myChart.data.datasets[3].data = calculateEfficiencyFactor();
+            myChart.data.datasets[4].data = calculateRadiationResistance();
+            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[6].data = calculateInductiveReactance();
+            myChart.data.datasets[7].data = calculateQualityFactor();
+            myChart.data.datasets[8].data = calculateCirculatingCurrent();
             myChart.update();
         }
 
@@ -366,20 +383,22 @@
             drawFrontDesign();
             drawSideDesign();
             myChart.data.datasets[0].data = calculateTuningCapacitor();
-            myChart.data.datasets[1].data = calculateBandwidth();
-            myChart.data.datasets[2].data = calculateEfficiencyFactor();
-            myChart.data.datasets[3].data = calculateRadiationResistance();
-            myChart.data.datasets[4].data = calculateLossResistance();
-            myChart.data.datasets[5].data = calculateInductiveReactance();
-            myChart.data.datasets[6].data = calculateQualityFactor();
-            myChart.data.datasets[7].data = calculateCapacitorVoltage();
+            myChart.data.datasets[1].data = calculateCapacitorVoltage();
+            myChart.data.datasets[2].data = calculateBandwidth();
+            myChart.data.datasets[3].data = calculateEfficiencyFactor();
+            myChart.data.datasets[4].data = calculateRadiationResistance();
+            myChart.data.datasets[5].data = calculateLossResistance();
+            myChart.data.datasets[6].data = calculateInductiveReactance();
+            myChart.data.datasets[7].data = calculateQualityFactor();
+            myChart.data.datasets[8].data = calculateCirculatingCurrent();
             myChart.update();
         }
 
         transmit_power_slider.oninput = function() {
             //transmit_power_value.innerHTML = this.value;
             drawFrontDesign();
-            myChart.data.datasets[7].data = calculateCapacitorVoltage();
+            myChart.data.datasets[1].data = calculateCapacitorVoltage();
+            myChart.data.datasets[8].data = calculateCirculatingCurrent();
             myChart.update();
         }
 
@@ -504,7 +523,8 @@
             p1x = loopx + 0.4 * (loop_radius - cond_radius);
             p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
             //fctx.textAlign = "right";
-            fctx.fillText("\u2300b = " + conductor_diameter_slider.value.toString() + "mm", loopx, p1y+2);
+            const cond_dia = 1.0 * conductor_diameter_slider.value;
+            fctx.fillText("\u2300b = " + cond_dia.toPrecision(3).toString() + "mm", loopx, p1y+2);
         }
         
         const aside_canvas = document.getElementById("antennaSide2D");
@@ -604,6 +624,15 @@
                     yAxisID: 'pfID'
                 },
                 {
+                    label: 'Vcap (kV)',
+                    fill: false,
+                    borderColor: 'rgb(150, 150, 0)',
+                    backgroundColor: 'rgb(200, 200, 0)',
+                    data: calculateCapacitorVoltage(),
+                    borderWidth: 1,
+                    yAxisID: 'vID'
+                },
+                {
                     label: 'BW (kHz)',
                     fill: false,
                     borderColor: 'brown',
@@ -658,13 +687,13 @@
                     yAxisID: 'qID'
                 },
                 {
-                    label: 'V cap (kV)',
+                    label: 'I\u2092 (A)',
                     fill: false,
-                    borderColor: 'rgb(150, 150, 0)',
-                    backgroundColor: 'rgb(150, 150, 0)',
-                    data: calculateCapacitorVoltage(),
+                    borderColor: 'rgb(0,255,255)',
+                    backgroundColor: 'rgb(0,128,128)',
+                    data: calculateCirculatingCurrent(),
                     borderWidth: 1,
-                    yAxisID: 'vID'
+                    yAxisID: 'ccID'
                 }]
             },
             options: {
@@ -709,6 +738,21 @@
                         },
                         position: 'left',
                         id: 'bwID'
+                    },{
+                        type: 'linear',
+                        display: 'auto',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'kV',
+                            fontColor: 'rgb(150, 150, 0)',
+                            fontStyle: 'bold'
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                        },
+                        min: 0.0,
+                        position: 'left',
+                        id: 'vID'
                     },{
                         type: 'linear',
                         display: 'auto',
@@ -767,8 +811,8 @@
                         display: 'auto',
                         scaleLabel: {
                             display: true,
-                            labelString: 'kV',
-                            fontColor: 'rgb(150, 150, 0)',
+                            labelString: 'A',
+                            fontColor: 'rgb(0,128,128)',
                             fontStyle: 'bold'
                         },
                         ticks: {
@@ -776,7 +820,7 @@
                         },
                         min: 0.0,
                         position: 'right',
-                        id: 'vID'
+                        id: 'ccID'
                     }]
                 },
                 showLines: true,
