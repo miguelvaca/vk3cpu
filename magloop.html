@@ -5,7 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>VK3CPU Magloop Calculator</title>
         <link rel="stylesheet" href="magloop.css">
-        <meta name="google-site-verification" content="5cA-F0VJFPLnD1No_QAVPhiYIJH9EN9n18w6bg1ASy4" />
     </head>
     <body>
         <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator v2</header>
@@ -46,823 +45,826 @@
                 </canvas>
             </div>
         </section>
-    </body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.1.2"></script>
-    <script>
-        var frequencies = [];
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.1.2"></script>
+        <script>
+            var frequencies = [];
 
-        var loop_diameter_slider = document.getElementById("loop_diameter_slider");
-        var loop_diameter_value = document.getElementById("loop_diameter_value");
-        var val = loop_diameter_slider.value * 1.0;
+            var loop_diameter_slider = document.getElementById("loop_diameter_slider");
+            var loop_diameter_value = document.getElementById("loop_diameter_value");
+            var val = loop_diameter_slider.value * 1.0;
 
-        var conductor_diameter_slider = document.getElementById("conductor_diameter_slider");
-        var conductor_diameter_value = document.getElementById("conductor_diameter_value");
-        
-        var loop_turns_slider = document.getElementById("loop_turns_slider");
-        var loop_turns_value = document.getElementById("loop_turns_value");
+            var conductor_diameter_slider = document.getElementById("conductor_diameter_slider");
+            var conductor_diameter_value = document.getElementById("conductor_diameter_value");
+            
+            var loop_turns_slider = document.getElementById("loop_turns_slider");
+            var loop_turns_value = document.getElementById("loop_turns_value");
 
-        var loop_spacing_slider = document.getElementById("loop_spacing_slider");
-        var loop_spacing_value = document.getElementById("loop_spacing_value");
-        val = loop_spacing_slider.value * 1.0;
+            var loop_spacing_slider = document.getElementById("loop_spacing_slider");
+            var loop_spacing_value = document.getElementById("loop_spacing_value");
+            val = loop_spacing_slider.value * 1.0;
 
-        var transmit_power_slider = document.getElementById("transmit_power_slider");
-        var transmit_power_value = document.getElementById("transmit_power_value");
+            var transmit_power_slider = document.getElementById("transmit_power_slider");
+            var transmit_power_value = document.getElementById("transmit_power_value");
 
-        function updateFrequencies() {
-            const hamFrequencies = [
-                //1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
-                //0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
-                0.1365, 0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
-                //0.1357, 0.1378, 0.472, 0.479, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
-            ];
-            frequencies = [];
-            hamFrequencies.forEach(freq => {
-                const wavelength = 3e8 / (freq * 1e6);
-                const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-                if (l <= 0.30) {
-                    frequencies.push(freq);
-                }
-            });
-        }
-        
-        // Update the frequencies, now that we have the sliders available:
-        updateFrequencies();
-
-        function getInductance() {
-            const a_coil_radius = loop_diameter_slider.value * 0.5;
-            const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
-            const n_turns = loop_turns_slider.value;
-            const mu0 = 4.0 * Math.PI * 1e-7;
-            var retval = (n_turns ** 2.0) * mu0 * a_coil_radius * (Math.log(8.0 * a_coil_radius / b_conductor_radius) - 2.0);
-            return retval;
-        }
-
-        function radiationResistance(frequency) {
-            const n_turns = loop_turns_slider.value;
-            const k = 20.0 * (Math.PI ** 2.0);
-            const wavelength = 3e8 / frequency;
-            const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-            const rr = (n_turns ** 2.0) * k * (l ** 4.0);
-            return rr;
-        }
-
-        function calculateRadiationResistance() {
-            var retval = [];
-            frequencies.forEach(freq => {
-                const rr = radiationResistance(freq * 1e6);
-                retval.push({x:freq, y:rr});
-            });
-            return retval;
-        }
-
-        function inductiveReactance(frequency) {
-            const inductance = getInductance();
-            const reactance = 2.0 * Math.PI * frequency * inductance;
-            return reactance;
-        }
-
-        function calculateInductiveReactance() {
-            var retval = [];
-            frequencies.forEach(freq => {
-                const reactance = inductiveReactance(freq * 1e6);
-                retval.push({x:freq, y:reactance});
-            });
-            return retval;
-        }
-
-        function nagaokaCoefficient() {
-            // From Knight's 2016 paper on coil self-resonance, attributed to Wheeler's 1982 eqn as modified by Bob Weaver
-            var retval;
-            const c_spacing = 1e-3 * loop_spacing_slider.value * conductor_diameter_slider.value;
-            const corr_factor = Math.sqrt(1.0 + (c_spacing**2 / loop_diameter_slider.value**2));
-            const conductor_length = Math.PI * loop_diameter_slider.value * loop_turns_slider.value * corr_factor;
-            const x = loop_diameter_slider.value / conductor_length;
-            const zk = 2.0 / (Math.PI * x);
-            const k0 = 1.0 / (Math.log(8.0 / Math.PI) - 0.5);
-            const k2 = 24.0 / (3.0 * Math.PI**2 - 16.0);
-            const w = -0.47 / (0.755 + x)**1.44;
-            const p = k0 + 3.437/x + k2/x**2 + w;
-            retval = zk * (Math.log(1 + 1/zk) + 1/p);
-            return retval;
-        }
-
-        function ctdw(ff, ei, ex) {
-            // From Knight's 2016 paper
-            const kL = nagaokaCoefficient();
-            const kct = 1.0/kL - 1.0;
-            return 11.27350207 * ex * ff * (1.0 + kct * (1.0 + ei/ex) / 2.0);
-        }
-
-        function ciae(ff, ei, ex) {
-            // From Knight's 2016 paper
-            return 17.70837564 * (ei+ex) / Math.log(1.0 + Math.PI**2 * ff);
-        }
-
-        function multiloopCapacitance() {
-            const e0 =  8.854187e-12;
-            const h = 1e-3 * loop_spacing_slider.value * conductor_diameter_slider.value;
-            const ei = 1.0; // Assume internal epsilon is air (or free-space)
-            const ex = 1.0; // Assume external epsilon is air (or free-space)
-            const solenoid_length = loop_turns_slider.value * h;
-            const ff = solenoid_length / loop_diameter_slider.value;
-            var multiloop_capacitance = 1e-12 * (ctdw(ff, ei, ex) / Math.sqrt(1 - h**2 / loop_diameter_slider.value**2) + ciae(ff, ei, ex)) * loop_diameter_slider.value;
-            return multiloop_capacitance; // in Farads
-        }
-
-        function tuningCapacitance(frequency) {
-            // frequency is in Hertz
-            const reactance = inductiveReactance(frequency);
-            var multiloop_capacitance = 0.0;
-            if(loop_turns_slider.value > 1) {
-                // Only compensate for multiloop capacitance when we have more than 1 turn:
-                multiloop_capacitance = multiloopCapacitance();
+            function updateFrequencies() {
+                const hamFrequencies = [
+                    //1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
+                    //0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
+                    0.1365, 0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
+                    //0.1357, 0.1378, 0.472, 0.479, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
+                ];
+                frequencies = [];
+                hamFrequencies.forEach(freq => {
+                    const wavelength = 3e8 / (freq * 1e6);
+                    const l = (Math.PI * loop_diameter_slider.value) / wavelength;
+                    if (l <= 0.30) {
+                        frequencies.push(freq);
+                    }
+                });
             }
-            const capacitance = 1e12 * ((1.0 / (2.0 * Math.PI * frequency * reactance)) - multiloop_capacitance);
-            return capacitance; // in picofarads
-        }
-
-        function calculateTuningCapacitor() {
-            var retval = [];
-            frequencies.forEach(freq => {
-                const capacitor = tuningCapacitance(freq * 1e6);
-                retval.push({x:freq, y:capacitor});
-            });
-            return retval;
-        }
-
-        const proximityResistance = {
-            // From G. S. Smith, "Radiation Efficiency of Electrically Small Multiturn Loop Antennas", IEEE Trans Antennas Propagation, September 1972
-            // 0 - this is the corresponding x-axis value. 1 - single loop adds zero to proximity resistance. Others measured empirically.
-            0:[  1.1,  1.15,  1.20,  1.25,  1.30,  1.40,  1.50,  1.60,  1.70,  1.80,  1.90,  2.00,  2.20,  2.40,  2.50,  2.60,  2.80,  3.00,  3.50,  4.00],
-            1:[0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000],
-            2:[0.299, 0.284, 0.268, 0.254, 0.240, 0.214, 0.191, 0.173, 0.155, 0.141, 0.128, 0.116, 0.098, 0.032, 0.077, 0.071, 0.061, 0.054, 0.040, 0.031],
-            3:[0.643, 0.580, 0.531, 0.491, 0.455, 0.395, 0.346, 0.305, 0.270, 0.241, 0.216, 0.195, 0.161, 0.135, 0.124, 0.114, 0.098, 0.085, 0.062, 0.048],
-            4:[0.996, 0.868, 0.777, 0.704, 0.644, 0.564, 0.470, 0.408, 0.353, 0.316, 0.281, 0.252, 0.205, 0.170, 0.156, 0.144, 0.123, 0.106, 0.077, 0.058],
-            5:[1.347, 1.142, 1.002, 0.896, 0.809, 0.674, 0.572, 0.492, 0.428, 0.375, 0.332, 0.295, 0.239, 0.197, 0.180, 0.165, 0.141, 0.121, 0.087, 0.066],
-            6:[1.689, 1.400, 1.210, 1.068, 0.956, 0.784, 0.658, 0.561, 0.485, 0.423, 0.372, 0.330, 0.265, 0.217, 0.198, 0.182, 0.154, 0.133, 0.095, 0.072],
-            7:[2.020, 1.693, 1.401, 1.224, 1.086, 0.880, 0.732, 0.620, 0.532, 0.462, 0.405, 0.358, 0.286, 0.234, 0.213, 0.195, 0.165, 0.142, 0.101, 0.076],
-            8:[2.340, 1.872, 1.577, 1.365, 1.203, 0.965, 0.796, 0.670, 0.573, 0.495, 0.433, 0.392, 0.304, 0.247, 0.225, 0.206, 0.174, 0.150, 0.106, 0.080]
-        };
-
-        function getProximityResFromSpacing(spacing_ratio) {
-            // Use the proximityResistance look-up table and interpolate values depending on the spacing ratio and the number of turns.
-            var retval = 0.0;
-            var n_turns = loop_turns_slider.value;
-            var i = 0;
-            for (i = 0; i < (proximityResistance[0].length-1); i++) {
-                if(spacing_ratio <= proximityResistance[0][i+1]) {
-                    // Linear interpolation between empirical proximity resistance values:
-                    retval = (((spacing_ratio - proximityResistance[0][i]) / (proximityResistance[0][i+1] - proximityResistance[0][i]) * (proximityResistance[n_turns][i+1] - proximityResistance[n_turns][i])) + proximityResistance[n_turns][i]);
-                    break;
-                }
-            }
-            return retval;
-        }
-
-        function lossResistance(frequency) {
-            // Frequency in Hertz
-            const a_coil_radius = loop_diameter_slider.value * 0.5;
-            const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
-            const n_turns = loop_turns_slider.value;
-            const loop_spacing_ratio = loop_spacing_slider.value;
-            const mu0 = 4.0 * Math.PI * 1e-7;
-            const k = (n_turns * a_coil_radius / b_conductor_radius);
-            const cu_sigma = 58e6; // Copper conductance value
-            const Rp = getProximityResFromSpacing(loop_spacing_ratio);
-            const Rs = Math.sqrt(Math.PI * frequency * mu0 / cu_sigma);
-            const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
-            const R_ohmic = k * Rs * (Rp / R0 + 1.0);
-            return R_ohmic;
-        }
-
-        function calculateLossResistance() {
-            var retval = [];
-            frequencies.forEach(freq => {
-                const R_ohmic = lossResistance(freq * 1e6);
-                retval.push({x:freq, y:R_ohmic});
-            });
-            return retval;
-        }
-        
-        function calculateEfficiencyFactor() {
-            var retval = [];
-            frequencies.forEach(freq => {
-                const R_ohmic = lossResistance(freq * 1e6);
-                const R_rad = radiationResistance(freq * 1e6);
-                const efficiency = 100.0 / (1.0 + (R_ohmic / R_rad));
-                //const efficiency = 10.0 * Math.log10(1.0 / (1.0 + (R_ohmic / R_rad))); // for Efficiency in dB
-                retval.push({x:freq, y:efficiency});
-            });
-            return retval;
-        }
-
-        function qualityFactor(frequency) {
-            const Xl = inductiveReactance(frequency);
-            const Rl = lossResistance(frequency);
-            const Rr = radiationResistance(frequency);
-            const Q = Xl / (Rl + Rr);
-            return Q;
-        }
-
-        function calculateQualityFactor() {
-            var retval = [];
-            frequencies.forEach(freq => {
-                const Q = qualityFactor(freq * 1e6);
-                retval.push({x:freq, y:Q});
-            });
-            return retval;
-        }
-
-        function bandwidth(frequency) {
-            const Q = qualityFactor(frequency);
-            const bw = frequency * 1e-3 / Q; // in kiloHertz, remember that frequency comes in as Hz. Conversion between Hz and kHz is why the 1e-3 exists.
-            return bw;
-        }
-
-        function calculateBandwidth() {
-            var retval = [];
-            frequencies.forEach(freq => {
-                const bw = bandwidth(freq * 1e6);
-                retval.push({x:freq, y:bw});
-            });
-            return retval;
-        }
-
-        function capacitorVoltage(frequency) {
-            const Vcap = Math.sqrt(transmit_power_slider.value * inductiveReactance(frequency) * qualityFactor(frequency));
-            return Vcap;
-        }
-
-        function calculateCapacitorVoltage() {
-            var retval = [];
-            frequencies.forEach(freq => {
-                const Vcap = 0.001 * capacitorVoltage(freq * 1e6);
-                retval.push({x:freq, y:Vcap});
-            });
-            return retval;
-        }
-
-        function circulatingCurrent(frequency) {
-            const cc = Math.sqrt(transmit_power_slider.value * qualityFactor(frequency) /  inductiveReactance(frequency));
-            return cc;
-        }
-
-        function calculateCirculatingCurrent() {
-            var retval = [];
-            frequencies.forEach(freq => {
-                const cc = circulatingCurrent(freq * 1e6);
-                retval.push({x:freq, y:cc});
-            });
-            return retval;
-        }
-
-        loop_diameter_slider.oninput = function() {
-            //const val = this.value * 1.0;
-            //loop_diameter_value.innerHTML = val.toPrecision(3).toString();
-            drawFrontDesign();
-            drawSideDesign();
+            
+            // Update the frequencies, now that we have the sliders available:
             updateFrequencies();
-            myChart.data.datasets[0].data = calculateTuningCapacitor();
-            myChart.data.datasets[1].data = calculateCapacitorVoltage();
-            myChart.data.datasets[2].data = calculateBandwidth();
-            myChart.data.datasets[3].data = calculateEfficiencyFactor();
-            myChart.data.datasets[4].data = calculateRadiationResistance();
-            myChart.data.datasets[5].data = calculateLossResistance();
-            myChart.data.datasets[6].data = calculateInductiveReactance();
-            myChart.data.datasets[7].data = calculateQualityFactor();
-            myChart.data.datasets[8].data = calculateCirculatingCurrent();
-            myChart.update();
-        }
 
-        conductor_diameter_slider.oninput = function() {
-            //conductor_diameter_value.innerHTML = this.value;
-            drawFrontDesign();
-            drawSideDesign();
-            myChart.data.datasets[0].data = calculateTuningCapacitor();
-            myChart.data.datasets[1].data = calculateCapacitorVoltage();
-            myChart.data.datasets[2].data = calculateBandwidth();
-            myChart.data.datasets[3].data = calculateEfficiencyFactor();
-            myChart.data.datasets[4].data = calculateRadiationResistance();
-            myChart.data.datasets[5].data = calculateLossResistance();
-            myChart.data.datasets[6].data = calculateInductiveReactance();
-            myChart.data.datasets[7].data = calculateQualityFactor();
-            myChart.data.datasets[8].data = calculateCirculatingCurrent();
-            myChart.update();
-        }
+            function getInductance() {
+                const a_coil_radius = loop_diameter_slider.value * 0.5;
+                const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
+                const n_turns = loop_turns_slider.value;
+                const mu0 = 4.0 * Math.PI * 1e-7;
+                var retval = (n_turns ** 2.0) * mu0 * a_coil_radius * (Math.log(8.0 * a_coil_radius / b_conductor_radius) - 2.0);
+                return retval;
+            }
 
-        loop_turns_slider.oninput = function() {
-            //loop_turns_value.innerHTML = this.value;
-            drawFrontDesign();
-            drawSideDesign();
-            myChart.data.datasets[0].data = calculateTuningCapacitor();
-            myChart.data.datasets[1].data = calculateCapacitorVoltage();
-            myChart.data.datasets[2].data = calculateBandwidth();
-            myChart.data.datasets[3].data = calculateEfficiencyFactor();
-            myChart.data.datasets[4].data = calculateRadiationResistance();
-            myChart.data.datasets[5].data = calculateLossResistance();
-            myChart.data.datasets[6].data = calculateInductiveReactance();
-            myChart.data.datasets[7].data = calculateQualityFactor();
-            myChart.data.datasets[8].data = calculateCirculatingCurrent();
-            myChart.update();
-        }
+            function radiationResistance(frequency) {
+                const n_turns = loop_turns_slider.value;
+                const k = 20.0 * (Math.PI ** 2.0);
+                const wavelength = 3e8 / frequency;
+                const l = (Math.PI * loop_diameter_slider.value) / wavelength;
+                const rr = (n_turns ** 2.0) * k * (l ** 4.0);
+                return rr;
+            }
 
-        loop_spacing_slider.oninput = function() {
-            //const val = loop_spacing_slider.value * 1.0;
-            //loop_spacing_value.innerHTML = val.toPrecision(3).toString();
-            drawFrontDesign();
-            drawSideDesign();
-            myChart.data.datasets[0].data = calculateTuningCapacitor();
-            myChart.data.datasets[1].data = calculateCapacitorVoltage();
-            myChart.data.datasets[2].data = calculateBandwidth();
-            myChart.data.datasets[3].data = calculateEfficiencyFactor();
-            myChart.data.datasets[4].data = calculateRadiationResistance();
-            myChart.data.datasets[5].data = calculateLossResistance();
-            myChart.data.datasets[6].data = calculateInductiveReactance();
-            myChart.data.datasets[7].data = calculateQualityFactor();
-            myChart.data.datasets[8].data = calculateCirculatingCurrent();
-            myChart.update();
-        }
+            function calculateRadiationResistance() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const rr = radiationResistance(freq * 1e6);
+                    retval.push({x:freq, y:rr});
+                });
+                return retval;
+            }
 
-        transmit_power_slider.oninput = function() {
-            //transmit_power_value.innerHTML = this.value;
-            drawFrontDesign();
-            myChart.data.datasets[1].data = calculateCapacitorVoltage();
-            myChart.data.datasets[8].data = calculateCirculatingCurrent();
-            myChart.update();
-        }
+            function inductiveReactance(frequency) {
+                const inductance = getInductance();
+                const reactance = 2.0 * Math.PI * frequency * inductance;
+                return reactance;
+            }
 
-        window.onresize = function() {
-            myChart.resize();
-            //myChart.update();
-            drawFrontDesign();
-            drawSideDesign();
-            // console.log("resize!");
-        }
+            function calculateInductiveReactance() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const reactance = inductiveReactance(freq * 1e6);
+                    retval.push({x:freq, y:reactance});
+                });
+                return retval;
+            }
 
-        window.onorientationchange = function() {
-            //myChart.resize();
-            //myChart.update();
-            drawFrontDesign();
-            drawSideDesign();
-        }
+            function nagaokaCoefficient() {
+                // From Knight's 2016 paper on coil self-resonance, attributed to Wheeler's 1982 eqn as modified by Bob Weaver
+                var retval;
+                const c_spacing = 1e-3 * loop_spacing_slider.value * conductor_diameter_slider.value;
+                //const corr_factor = Math.sqrt(1.0 + (c_spacing**2 / loop_diameter_slider.value**2));
+                //const conductor_length = Math.PI * loop_diameter_slider.value * loop_turns_slider.value * corr_factor;
+                // const x = loop_diameter_slider.value / conductor_length;
+                const x = loop_diameter_slider.value / (c_spacing * loop_turns_slider.value); 
+                const zk = 2.0 / (Math.PI * x);
+                const k0 = 1.0 / (Math.log(8.0 / Math.PI) - 0.5);
+                const k2 = 24.0 / (3.0 * Math.PI**2 - 16.0);
+                const w = -0.47 / (0.755 + x)**1.44;
+                const p = k0 + 3.437/x + k2/x**2 + w;
+                retval = zk * (Math.log(1 + 1/zk) + 1/p);
+                // console.log(x, retval);
+                return retval;
+            }
 
-        window.onbeforeprint = function() {
-            console.log("onbeforeprint");
-            //myChart.resize();
-            drawFrontDesign();
-            drawSideDesign();
-        }
+            function ctdw(ff, ei, ex) {
+                // From Knight's 2016 paper
+                const kL = nagaokaCoefficient();
+                //console.log(kL);
+                const kct = 1.0/kL - 1.0;
+                return 11.27350207 * ex * ff * (1.0 + kct * (1.0 + ei/ex) / 2.0);
+            }
 
-        const afront_canvas = document.getElementById("antennaFront2D");
-        const fctx = afront_canvas.getContext('2d');
+            function ciae(ff, ei, ex) {
+                // From Knight's 2016 paper
+                return 17.70837564 * (ei+ex) / Math.log(1.0 + Math.PI**2 * ff);
+            }
 
-        function drawFrontDesign() {
-            const win_width  = document.getElementById("antenna-front-container").offsetWidth; 
-            const win_height = document.getElementById("antenna-front-container").offsetHeight; 
-            //const win_width  = afront_canvas.getBoundingClientRect().width; 
-            //const win_height = afront_canvas.getBoundingClientRect().height; 
-            afront_canvas.width = win_width-2; 
-            afront_canvas.height = win_height-2; 
+            function multiloopCapacitance() {
+                const e0 =  8.854187e-12;
+                const h = 1e-3 * loop_spacing_slider.value * conductor_diameter_slider.value;
+                const ei = 1.0; // Assume internal epsilon is air (or free-space)
+                const ex = 1.0; // Assume external epsilon is air (or free-space)
+                const solenoid_length = loop_turns_slider.value * h;
+                const ff = solenoid_length / loop_diameter_slider.value;
+                var multiloop_capacitance = 1e-12 * (ctdw(ff, ei, ex) / Math.sqrt(1 - h**2 / loop_diameter_slider.value**2) + ciae(ff, ei, ex)) * loop_diameter_slider.value;
+                return multiloop_capacitance; // in Farads
+            }
 
-            fctx.clearRect(0, 0, win_width, win_height);
-            const loop_radius = win_width < win_height ? 0.32 * win_width : 0.32 * win_height; //  100; // loop_diameter_slider.value * 80;
-            const cond_radius = conductor_diameter_slider.value / 6;
-            const loopx = win_width/2; 
-            const loopy = win_height/2;
+            function tuningCapacitance(frequency) {
+                // frequency is in Hertz
+                const reactance = inductiveReactance(frequency);
+                var multiloop_capacitance = 0.0;
+                if(loop_turns_slider.value > 1) {
+                    // Only compensate for multiloop capacitance when we have more than 1 turn:
+                    multiloop_capacitance = multiloopCapacitance();
+                }
+                const capacitance = 1e12 * ((1.0 / (2.0 * Math.PI * frequency * reactance)) - multiloop_capacitance);
+                return capacitance; // in picofarads
+            }
 
-            // Draw loop:
-            fctx.beginPath();
-            fctx.arc(loopx, loopy, loop_radius + cond_radius, 0.5 * Math.PI + 0.02, 0.5 * Math.PI - 0.02, false);
-            fctx.arc(loopx, loopy, loop_radius - cond_radius, 0.5 * Math.PI - 0.025, 0.5 * Math.PI + 0.025, true);
-            fctx.closePath();
-            fctx.fill();
+            function calculateTuningCapacitor() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const capacitor = tuningCapacitance(freq * 1e6);
+                    retval.push({x:freq, y:capacitor});
+                });
+                return retval;
+            }
+
+            const proximityResistance = {
+                // From G. S. Smith, "Radiation Efficiency of Electrically Small Multiturn Loop Antennas", IEEE Trans Antennas Propagation, September 1972
+                // 0 - this is the corresponding x-axis value. 1 - single loop adds zero to proximity resistance. Others measured empirically.
+                0:[  1.1,  1.15,  1.20,  1.25,  1.30,  1.40,  1.50,  1.60,  1.70,  1.80,  1.90,  2.00,  2.20,  2.40,  2.50,  2.60,  2.80,  3.00,  3.50,  4.00],
+                1:[0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000],
+                2:[0.299, 0.284, 0.268, 0.254, 0.240, 0.214, 0.191, 0.173, 0.155, 0.141, 0.128, 0.116, 0.098, 0.032, 0.077, 0.071, 0.061, 0.054, 0.040, 0.031],
+                3:[0.643, 0.580, 0.531, 0.491, 0.455, 0.395, 0.346, 0.305, 0.270, 0.241, 0.216, 0.195, 0.161, 0.135, 0.124, 0.114, 0.098, 0.085, 0.062, 0.048],
+                4:[0.996, 0.868, 0.777, 0.704, 0.644, 0.564, 0.470, 0.408, 0.353, 0.316, 0.281, 0.252, 0.205, 0.170, 0.156, 0.144, 0.123, 0.106, 0.077, 0.058],
+                5:[1.347, 1.142, 1.002, 0.896, 0.809, 0.674, 0.572, 0.492, 0.428, 0.375, 0.332, 0.295, 0.239, 0.197, 0.180, 0.165, 0.141, 0.121, 0.087, 0.066],
+                6:[1.689, 1.400, 1.210, 1.068, 0.956, 0.784, 0.658, 0.561, 0.485, 0.423, 0.372, 0.330, 0.265, 0.217, 0.198, 0.182, 0.154, 0.133, 0.095, 0.072],
+                7:[2.020, 1.693, 1.401, 1.224, 1.086, 0.880, 0.732, 0.620, 0.532, 0.462, 0.405, 0.358, 0.286, 0.234, 0.213, 0.195, 0.165, 0.142, 0.101, 0.076],
+                8:[2.340, 1.872, 1.577, 1.365, 1.203, 0.965, 0.796, 0.670, 0.573, 0.495, 0.433, 0.392, 0.304, 0.247, 0.225, 0.206, 0.174, 0.150, 0.106, 0.080]
+            };
+
+            function getProximityResFromSpacing(spacing_ratio) {
+                // Use the proximityResistance look-up table and interpolate values depending on the spacing ratio and the number of turns.
+                var retval = 0.0;
+                var n_turns = loop_turns_slider.value;
+                var i = 0;
+                for (i = 0; i < (proximityResistance[0].length-1); i++) {
+                    if(spacing_ratio <= proximityResistance[0][i+1]) {
+                        // Linear interpolation between empirical proximity resistance values:
+                        retval = (((spacing_ratio - proximityResistance[0][i]) / (proximityResistance[0][i+1] - proximityResistance[0][i]) * (proximityResistance[n_turns][i+1] - proximityResistance[n_turns][i])) + proximityResistance[n_turns][i]);
+                        break;
+                    }
+                }
+                return retval;
+            }
+
+            function lossResistance(frequency) {
+                // Frequency in Hertz
+                const a_coil_radius = loop_diameter_slider.value * 0.5;
+                const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
+                const n_turns = loop_turns_slider.value;
+                const loop_spacing_ratio = loop_spacing_slider.value;
+                const mu0 = 4.0 * Math.PI * 1e-7;
+                const k = (n_turns * a_coil_radius / b_conductor_radius);
+                const cu_sigma = 58e6; // Copper conductance value
+                const Rp = getProximityResFromSpacing(loop_spacing_ratio);
+                const Rs = Math.sqrt(Math.PI * frequency * mu0 / cu_sigma);
+                const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
+                const R_ohmic = k * Rs * (Rp / R0 + 1.0);
+                return R_ohmic;
+            }
+
+            function calculateLossResistance() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const R_ohmic = lossResistance(freq * 1e6);
+                    retval.push({x:freq, y:R_ohmic});
+                });
+                return retval;
+            }
             
-            // Draw cap:
-            fctx.lineWidth = 3;
-            fctx.beginPath();
-            fctx.moveTo(loopx - 3, loopy + loop_radius - 3*cond_radius);
-            fctx.lineTo(loopx - 3, loopy + loop_radius + 3*cond_radius);
-            fctx.moveTo(loopx + 3, loopy + loop_radius - 3*cond_radius);
-            fctx.lineTo(loopx + 3, loopy + loop_radius + 3*cond_radius);
-            fctx.stroke();
-            fctx.lineWidth = 1;
+            function calculateEfficiencyFactor() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const R_ohmic = lossResistance(freq * 1e6);
+                    const R_rad = radiationResistance(freq * 1e6);
+                    const efficiency = 100.0 / (1.0 + (R_ohmic / R_rad));
+                    //const efficiency = 10.0 * Math.log10(1.0 / (1.0 + (R_ohmic / R_rad))); // for Efficiency in dB
+                    retval.push({x:freq, y:efficiency});
+                });
+                return retval;
+            }
+
+            function qualityFactor(frequency) {
+                const Xl = inductiveReactance(frequency);
+                const Rl = lossResistance(frequency);
+                const Rr = radiationResistance(frequency);
+                const Q = Xl / (Rl + Rr);
+                return Q;
+            }
+
+            function calculateQualityFactor() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const Q = qualityFactor(freq * 1e6);
+                    retval.push({x:freq, y:Q});
+                });
+                return retval;
+            }
+
+            function bandwidth(frequency) {
+                const Q = qualityFactor(frequency);
+                const bw = frequency * 1e-3 / Q; // in kiloHertz, remember that frequency comes in as Hz. Conversion between Hz and kHz is why the 1e-3 exists.
+                return bw;
+            }
+
+            function calculateBandwidth() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const bw = bandwidth(freq * 1e6);
+                    retval.push({x:freq, y:bw});
+                });
+                return retval;
+            }
+
+            function capacitorVoltage(frequency) {
+                const Vcap = Math.sqrt(transmit_power_slider.value * inductiveReactance(frequency) * qualityFactor(frequency));
+                return Vcap;
+            }
+
+            function calculateCapacitorVoltage() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const Vcap = 0.001 * capacitorVoltage(freq * 1e6);
+                    retval.push({x:freq, y:Vcap});
+                });
+                return retval;
+            }
+
+            function circulatingCurrent(frequency) {
+                const cc = Math.sqrt(transmit_power_slider.value * qualityFactor(frequency) /  inductiveReactance(frequency));
+                return cc;
+            }
+
+            function calculateCirculatingCurrent() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const cc = circulatingCurrent(freq * 1e6);
+                    retval.push({x:freq, y:cc});
+                });
+                return retval;
+            }
+
+            loop_diameter_slider.oninput = function() {
+                //const val = this.value * 1.0;
+                //loop_diameter_value.innerHTML = val.toPrecision(3).toString();
+                drawFrontDesign();
+                drawSideDesign();
+                updateFrequencies();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
+            conductor_diameter_slider.oninput = function() {
+                //conductor_diameter_value.innerHTML = this.value;
+                drawFrontDesign();
+                drawSideDesign();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
+            loop_turns_slider.oninput = function() {
+                //loop_turns_value.innerHTML = this.value;
+                drawFrontDesign();
+                drawSideDesign();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
+            loop_spacing_slider.oninput = function() {
+                //const val = loop_spacing_slider.value * 1.0;
+                //loop_spacing_value.innerHTML = val.toPrecision(3).toString();
+                drawFrontDesign();
+                drawSideDesign();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
+            transmit_power_slider.oninput = function() {
+                //transmit_power_value.innerHTML = this.value;
+                drawFrontDesign();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
+            window.onresize = function() {
+                myChart.resize();
+                //myChart.update();
+                drawFrontDesign();
+                drawSideDesign();
+                // console.log("resize!");
+            }
+
+            window.onorientationchange = function() {
+                //myChart.resize();
+                //myChart.update();
+                drawFrontDesign();
+                drawSideDesign();
+            }
+
+            window.onbeforeprint = function() {
+                console.log("onbeforeprint");
+                //myChart.resize();
+                drawFrontDesign();
+                drawSideDesign();
+            }
+
+            const afront_canvas = document.getElementById("antennaFront2D");
+            const fctx = afront_canvas.getContext('2d');
+
+            function drawFrontDesign() {
+                const win_width  = document.getElementById("antenna-front-container").offsetWidth; 
+                const win_height = document.getElementById("antenna-front-container").offsetHeight; 
+                //const win_width  = afront_canvas.getBoundingClientRect().width; 
+                //const win_height = afront_canvas.getBoundingClientRect().height; 
+                afront_canvas.width = win_width-2; 
+                afront_canvas.height = win_height-2; 
+
+                fctx.clearRect(0, 0, win_width, win_height);
+                const loop_radius = win_width < win_height ? 0.32 * win_width : 0.32 * win_height; //  100; // loop_diameter_slider.value * 80;
+                const cond_radius = conductor_diameter_slider.value / 6;
+                const loopx = win_width/2; 
+                const loopy = win_height/2;
+
+                // Draw loop:
+                fctx.beginPath();
+                fctx.arc(loopx, loopy, loop_radius + cond_radius, 0.5 * Math.PI + 0.02, 0.5 * Math.PI - 0.02, false);
+                fctx.arc(loopx, loopy, loop_radius - cond_radius, 0.5 * Math.PI - 0.025, 0.5 * Math.PI + 0.025, true);
+                fctx.closePath();
+                fctx.fill();
+                
+                // Draw cap:
+                fctx.lineWidth = 3;
+                fctx.beginPath();
+                fctx.moveTo(loopx - 3, loopy + loop_radius - 3*cond_radius);
+                fctx.lineTo(loopx - 3, loopy + loop_radius + 3*cond_radius);
+                fctx.moveTo(loopx + 3, loopy + loop_radius - 3*cond_radius);
+                fctx.lineTo(loopx + 3, loopy + loop_radius + 3*cond_radius);
+                fctx.stroke();
+                fctx.lineWidth = 1;
+                
+                // Draw coupling loop:
+                fctx.beginPath();
+                fctx.arc(loopx, loopy - (loop_radius - loop_radius/5) + cond_radius , loop_radius/5, 0, 2*Math.PI, true);
+                fctx.stroke();
+
+                // Draw loop diameter arrow:
+                fctx.beginPath();
+                fctx.moveTo(loopx - loop_radius, loopy);
+                fctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy - 2*cond_radius);
+                fctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy + 2*cond_radius);
+                fctx.lineTo(loopx - loop_radius, loopy);
+                fctx.lineTo(loopx + loop_radius, loopy);
+                fctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy + 2*cond_radius);
+                fctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy - 2*cond_radius);
+                fctx.lineTo(loopx + loop_radius, loopy);
+                fctx.stroke();
+                
+                // Write loop inductance:
+                fctx.font = "12px arial";
+                const L = getInductance() * 1.0e+6;
+                fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
+
+                // Write Tx power text:
+                fctx.fillText("Tx = " + transmit_power_slider.value + "W", 8, win_height * 0.8 + 20);
+
+                // Write loop diameter symbol:
+                fctx.font = "12px arial";
+                fctx.textAlign = "center";
+                const dia = 1.0 * loop_diameter_slider.value;
+                fctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 6);
+
+                // Draw conductor diameter arrow:
+                fctx.beginPath();
+                var p1x = loopx + 0.4 * (loop_radius - cond_radius);
+                var p1y = loopy + 0.4 * (loop_radius - cond_radius);
+                var p2x = loopx + 0.707 * (loop_radius - cond_radius);
+                var p2y = loopy + 0.707 * (loop_radius - cond_radius);
+                var p3x = loopx + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
+                var p3y = loopy + 0.707 * (loop_radius - cond_radius);
+                var p4x = loopx + 0.707 * (loop_radius - cond_radius);
+                var p4y = loopy + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
+                fctx.moveTo(win_width-p1x, p1y);
+                fctx.lineTo(p1x, p1y);
+                fctx.lineTo(p2x, p2y);
+                fctx.lineTo(p3x, p3y);
+                fctx.lineTo(p4x, p4y);
+                fctx.lineTo(p2x, p2y);
+
+                p1x = loopx + 1.0 * (loop_radius + cond_radius);
+                p1y = loopy + 1.0 * (loop_radius + cond_radius);
+                p2x = loopx + 0.707 * (loop_radius + cond_radius);
+                p2y = loopy + 0.707 * (loop_radius + cond_radius);
+                p3x = loopx + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+                p3y = loopy + 0.707 * (loop_radius + cond_radius);
+                p4x = loopx + 0.707 * (loop_radius + cond_radius);
+                p4y = loopy + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+                fctx.moveTo(p1x, p1y);
+                fctx.lineTo(p2x, p2y);
+                fctx.lineTo(p3x, p3y);
+                fctx.lineTo(p4x, p4y);
+                fctx.lineTo(p2x, p2y);
+                fctx.stroke();
+                p1x = loopx + 0.4 * (loop_radius - cond_radius);
+                p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
+                //fctx.textAlign = "right";
+                const cond_dia = 1.0 * conductor_diameter_slider.value;
+                fctx.fillText("\u2300b = " + cond_dia.toPrecision(3).toString() + "mm", loopx, p1y+2);
+            }
             
-            // Draw coupling loop:
-            fctx.beginPath();
-            fctx.arc(loopx, loopy - (loop_radius - loop_radius/5) + cond_radius , loop_radius/5, 0, 2*Math.PI, true);
-            fctx.stroke();
+            const aside_canvas = document.getElementById("antennaSide2D");
+            const sctx = aside_canvas.getContext('2d');
 
-            // Draw loop diameter arrow:
-            fctx.beginPath();
-            fctx.moveTo(loopx - loop_radius, loopy);
-            fctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy - 2*cond_radius);
-            fctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy + 2*cond_radius);
-            fctx.lineTo(loopx - loop_radius, loopy);
-            fctx.lineTo(loopx + loop_radius, loopy);
-            fctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy + 2*cond_radius);
-            fctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy - 2*cond_radius);
-            fctx.lineTo(loopx + loop_radius, loopy);
-            fctx.stroke();
-            
-            // Write loop inductance:
-            fctx.font = "12px arial";
-            const L = getInductance() * 1.0e+6;
-            fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
+            function drawSideDesign() {
+                const win_width  = document.getElementById("antenna-side-container").offsetWidth; 
+                const win_height = document.getElementById("antenna-side-container").offsetHeight; 
+                //const win_width  = aside_canvas.getBoundingClientRect().width; 
+                //const win_height = aside_canvas.getBoundingClientRect().height; 
+                //console.log(win_width, win_height);
+                aside_canvas.width = win_width-2; 
+                aside_canvas.height = win_height-2; 
+                //const win_width  = aside_canvas.width; 
+                //const win_height = aside_canvas.height; 
+                sctx.clearRect(0, 0, win_width, win_height);
 
-            // Write Tx power text:
-            fctx.fillText("Tx = " + transmit_power_slider.value + "W", 8, win_height * 0.8 + 20);
+                //const loop_radius = win_width < win_height ? 0.40 * win_width : 0.40 * win_height; 
 
-            // Write loop diameter symbol:
-            fctx.font = "12px arial";
-            fctx.textAlign = "center";
-            const dia = 1.0 * loop_diameter_slider.value;
-            fctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 6);
+                const cond_radius = conductor_diameter_slider.value / 6;
+                const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
+                const start_x = win_width/2 - loop_turns_slider.value * cond_spacing * 0.5;
+                const top_y = win_height * 0.2;
+                const bot_y = win_height * 0.7;
+                for (let i = 0; i < loop_turns_slider.value; i++) {
+                    sctx.beginPath();
+                    sctx.arc(start_x + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
+                    sctx.arc(start_x + cond_spacing * 0.5 + i * cond_spacing, top_y, cond_radius, Math.PI, 0);
+                    sctx.lineTo(start_x + i * cond_spacing + cond_radius, bot_y);
+                    sctx.fill();
 
-            // Draw conductor diameter arrow:
-            fctx.beginPath();
-            var p1x = loopx + 0.4 * (loop_radius - cond_radius);
-            var p1y = loopy + 0.4 * (loop_radius - cond_radius);
-            var p2x = loopx + 0.707 * (loop_radius - cond_radius);
-            var p2y = loopy + 0.707 * (loop_radius - cond_radius);
-            var p3x = loopx + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
-            var p3y = loopy + 0.707 * (loop_radius - cond_radius);
-            var p4x = loopx + 0.707 * (loop_radius - cond_radius);
-            var p4y = loopy + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
-            fctx.moveTo(win_width-p1x, p1y);
-            fctx.lineTo(p1x, p1y);
-            fctx.lineTo(p2x, p2y);
-            fctx.lineTo(p3x, p3y);
-            fctx.lineTo(p4x, p4y);
-            fctx.lineTo(p2x, p2y);
-
-            p1x = loopx + 1.0 * (loop_radius + cond_radius);
-            p1y = loopy + 1.0 * (loop_radius + cond_radius);
-            p2x = loopx + 0.707 * (loop_radius + cond_radius);
-            p2y = loopy + 0.707 * (loop_radius + cond_radius);
-            p3x = loopx + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
-            p3y = loopy + 0.707 * (loop_radius + cond_radius);
-            p4x = loopx + 0.707 * (loop_radius + cond_radius);
-            p4y = loopy + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
-            fctx.moveTo(p1x, p1y);
-            fctx.lineTo(p2x, p2y);
-            fctx.lineTo(p3x, p3y);
-            fctx.lineTo(p4x, p4y);
-            fctx.lineTo(p2x, p2y);
-            fctx.stroke();
-            p1x = loopx + 0.4 * (loop_radius - cond_radius);
-            p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
-            //fctx.textAlign = "right";
-            const cond_dia = 1.0 * conductor_diameter_slider.value;
-            fctx.fillText("\u2300b = " + cond_dia.toPrecision(3).toString() + "mm", loopx, p1y+2);
-        }
-        
-        const aside_canvas = document.getElementById("antennaSide2D");
-        const sctx = aside_canvas.getContext('2d');
-
-        function drawSideDesign() {
-            const win_width  = document.getElementById("antenna-side-container").offsetWidth; 
-            const win_height = document.getElementById("antenna-side-container").offsetHeight; 
-            //const win_width  = aside_canvas.getBoundingClientRect().width; 
-            //const win_height = aside_canvas.getBoundingClientRect().height; 
-            //console.log(win_width, win_height);
-            aside_canvas.width = win_width-2; 
-            aside_canvas.height = win_height-2; 
-            //const win_width  = aside_canvas.width; 
-            //const win_height = aside_canvas.height; 
-            sctx.clearRect(0, 0, win_width, win_height);
-
-            //const loop_radius = win_width < win_height ? 0.40 * win_width : 0.40 * win_height; 
-
-            const cond_radius = conductor_diameter_slider.value / 6;
-            const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
-            const start_x = win_width/2 - loop_turns_slider.value * cond_spacing * 0.5;
-            const top_y = win_height * 0.2;
-            const bot_y = win_height * 0.7;
-            for (let i = 0; i < loop_turns_slider.value; i++) {
+                    sctx.beginPath();
+                    sctx.moveTo(start_x + cond_spacing * 0.5 + i * cond_spacing + cond_radius, top_y);
+                    sctx.lineTo(start_x + (i+1) * cond_spacing + cond_radius, bot_y);
+                    sctx.arc(start_x + (i+1) * cond_spacing, bot_y, cond_radius, 0, Math.PI, false);
+                    sctx.lineTo(start_x + cond_spacing * 0.5 + i * cond_spacing - cond_radius, top_y);
+                    sctx.stroke();
+                }
+                // Draw left spacing arrow:
+                const dim_y = win_height * 0.8;
                 sctx.beginPath();
-                sctx.arc(start_x + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
-                sctx.arc(start_x + cond_spacing * 0.5 + i * cond_spacing, top_y, cond_radius, Math.PI, 0);
-                sctx.lineTo(start_x + i * cond_spacing + cond_radius, bot_y);
-                sctx.fill();
-
-                sctx.beginPath();
-                sctx.moveTo(start_x + cond_spacing * 0.5 + i * cond_spacing + cond_radius, top_y);
-                sctx.lineTo(start_x + (i+1) * cond_spacing + cond_radius, bot_y);
-                sctx.arc(start_x + (i+1) * cond_spacing, bot_y, cond_radius, 0, Math.PI, false);
-                sctx.lineTo(start_x + cond_spacing * 0.5 + i * cond_spacing - cond_radius, top_y);
+                sctx.moveTo(start_x - 20, dim_y);
+                sctx.lineTo(start_x, dim_y);
+                sctx.lineTo(start_x - 7, dim_y + 7)
+                sctx.lineTo(start_x - 7, dim_y - 7)
+                sctx.lineTo(start_x, dim_y);
+                sctx.moveTo(start_x, dim_y - 7);
+                sctx.lineTo(start_x, dim_y + 7);
                 sctx.stroke();
-            }
-            // Draw left spacing arrow:
-            const dim_y = win_height * 0.8;
-            sctx.beginPath();
-            sctx.moveTo(start_x - 20, dim_y);
-            sctx.lineTo(start_x, dim_y);
-            sctx.lineTo(start_x - 7, dim_y + 7)
-            sctx.lineTo(start_x - 7, dim_y - 7)
-            sctx.lineTo(start_x, dim_y);
-            sctx.moveTo(start_x, dim_y - 7);
-            sctx.lineTo(start_x, dim_y + 7);
-            sctx.stroke();
-            // Draw right spacing arrow:
-            sctx.beginPath();
-            sctx.moveTo(start_x + cond_spacing + 20, dim_y);
-            sctx.lineTo(start_x + cond_spacing, dim_y);
-            sctx.lineTo(start_x + cond_spacing + 7, dim_y + 7)
-            sctx.lineTo(start_x + cond_spacing + 7, dim_y - 7)
-            sctx.lineTo(start_x + cond_spacing, dim_y);
-            sctx.moveTo(start_x + cond_spacing, dim_y - 7);
-            sctx.lineTo(start_x + cond_spacing, dim_y + 7);
-            sctx.stroke();
+                // Draw right spacing arrow:
+                sctx.beginPath();
+                sctx.moveTo(start_x + cond_spacing + 20, dim_y);
+                sctx.lineTo(start_x + cond_spacing, dim_y);
+                sctx.lineTo(start_x + cond_spacing + 7, dim_y + 7)
+                sctx.lineTo(start_x + cond_spacing + 7, dim_y - 7)
+                sctx.lineTo(start_x + cond_spacing, dim_y);
+                sctx.moveTo(start_x + cond_spacing, dim_y - 7);
+                sctx.lineTo(start_x + cond_spacing, dim_y + 7);
+                sctx.stroke();
 
-            sctx.font = "12px arial";
-            if(loop_turns_slider.value > 1) {
-                const L = multiloopCapacitance() * 1e+12;
-                sctx.textAlign = "right";
-                sctx.fillText("C = " + L.toFixed(0).toString() + " pF", win_width-8, 18);
-                sctx.textAlign = "left";
-                sctx.fillText("N = " + loop_turns_slider.value.toString(), 8, win_height * 0.1 + 3);
-            } else {
-                // Draw turns number text:
-                //sctx.font = "12px arial";
+                sctx.font = "12px arial";
+                if(loop_turns_slider.value > 1) {
+                    const L = multiloopCapacitance() * 1e+12;
+                    sctx.textAlign = "right";
+                    sctx.fillText("C = " + L.toFixed(0).toString() + " pF", win_width-8, 18);
+                    sctx.textAlign = "left";
+                    sctx.fillText("N = " + loop_turns_slider.value.toString(), 8, win_height * 0.1 + 3);
+                } else {
+                    // Draw turns number text:
+                    //sctx.font = "12px arial";
+                    sctx.textAlign = "center";
+                    sctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.1 + 3);
+                }
+                
+                // Draw spacing text:
                 sctx.textAlign = "center";
-                sctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.1 + 3);
+                const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
+                sctx.fillText("c = " + spc.toPrecision(3).toString() + "mm", start_x + cond_spacing, dim_y + 20);
             }
-            
-            // Draw spacing text:
-            sctx.textAlign = "center";
-            const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
-            sctx.fillText("c = " + spc.toPrecision(3).toString() + "mm", start_x + cond_spacing, dim_y + 20);
-        }
-        drawFrontDesign();
-        drawSideDesign();
+            drawFrontDesign();
+            drawSideDesign();
 
-        const chartCanvas = document.getElementById("chartCanvas");
-        const chartCanvasContext = chartCanvas.getContext('2d');
+            const chartCanvas = document.getElementById("chartCanvas");
+            const chartCanvasContext = chartCanvas.getContext('2d');
 
-        var myChart = new Chart(chartCanvasContext, {
-            type: 'line',
-            data: {
-                datasets: [
-                {
-                    label: 'Tuning Cap (pF)',
-                    fill: false,
-                    borderColor: 'green',
-                    backgroundColor: 'green',
-                    data: calculateTuningCapacitor(),
-                    borderWidth: 1,
-                    yAxisID: 'pfID'
-                },
-                {
-                    label: 'Vcap (kV)',
-                    fill: false,
-                    borderColor: 'rgb(150, 150, 0)',
-                    backgroundColor: 'rgb(200, 200, 0)',
-                    data: calculateCapacitorVoltage(),
-                    borderWidth: 1,
-                    yAxisID: 'vID'
-                },
-                {
-                    label: 'BW (kHz)',
-                    fill: false,
-                    borderColor: 'brown',
-                    backgroundColor: 'brown',
-                    data: calculateBandwidth(),
-                    borderWidth: 1,
-                    yAxisID: 'bwID'
-                },
-                {
-                    label: 'Efficiency (%)',
-                    fill: false,
-                    borderColor: 'black',
-                    backgroundColor: 'black',
-                    data: calculateEfficiencyFactor(),
-                    borderWidth: 1,
-                    yAxisID: 'effID'
-                },
-                {
-                    label: 'R-radiation (\u03A9)',
-                    fill: false,
-                    borderColor: 'red',
-                    backgroundColor: 'red',
-                    data: calculateRadiationResistance(),
-                    borderWidth: 1,
-                    yAxisID: 'mohmsID'
-                },
-                {
-                    label: 'R-loss (\u03A9)',
-                    fill: false,
-                    borderColor: 'orange',
-                    backgroundColor: 'orange',
-                    data: calculateLossResistance(),
-                    borderWidth: 1,
-                    yAxisID: 'mohmsID'
-                },
-                {
-                    label: 'Reactance (j\u03A9)',
-                    fill: false,
-                    borderColor: 'blue',
-                    backgroundColor: 'blue',
-                    data: calculateInductiveReactance(),
-                    borderWidth: 1,
-                    yAxisID: 'ohmsID'
-                },
-                {
-                    label: 'Q',
-                    fill: false,
-                    borderColor: 'purple',
-                    backgroundColor: 'purple',
-                    data: calculateQualityFactor(),
-                    borderWidth: 1,
-                    yAxisID: 'qID'
-                },
-                {
-                    label: 'I\u2092 (A)',
-                    fill: false,
-                    borderColor: 'rgb(0,255,255)',
-                    backgroundColor: 'rgb(0,128,128)',
-                    data: calculateCirculatingCurrent(),
-                    borderWidth: 1,
-                    yAxisID: 'ccID'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    xAxes: [{
-                        type: 'linear',
-                        position: 'bottom',
-                        display: true,
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Frequency (MHz)'
-                        }
-                    }],
-                    yAxes: [{
-                        type: 'linear',
-                        display: 'auto',
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Efficiency %',
-                            fontColor: 'black',
-                            fontStyle: 'bold'
-                        },
-                        ticks: {
-                            min: 0,
-                            max: 100,
-                        },
-                        position: 'left',
-                        id: 'effID'
-                    },{
-                        type: 'linear',
-                        display: 'auto',
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'BW kHz',
-                            fontColor: 'brown',
-                            fontStyle: 'bold'
-                        },
-                        ticks: {
-                            beginAtZero: true,
-                        },
-                        position: 'left',
-                        id: 'bwID'
-                    },{
-                        type: 'linear',
-                        display: 'auto',
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'kV',
-                            fontColor: 'rgb(150, 150, 0)',
-                            fontStyle: 'bold'
-                        },
-                        ticks: {
-                            beginAtZero: true,
-                        },
-                        min: 0.0,
-                        position: 'left',
-                        id: 'vID'
-                    },{
-                        type: 'linear',
-                        display: 'auto',
-                        scaleLabel: {
-                            display: true,
-                            labelString: '\u03A9',
-                            fontColor: 'red',
-                            fontStyle: 'bold'
-                        },
-                        position: 'right',
-                        id: 'mohmsID',
-                    },{
-                        type: 'linear',
-                        display: 'auto',
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'pF',
-                            fontColor: 'green',
-                            fontStyle: 'bold'
-                        },
-                        ticks: {
-                            max: 3000.0,
-                        },
-                        position: 'left',
-                        id: 'pfID'
-                    },{
-                        type: 'linear',
-                        display: 'auto',
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'j\u03A9',
-                            fontColor: 'blue',
-                            fontStyle: 'bold'
-                        },
-                        ticks: {
-                            beginAtZero: true,
-                        },
-                        position: 'right',
-                        id: 'ohmsID'
-                    },{
-                        type: 'linear',
-                        display: 'auto',
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Q',
-                            fontColor: 'purple',
-                            fontStyle: 'bold'
-                        },
-                        ticks: {
-                            beginAtZero: true,
-                        },
-                        position: 'right',
-                        id: 'qID'
-                    },{
-                        type: 'linear',
-                        display: 'auto',
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'A',
-                            fontColor: 'rgb(0,128,128)',
-                            fontStyle: 'bold'
-                        },
-                        ticks: {
-                            beginAtZero: true,
-                        },
-                        min: 0.0,
-                        position: 'right',
-                        id: 'ccID'
+            var myChart = new Chart(chartCanvasContext, {
+                type: 'line',
+                data: {
+                    datasets: [
+                    {
+                        label: 'Tuning Cap (pF)',
+                        fill: false,
+                        borderColor: 'green',
+                        backgroundColor: 'green',
+                        data: calculateTuningCapacitor(),
+                        borderWidth: 1,
+                        yAxisID: 'pfID'
+                    },
+                    {
+                        label: 'Vcap (kV)',
+                        fill: false,
+                        borderColor: 'rgb(150, 150, 0)',
+                        backgroundColor: 'rgb(200, 200, 0)',
+                        data: calculateCapacitorVoltage(),
+                        borderWidth: 1,
+                        yAxisID: 'vID'
+                    },
+                    {
+                        label: 'BW (kHz)',
+                        fill: false,
+                        borderColor: 'brown',
+                        backgroundColor: 'brown',
+                        data: calculateBandwidth(),
+                        borderWidth: 1,
+                        yAxisID: 'bwID'
+                    },
+                    {
+                        label: 'Efficiency (%)',
+                        fill: false,
+                        borderColor: 'black',
+                        backgroundColor: 'black',
+                        data: calculateEfficiencyFactor(),
+                        borderWidth: 1,
+                        yAxisID: 'effID'
+                    },
+                    {
+                        label: 'R-radiation (\u03A9)',
+                        fill: false,
+                        borderColor: 'red',
+                        backgroundColor: 'red',
+                        data: calculateRadiationResistance(),
+                        borderWidth: 1,
+                        yAxisID: 'mohmsID'
+                    },
+                    {
+                        label: 'R-loss (\u03A9)',
+                        fill: false,
+                        borderColor: 'orange',
+                        backgroundColor: 'orange',
+                        data: calculateLossResistance(),
+                        borderWidth: 1,
+                        yAxisID: 'mohmsID'
+                    },
+                    {
+                        label: 'Reactance (j\u03A9)',
+                        fill: false,
+                        borderColor: 'blue',
+                        backgroundColor: 'blue',
+                        data: calculateInductiveReactance(),
+                        borderWidth: 1,
+                        yAxisID: 'ohmsID'
+                    },
+                    {
+                        label: 'Q',
+                        fill: false,
+                        borderColor: 'purple',
+                        backgroundColor: 'purple',
+                        data: calculateQualityFactor(),
+                        borderWidth: 1,
+                        yAxisID: 'qID'
+                    },
+                    {
+                        label: 'I\u2092 (A)',
+                        fill: false,
+                        borderColor: 'rgb(0,255,255)',
+                        backgroundColor: 'rgb(0,128,128)',
+                        data: calculateCirculatingCurrent(),
+                        borderWidth: 1,
+                        yAxisID: 'ccID'
                     }]
                 },
-                showLines: true,
-                tooltips: {
-                    mode: 'interpolate',
-                    intersect: false,
-                    position: 'nearest',
-                    callbacks: {
-                        title: function(tooltipItem, data) {
-                            var label = '' + tooltipItem[0].xLabel.toFixed(3).toString();
-                            label += ' MHz ';
-                            return label;
-                        },
-                        label: function(tooltipItem, data) {
-                            var label = data.datasets[tooltipItem.datasetIndex].label || '';
-                            if (label) {
-                                label += ': ';
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            type: 'linear',
+                            position: 'bottom',
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Frequency (MHz)'
                             }
-                            label += Math.round(tooltipItem.yLabel * 1000) / 1000;
-                            return label;
-                        }
-                    }
-                },
-                plugins: {
-                    crosshair: {
-                        line: {
-                            color: 'red',   // crosshair line color
-                            width: 1,       // crosshair line width
-                            dashPattern: [100, 100]
-                        },
-                        sync: {
-                            enabled: false,            // enable trace line syncing with other charts
-                            group: 1,                 // chart group
-                            suppressTooltips: true   // suppress tooltips when showing a synced tracer
-                        },
-                        zoom: {
-                            enabled: false,                                      // enable zooming
-                            zoomboxBackgroundColor: 'rgba(66,133,244,0.2)',     // background color of zoom box 
-                            zoomboxBorderColor: '#48F',                         // border color of zoom box
-                            zoomButtonText: 'Reset Zoom',                       // reset zoom button text
-                            zoomButtonClass: 'reset-zoom',                      // reset zoom button class
-                        },
-                        callbacks: {
-                            beforeZoom: function(start, end) {                  // called before zoom, return false to prevent zoom
-                                return false;                                   // return true to enable zooming
+                        }],
+                        yAxes: [{
+                            type: 'linear',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Efficiency %',
+                                fontColor: 'black',
+                                fontStyle: 'bold'
                             },
-                            afterZoom: function(start, end) {                   // called after zoom
+                            ticks: {
+                                min: 0,
+                                max: 100,
+                            },
+                            position: 'left',
+                            id: 'effID'
+                        },{
+                            type: 'linear',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'BW kHz',
+                                fontColor: 'brown',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                            },
+                            position: 'left',
+                            id: 'bwID'
+                        },{
+                            type: 'linear',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'kV',
+                                fontColor: 'rgb(150, 150, 0)',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                            },
+                            min: 0.0,
+                            position: 'left',
+                            id: 'vID'
+                        },{
+                            type: 'linear',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: '\u03A9',
+                                fontColor: 'red',
+                                fontStyle: 'bold'
+                            },
+                            position: 'right',
+                            id: 'mohmsID',
+                        },{
+                            type: 'linear',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'pF',
+                                fontColor: 'green',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                max: 3000.0,
+                            },
+                            position: 'left',
+                            id: 'pfID'
+                        },{
+                            type: 'linear',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'j\u03A9',
+                                fontColor: 'blue',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                            },
+                            position: 'right',
+                            id: 'ohmsID'
+                        },{
+                            type: 'linear',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Q',
+                                fontColor: 'purple',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                            },
+                            position: 'right',
+                            id: 'qID'
+                        },{
+                            type: 'linear',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'A',
+                                fontColor: 'rgb(0,128,128)',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                            },
+                            min: 0.0,
+                            position: 'right',
+                            id: 'ccID'
+                        }]
+                    },
+                    showLines: true,
+                    tooltips: {
+                        mode: 'interpolate',
+                        intersect: false,
+                        position: 'nearest',
+                        callbacks: {
+                            title: function(tooltipItem, data) {
+                                var label = '' + tooltipItem[0].xLabel.toFixed(3).toString();
+                                label += ' MHz ';
+                                return label;
+                            },
+                            label: function(tooltipItem, data) {
+                                var label = data.datasets[tooltipItem.datasetIndex].label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += Math.round(tooltipItem.yLabel * 1000) / 1000;
+                                return label;
+                            }
+                        }
+                    },
+                    plugins: {
+                        crosshair: {
+                            line: {
+                                color: 'red',   // crosshair line color
+                                width: 1,       // crosshair line width
+                                dashPattern: [100, 100]
+                            },
+                            sync: {
+                                enabled: false,            // enable trace line syncing with other charts
+                                group: 1,                 // chart group
+                                suppressTooltips: true   // suppress tooltips when showing a synced tracer
+                            },
+                            zoom: {
+                                enabled: false,                                      // enable zooming
+                                zoomboxBackgroundColor: 'rgba(66,133,244,0.2)',     // background color of zoom box 
+                                zoomboxBorderColor: '#48F',                         // border color of zoom box
+                                zoomButtonText: 'Reset Zoom',                       // reset zoom button text
+                                zoomButtonClass: 'reset-zoom',                      // reset zoom button class
+                            },
+                            callbacks: {
+                                beforeZoom: function(start, end) {                  // called before zoom, return false to prevent zoom
+                                    return false;                                   // return true to enable zooming
+                                },
+                                afterZoom: function(start, end) {                   // called after zoom
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
-    </script>
+            });
+        </script>
+    </body>
 </html>
