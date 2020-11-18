@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Inductor Calculator v1</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Designer v1</header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -35,6 +35,11 @@
                     <input type="range" id="frequency_slider" min="1.0" max="30.0" value="7.0" step="0.1">
                 </div>
             </div>
+            <p>
+                Help page:
+                Proximity resistance uses the empirical data collected by Medhurst.
+
+            </p>
         </section>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.1.2"></script>
@@ -53,6 +58,10 @@
             var loop_spacing_value = document.getElementById("loop_spacing_value");
             val = loop_spacing_slider.value * 1.0;
 
+            // Global constants:
+            const mu0 = Math.PI * 4e-7;
+            const cu_sigma = 58e6;      // Copper conductance value
+
             function dcResistance() {
                 const loop_diameter_meters = 1e-3 * loop_diameter_slider.value;
                 const cond_diameter_meters = 1e-3 * conductor_diameter_slider.value;
@@ -61,8 +70,19 @@
                 const corr_factor = Math.sqrt(1.0 + (c_spacing**2 / loop_diameter_meters**2));
                 const conductor_length = Math.PI * loop_diameter_meters * loop_turns_slider.value * corr_factor;
                 const conductor_area = Math.PI * (cond_radius_meters**2.0);
-                console.log(conductor_length, conductor_area);
+                //console.log(conductor_length, conductor_area);
                 return 1.68e-8 * conductor_length / conductor_area;
+            }
+
+            function skinDepth() {
+                return Math.sqrt(1.0 / (Math.PI * frequency_slider.value * 1e6 * mu0 * cu_sigma));
+            }
+
+            // From Knight "Solenoid Impedance and Q"
+            function dc2acFactor() {
+                const diameter = 1e-3 * conductor_diameter_slider.value;
+                const skin_depth = skinDepth();
+                return diameter**2 / (4.0 * (diameter * skin_depth - skin_depth**2));
             }
 
             function getInductance() {
@@ -70,7 +90,6 @@
                 const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
                 const n_turns = 1.0 * loop_turns_slider.value;
                 const coil_length = b_conductor_radius * 2.0 * loop_spacing_slider.value * n_turns;
-                const mu0 = Math.PI * 4e-7;
                 var retval = (n_turns**2.0) * mu0 * Math.PI * (a_coil_radius**2.0) * nagaokaCoefficient() / coil_length;
                 return retval;
             }
@@ -94,7 +113,7 @@
                 const w = -0.47 / (0.755 + x)**1.44;
                 const p = k0 + 3.437/x + k2/x**2 + w;
                 var retval = zk * (Math.log(1 + 1/zk) + 1/p);
-                console.log(retval);
+                //console.log(retval);
                 return retval;
             }
 
@@ -136,44 +155,57 @@
                 return capacitance; // in picofarads
             }
 
-            function calculateTuningCapacitor() {
-                var retval = [];
-                frequencies.forEach(freq => {
-                    const capacitor = tuningCapacitance(freq * 1e6);
-                    retval.push({x:freq, y:capacitor});
-                });
-                return retval;
-            }
+            const proximityResistance = [
+                // From R.G. Medhurst H.F. Resistance and Self-Capacitance of Single-Layer Solenoids (Feb, 1947)
+                [  0.0, 1.0, 1.111, 1.25, 1.429, 1.667, 2.0, 2.5, 3.333, 5.00, 10.0 ],
+                [  0.0, 5.31, 3.73,  2.74, 2.12, 1.74, 1.44, 1.20, 1.16, 1.07, 1.02 ],
+                [  0.2, 5.45, 3.84,  2.83, 2.20, 1.77, 1.48, 1.29, 1.19, 1.08, 1.02 ],
+                [  0.4, 5.65, 3.99,  2.97, 2.28, 1.83, 1.54, 1.33, 1.21, 1.08, 1.03 ],
+                [  0.6, 5.80, 4.11,  3.10, 2.38, 1.89, 1.60, 1.38, 1.22, 1.10, 1.03 ],
+                [  0.8, 5.80, 4.17,  3.20, 2.44, 1.92, 1.64, 1.42, 1.23, 1.10, 1.03 ],
+                [  1.0, 5.55, 4.10,  3.17, 2.47, 1.94, 1.67, 1.45, 1.24, 1.10, 1.03 ],
+                [  2.0, 4.10, 3.36,  2.74, 2.32, 1.98, 1.74, 1.50, 1.28, 1.13, 1.04 ],
+                [  4.0, 3.54, 3.05,  2.60, 2.27, 2.01, 1.78, 1.54, 1.32, 1.15, 1.04 ],
+                [  6.0, 3.31, 2.92,  2.60, 2.29, 2.03, 1.80, 1.56, 1.34, 1.16, 1.04 ],
+                [  8.0, 3.20, 2.90,  2.62, 2.34, 2.08, 1.81, 1.57, 1.34, 1.165, 1.04],
+                [ 10.0, 3.23, 2.93,  2.65, 2.37, 2.10, 1.83, 1.58, 1.35, 1.17, 1.04 ],
+                [999.0, 3.41, 3.11, 2.815, 2.51, 2.22, 1.93, 1.65, 1.395, 1.19, 1.05]
+            ];
 
-            const proximityResistance = {
-                // From G. S. Smith, "Radiation Efficiency of Electrically Small Multiturn Loop Antennas", IEEE Trans Antennas Propagation, September 1972
-                // 0 - this is the corresponding x-axis value. 1 - single loop adds zero to proximity resistance. Others measured empirically.
-                0:[  1.1,  1.15,  1.20,  1.25,  1.30,  1.40,  1.50,  1.60,  1.70,  1.80,  1.90,  2.00,  2.20,  2.40,  2.50,  2.60,  2.80,  3.00,  3.50,  4.00],
-                1:[0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000],
-                2:[0.299, 0.284, 0.268, 0.254, 0.240, 0.214, 0.191, 0.173, 0.155, 0.141, 0.128, 0.116, 0.098, 0.032, 0.077, 0.071, 0.061, 0.054, 0.040, 0.031],
-                3:[0.643, 0.580, 0.531, 0.491, 0.455, 0.395, 0.346, 0.305, 0.270, 0.241, 0.216, 0.195, 0.161, 0.135, 0.124, 0.114, 0.098, 0.085, 0.062, 0.048],
-                4:[0.996, 0.868, 0.777, 0.704, 0.644, 0.564, 0.470, 0.408, 0.353, 0.316, 0.281, 0.252, 0.205, 0.170, 0.156, 0.144, 0.123, 0.106, 0.077, 0.058],
-                5:[1.347, 1.142, 1.002, 0.896, 0.809, 0.674, 0.572, 0.492, 0.428, 0.375, 0.332, 0.295, 0.239, 0.197, 0.180, 0.165, 0.141, 0.121, 0.087, 0.066],
-                6:[1.689, 1.400, 1.210, 1.068, 0.956, 0.784, 0.658, 0.561, 0.485, 0.423, 0.372, 0.330, 0.265, 0.217, 0.198, 0.182, 0.154, 0.133, 0.095, 0.072],
-                7:[2.020, 1.693, 1.401, 1.224, 1.086, 0.880, 0.732, 0.620, 0.532, 0.462, 0.405, 0.358, 0.286, 0.234, 0.213, 0.195, 0.165, 0.142, 0.101, 0.076],
-                8:[2.340, 1.872, 1.577, 1.365, 1.203, 0.965, 0.796, 0.670, 0.573, 0.495, 0.433, 0.392, 0.304, 0.247, 0.225, 0.206, 0.174, 0.150, 0.106, 0.080]
-            };
-
-            function getProximityResFromSpacing(spacing_ratio) {
+            function getProximityResFromSpacing() {
                 // Use the proximityResistance look-up table and interpolate values depending on the spacing ratio and the number of turns.
                 var retval = 0.0;
-                var n_turns = loop_turns_slider.value;
-                var i = 0;
-                for (i = 0; i < (proximityResistance[0].length-1); i++) {
-                    if(spacing_ratio <= proximityResistance[0][i+1]) {
-                        // Linear interpolation between empirical proximity resistance values:
-                        retval = (((spacing_ratio - proximityResistance[0][i]) / (proximityResistance[0][i+1] - proximityResistance[0][i]) * (proximityResistance[n_turns][i+1] - proximityResistance[n_turns][i])) + proximityResistance[n_turns][i]);
+                const n_turns = 1.0 * loop_turns_slider.value;
+                const spacing_ratio = 1.0 * loop_spacing_slider.value;
+                const length_diameter_ratio = n_turns * spacing_ratio * conductor_diameter_slider.value / loop_diameter_slider.value;
+                var i = 0; // Going to the right, which is the spacing ratio
+                var j = 0; // Going down the page, which is the solenoid length to diameter ratio
+                for (i = 1; i < (proximityResistance[0].length); i++) {
+                    if(spacing_ratio < proximityResistance[0][i]) {
+                        i--;
                         break;
                     }
                 }
+                for (j = 1; j < (proximityResistance.length); j++) {
+                    if(length_diameter_ratio < proximityResistance[j][0]) {
+                        j--;
+                        break;
+                    }
+                }
+                var t1 = ((spacing_ratio - proximityResistance[0][i]) / (proximityResistance[0][i+1] - proximityResistance[0][i])) * (proximityResistance[j][i+1] - proximityResistance[j][i]) + proximityResistance[j][i];
+                var t2 = ((spacing_ratio - proximityResistance[0][i]) / (proximityResistance[0][i+1] - proximityResistance[0][i])) * (proximityResistance[j+1][i+1] - proximityResistance[j+1][i]) + proximityResistance[j+1][i];
+                retval = ((length_diameter_ratio - proximityResistance[j][0])/(proximityResistance[j+1][0] - proximityResistance[j][0])) * (t2 - t1) + t1;
                 return retval;
             }
 
+            function acResistance() {
+                const Rdc = dcResistance();
+                const dc2ac = dc2acFactor();
+                const prox = getProximityResFromSpacing();
+                console.log(Rdc, dc2ac, prox);
+                return Rdc * dc2ac * prox;
+            }
+/*            
             function lossResistance(frequency) {
                 // Frequency in Hertz
                 const a_coil_radius = loop_diameter_slider.value * 0.0005;
@@ -182,31 +214,18 @@
                 const loop_spacing_ratio = loop_spacing_slider.value;
                 const mu0 = 4.0 * Math.PI * 1e-7;
                 const k = (n_turns * a_coil_radius / b_conductor_radius);
-                const cu_sigma = 58e6; // Copper conductance value
                 const Rp = getProximityResFromSpacing(loop_spacing_ratio);
                 const Rs = Math.sqrt(Math.PI * frequency * mu0 / cu_sigma);
                 const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
                 const R_ohmic = k * Rs * (Rp / R0 + 1.0);
                 return R_ohmic;
             }
-            
-            function calculateEfficiencyFactor() {
-                var retval = [];
-                frequencies.forEach(freq => {
-                    const R_ohmic = lossResistance(freq * 1e6);
-                    const R_rad = radiationResistance(freq * 1e6);
-                    const efficiency = 100.0 / (1.0 + (R_ohmic / R_rad));
-                    //const efficiency = 10.0 * Math.log10(1.0 / (1.0 + (R_ohmic / R_rad))); // for Efficiency in dB
-                    retval.push({x:freq, y:efficiency});
-                });
-                return retval;
-            }
+*/ 
 
             function qualityFactor(frequency) {
                 const Xl = inductiveReactance(frequency);
-                const Rac = lossResistance(frequency);
-                const Rdc = dcResistance();
-                const Q = Xl / (Rdc + Rac);
+                const Rac = acResistance();
+                const Q = Xl / Rac;
                 return Q;
             }
 
@@ -286,7 +305,7 @@
                 const L = getInductance() * 1.0e+6;
                 fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
                 fctx.fillText("C = " + "ccc" + " pF", 8, 32);
-                fctx.fillText("R = " + dcResistance().toFixed(1) + " \u03A9", 8, 46);
+                fctx.fillText("Rdc = " + dcResistance().toFixed(1) + " \u03A9", 8, 46);
                 fctx.fillText("SRF = " + "fff" + " MHz", 8, 60);
 
                 // Write loop diameter symbol:
@@ -390,8 +409,10 @@
                 var freq = 1.0 * frequency_slider.value;
                 fctx.fillText("f = " + freq.toFixed(1) + " MHz", win_width-18, 18);
                 fctx.fillText("X = " + inductiveReactance(freq * 1e6).toFixed(1) + " \u03A9", win_width-18, 32);
-                fctx.fillText("Rac = " + lossResistance(freq * 1e6).toFixed(1) + " \u03A9", win_width-18, 46);
-                fctx.fillText("Q = " + qualityFactor(freq * 1e6).toFixed(1), win_width-18, 60);
+                fctx.fillText("\u03B4 = " + (skinDepth() * 1e6).toFixed(1) + " \u03BCm", win_width-18, 46);
+                fctx.fillText("Rac = " + acResistance(freq * 1e6).toFixed(1) + " \u03A9", win_width-18, 60);
+                fctx.fillText("Q = " + qualityFactor(freq * 1e6).toFixed(1), win_width-18, 74);
+
                 fctx.textAlign = "center";
                 fctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.56);
                 
