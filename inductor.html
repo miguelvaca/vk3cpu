@@ -28,18 +28,34 @@
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
-                    <input type="range" id="loop_turns_slider" min="2" max="50" value="4.0" step="1.0">
+                    <input type="range" id="loop_turns_slider" min="2" max="100" value="4.0" step="1.0">
                 </div>
                 <div class="sliders">
                     <label for="frequency_slider">f:</label>
                     <input type="range" id="frequency_slider" min="1.0" max="30.0" value="7.0" step="0.1">
                 </div>
             </div>
-            <p>
-                Help page:
-                Proximity resistance uses the empirical data collected by Medhurst.
-
-            </p>
+            <br>
+            <b>Notes:</b><br>
+            RF Inductor Designer was developed to help users predict the RF characteristics of a single-layer solenoid-style air-core inductor. <br><br>
+            <u>Inputs via the slider widgets:</u>
+            <ul> 
+                <li>&#8960a : Conductor diameter in millimeters (mm).</li>
+                <li>&#8960b : Loop diameter in millimeters (mm).</li>
+                <li>c/a : 'c' is the inter-winding spacing, and 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (Must be >= 1.1) 
+                    A low-value will increase the proximity effect.</li>
+                <li>N : Number of turns or windings.</li>
+                <li>f : The frequency of interest for some of the calculations.</li>
+            </ul>
+            Characteristics on the left are independent of frequency, while the characteristics on the right are dependent on the selected frequency. <br>
+            Each of the graphic representations attempt to keep the relative geometry correct, without exceeding the drawing boundary. The coil diameter
+            relative to the conductor diameter are representative. 
+            <ul>
+                <li>Inductance is calculated using an equation incorporating the Nagaoka coefficient.</li>
+                <li>Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
+                <li>DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
+                <li>Proximity resistance is calculated using the empirical data collected by Medhurst using the spacing ratio, and length-to-diameter ratio.</li>
+            </ul>
         </section>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.1.2"></script>
@@ -103,9 +119,6 @@
                 const loop_diameter_meters = 1e-3 * loop_diameter_slider.value;
                 const cond_diameter_meters = 1e-3 * conductor_diameter_slider.value;
                 const c_spacing = loop_spacing_slider.value * cond_diameter_meters;
-                //const corr_factor = Math.sqrt(1.0 + (c_spacing**2 / loop_diameter_meters**2));
-                //const conductor_length = Math.PI * loop_diameter_meters * loop_turns_slider.value * corr_factor;
-                // const x = loop_diameter_meters / conductor_length;
                 const x = loop_diameter_meters / (c_spacing * loop_turns_slider.value);
                 const zk = 2.0 / (Math.PI * x);
                 const k0 = 1.0 / (Math.log(8.0 / Math.PI) - 0.5);
@@ -113,14 +126,12 @@
                 const w = -0.47 / (0.755 + x)**1.44;
                 const p = k0 + 3.437/x + k2/x**2 + w;
                 var retval = zk * (Math.log(1 + 1/zk) + 1/p);
-                //console.log(retval);
                 return retval;
             }
 
             function ctdw(ff, ei, ex) {
                 // From Knight's 2016 paper
                 const kL = nagaokaCoefficient();
-                //console.log(kL);
                 const kct = 1.0/kL - 1.0;
                 return 11.27350207 * ex * ff * (1.0 + kct * (1.0 + ei/ex) / 2.0);
             }
@@ -141,18 +152,6 @@
                 const ff = solenoid_length / loop_diameter_meters;
                 var multiloop_capacitance = 1e-12 * (ctdw(ff, ei, ex) / Math.sqrt(1 - h**2 / loop_diameter_meters**2) + ciae(ff, ei, ex)) * loop_diameter_meters;
                 return multiloop_capacitance; // in Farads
-            }
-
-            function tuningCapacitance(frequency) {
-                // frequency is in Hertz
-                const reactance = inductiveReactance(frequency);
-                var multiloop_capacitance = 0.0;
-                if(loop_turns_slider.value > 1) {
-                    // Only compensate for multiloop capacitance when we have more than 1 turn:
-                    multiloop_capacitance = multiloopCapacitance();
-                }
-                const capacitance = 1e12 * ((1.0 / (2.0 * Math.PI * frequency * reactance)) - multiloop_capacitance);
-                return capacitance; // in picofarads
             }
 
             const proximityResistance = [
@@ -202,25 +201,9 @@
                 const Rdc = dcResistance();
                 const dc2ac = dc2acFactor();
                 const prox = getProximityResFromSpacing();
-                console.log(Rdc, dc2ac, prox);
+                // console.log(Rdc, dc2ac, prox);
                 return Rdc * dc2ac * prox;
             }
-/*            
-            function lossResistance(frequency) {
-                // Frequency in Hertz
-                const a_coil_radius = loop_diameter_slider.value * 0.0005;
-                const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
-                const n_turns = loop_turns_slider.value;
-                const loop_spacing_ratio = loop_spacing_slider.value;
-                const mu0 = 4.0 * Math.PI * 1e-7;
-                const k = (n_turns * a_coil_radius / b_conductor_radius);
-                const Rp = getProximityResFromSpacing(loop_spacing_ratio);
-                const Rs = Math.sqrt(Math.PI * frequency * mu0 / cu_sigma);
-                const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
-                const R_ohmic = k * Rs * (Rp / R0 + 1.0);
-                return R_ohmic;
-            }
-*/ 
 
             function qualityFactor(frequency) {
                 const Xl = inductiveReactance(frequency);
@@ -229,43 +212,48 @@
                 return Q;
             }
 
+            function selfResonantFrequency() {
+                var freq = 1.0 / (2.0 * Math.PI * Math.sqrt(getInductance() * multiloopCapacitance()));
+                return freq;
+            }
+
             loop_diameter_slider.oninput = function() {
-                drawFrontDesign();
+                drawDesign();
             }
 
             conductor_diameter_slider.oninput = function() {
-                drawFrontDesign();
+                drawDesign();
             }
 
             loop_turns_slider.oninput = function() {
-                drawFrontDesign();
+                drawDesign();
             }
 
             loop_spacing_slider.oninput = function() {
-                drawFrontDesign();
+                drawDesign();
             }
 
             frequency_slider.oninput = function() {
-                drawFrontDesign();
+                drawDesign();
             }
 
             window.onresize = function() {
-                drawFrontDesign();
+                drawDesign();
             }
 
             window.onorientationchange = function() {
-                drawFrontDesign();
+                drawDesign();
             }
 
             window.onbeforeprint = function() {
                 console.log("onbeforeprint");
-                drawFrontDesign();
+                drawDesign();
             }
 
             const afront_canvas = document.getElementById("inductor2D");
             const fctx = afront_canvas.getContext('2d');
 
-            function drawFrontDesign() {
+            function drawDesign() {
                 const win_width  = document.getElementById("inductor-container").clientWidth; 
                 const win_height = document.getElementById("inductor-container").clientHeight; 
                 afront_canvas.width = win_width-12; 
@@ -304,9 +292,9 @@
                 fctx.font = "12px arial";
                 const L = getInductance() * 1.0e+6;
                 fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
-                fctx.fillText("C = " + "ccc" + " pF", 8, 32);
-                fctx.fillText("Rdc = " + dcResistance().toFixed(1) + " \u03A9", 8, 46);
-                fctx.fillText("SRF = " + "fff" + " MHz", 8, 60);
+                fctx.fillText("C = " + (multiloopCapacitance()*1e12).toFixed(1) + " pF", 8, 32);
+                fctx.fillText("Rdc = " + dcResistance().toFixed(2) + " \u03A9", 8, 46);
+                fctx.fillText("SRF = " + (selfResonantFrequency()*1e-6).toFixed(3) + " MHz", 8, 60);
 
                 // Write loop diameter symbol:
                 fctx.font = "12px arial";
@@ -333,7 +321,6 @@
                 //fctx.textAlign = "right";
                 const cond_dia = 1.0 * conductor_diameter_slider.value;
                 fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + "mm", loopx, loopy - 6);
-
 
 
 
@@ -410,7 +397,7 @@
                 fctx.fillText("f = " + freq.toFixed(1) + " MHz", win_width-18, 18);
                 fctx.fillText("X = " + inductiveReactance(freq * 1e6).toFixed(1) + " \u03A9", win_width-18, 32);
                 fctx.fillText("\u03B4 = " + (skinDepth() * 1e6).toFixed(1) + " \u03BCm", win_width-18, 46);
-                fctx.fillText("Rac = " + acResistance(freq * 1e6).toFixed(1) + " \u03A9", win_width-18, 60);
+                fctx.fillText("Rac = " + acResistance(freq * 1e6).toFixed(2) + " \u03A9", win_width-18, 60);
                 fctx.fillText("Q = " + qualityFactor(freq * 1e6).toFixed(1), win_width-18, 74);
 
                 fctx.textAlign = "center";
@@ -425,8 +412,7 @@
                 const sol_len = loop_turns_slider.value*spc;
                 fctx.fillText(" " + sol_len.toFixed(1).toString() + "mm", start_x + loop_turns_slider.value*cond_spacing + 20, dim_y + 20);
             }
-            drawFrontDesign();
-            //drawSideDesign();
+            drawDesign();
         </script>
     </body>
 </html>
