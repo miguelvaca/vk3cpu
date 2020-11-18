@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v0.8</header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -45,16 +45,28 @@
                 <li>c/a : 'c' is the inter-winding spacing, and 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (Must be >= 1.1) 
                     A low-value will increase the proximity effect.</li>
                 <li>N : Number of turns or windings.</li>
-                <li>f : The frequency of interest for some of the calculations.</li>
+                <li>f : The frequency of interest (MHz) for some of the calculations.</li>
             </ul>
-            Characteristics on the left are independent of frequency, while the characteristics on the right are dependent on the selected frequency. <br>
-            Each of the graphic representations attempt to keep the relative geometry correct, without exceeding the drawing boundary. The coil diameter
-            relative to the conductor diameter are representative. 
+            <p>Characteristics on the left are independent of frequency, while the characteristics on the right are dependent on the selected frequency. </p>
+            <p>Each of the graphic representations attempt to keep the relative geometry correct, without exceeding the drawing boundary. The coil diameter
+            relative to the conductor diameter are representative. </p>
+            <u>Calculated dimensions:</u>
             <ul>
-                <li>Inductance is calculated using an equation incorporating the Nagaoka coefficient.</li>
-                <li>Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
-                <li>DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
-                <li>Proximity resistance is calculated using the empirical data collected by Medhurst using the spacing ratio, and length-to-diameter ratio.</li>
+                <li>&#8960o : Outer loop diameter (mm) </li>
+                <li>&#8960i : Inner loop diameter (mm) - corresponds to the diameter of the winding former.</li>
+                <li>c : Distance between windings, measured from the conductor centers (mm).</li>
+                <li>&#8467 : Length of the coil (mm). Equal to c x N.</li>
+            </ul>
+            <u>Calculated parameters:</u>
+            <ul>
+                <li>L : Inductance is calculated using an equation incorporating the Nagaoka coefficient.</li>
+                <li>C : Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
+                <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
+                <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. Due to the conductor length and velocity factor as described by Knight (2016).</li>
+                <li>X : Reactance at the given frequency. (&#937)</li>
+                <li>&#948 : Skin depth due to skin effect (&#956m)</li>
+                <li>Rac : AC resistance is calculated using the skin effect and proximity resistance from empirical data collected by Medhurst using the spacing ratio, and length-to-diameter ratio.</li>
+                <li>Q : Quality factor of device, based on reactance (X) &#247 resistance (Rac) at the given frequency.</li>
             </ul>
         </section>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
@@ -460,7 +472,7 @@
 
                 // Draw length text:
                 const sol_len = loop_turns_slider.value*spc;
-                fctx.fillText(" " + sol_len.toFixed(1).toString() + "mm", start_x + loop_turns_slider.value*cond_spacing + 20, dim_y + 20);
+                fctx.fillText("\u2113 = " + sol_len.toFixed(1).toString() + "mm", start_x + loop_turns_slider.value*cond_spacing + 20, dim_y + 20);
             }
             drawDesign();
         </script>
