@@ -95,11 +95,33 @@ div input {
 @media (orientation: landscape) {
     section.gridLayoutClass {
         display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 0.3fr;
+        grid-template-areas: 
+        "inductor-container" 
+        "slider-container";
+        justify-items: stretch;
+    }
+
+    section div.inductor-container {
+        height: 75vh;
+        width: 100vw;
+        box-sizing: border-box; 
+    }
+    
+    section div.slider_container {
+        width: 100%;
+    }
+}
+
+/*
+@media (orientation: landscape) {
+    section.gridLayoutClass {
+        display: grid;
         grid-template-columns: 1fr 0.3fr;
         grid-template-rows: 1fr;
         grid-template-areas: 
         "inductor-container" "slider-container";
-        /*justify-items: stretch;*/
     }
 
     section div.inductor-container {
@@ -112,7 +134,7 @@ div input {
         width: 40vw;
     }
 }    
-/*
+
 @media print (orientation: landscape) {
     section.gridLayoutClass {
         display: grid;
