@@ -260,7 +260,7 @@
                 afront_canvas.height = win_height-12; 
 
                 fctx.clearRect(0, 0, win_width, win_height);
-                const loop_radius = 0.16 * win_height; //  100; // loop_diameter_slider.value * 80;
+                const loop_radius = 0.14 * win_height; //  100; // loop_diameter_slider.value * 80;
                 var cond_radius = loop_radius * conductor_diameter_slider.value / loop_diameter_slider.value;
                 const loopx = win_width/2; 
                 const loopy = win_height/4;
@@ -273,34 +273,83 @@
                 fctx.lineWidth = 1.0;
                                 
                 // Draw loop diameter arrow:
-                const y_offset = loopy + loop_radius + 25;
+                const y_offset = loopy + loop_radius + 20;
                 var arrow_size = 10.0;
                 fctx.beginPath();
                 fctx.moveTo(loopx - loop_radius, loopy);
                 fctx.lineTo(loopx - loop_radius, y_offset);
-                fctx.lineTo(loopx - loop_radius + arrow_size, y_offset - arrow_size);
-                fctx.lineTo(loopx - loop_radius + arrow_size, y_offset + arrow_size);
+                fctx.lineTo(loopx - loop_radius - arrow_size, y_offset - arrow_size);
+                fctx.lineTo(loopx - loop_radius - arrow_size, y_offset + arrow_size);
                 fctx.lineTo(loopx - loop_radius, y_offset);
-                fctx.lineTo(loopx + loop_radius, y_offset);
-                fctx.lineTo(loopx + loop_radius - arrow_size, y_offset + arrow_size);
-                fctx.lineTo(loopx + loop_radius - arrow_size, y_offset - arrow_size);
-                fctx.lineTo(loopx + loop_radius, y_offset);
-                fctx.lineTo(loopx + loop_radius, loopy);
+                fctx.lineTo(loopx - loop_radius - 3.0*arrow_size, y_offset);
                 fctx.stroke();
-                
+
+                fctx.beginPath();
+                fctx.moveTo(loopx + loop_radius, loopy);
+                fctx.lineTo(loopx + loop_radius, y_offset);
+                fctx.lineTo(loopx + loop_radius + arrow_size, y_offset - arrow_size);
+                fctx.lineTo(loopx + loop_radius + arrow_size, y_offset + arrow_size);
+                fctx.lineTo(loopx + loop_radius, y_offset);
+                fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, y_offset);
+                fctx.stroke();
+
+                // Write loop diameter symbol:
+                fctx.font = "12px arial";
+                fctx.textAlign = "right";
+                const dia = 1.0 * loop_diameter_slider.value;
+                fctx.fillText("\u2300b = " + dia.toPrecision(3).toString() + "mm", loopx - loop_radius - 2.0*arrow_size, y_offset - 2);
+
+                // Draw inner-diameter arrows: (for using a winding former)
+                const inner_dia_y = loopy + loop_radius + 40;
+                fctx.beginPath();
+                fctx.moveTo(loopx - loop_radius + cond_radius, loopy);
+                fctx.lineTo(loopx - loop_radius + cond_radius, inner_dia_y);
+                fctx.lineTo(loopx - loop_radius + cond_radius - arrow_size, inner_dia_y - arrow_size);
+                fctx.lineTo(loopx - loop_radius + cond_radius - arrow_size, inner_dia_y + arrow_size);
+                fctx.lineTo(loopx - loop_radius + cond_radius, inner_dia_y);
+                fctx.lineTo(loopx - loop_radius - 3.0*arrow_size, inner_dia_y);
+                fctx.stroke();
+
+                fctx.beginPath();
+                fctx.moveTo(loopx + loop_radius - cond_radius, loopy);
+                fctx.lineTo(loopx + loop_radius - cond_radius, inner_dia_y);
+                fctx.lineTo(loopx + loop_radius - cond_radius + arrow_size, inner_dia_y - arrow_size);
+                fctx.lineTo(loopx + loop_radius - cond_radius + arrow_size, inner_dia_y + arrow_size);
+                fctx.lineTo(loopx + loop_radius - cond_radius, inner_dia_y);
+                fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, inner_dia_y);
+                fctx.stroke();
+                fctx.textAlign = "left";
+                fctx.fillText("\u2300i = " + (dia-1.0*conductor_diameter_slider.value).toPrecision(3).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
+
+                // Draw outer-diameter arrows: (for using a winding former)
+                const outer_dia_y = loopy + loop_radius + 0;
+                fctx.beginPath();
+                fctx.moveTo(loopx - loop_radius - cond_radius, loopy);
+                fctx.lineTo(loopx - loop_radius - cond_radius, outer_dia_y);
+                fctx.lineTo(loopx - loop_radius - cond_radius - arrow_size, outer_dia_y - arrow_size);
+                fctx.lineTo(loopx - loop_radius - cond_radius - arrow_size, outer_dia_y + arrow_size);
+                fctx.lineTo(loopx - loop_radius - cond_radius, outer_dia_y);
+                fctx.lineTo(loopx - loop_radius - 3.0*arrow_size, outer_dia_y);
+                fctx.stroke();
+
+                fctx.beginPath();
+                fctx.moveTo(loopx + loop_radius + cond_radius, loopy);
+                fctx.lineTo(loopx + loop_radius + cond_radius, outer_dia_y);
+                fctx.lineTo(loopx + loop_radius + cond_radius + arrow_size, outer_dia_y - arrow_size);
+                fctx.lineTo(loopx + loop_radius + cond_radius + arrow_size, outer_dia_y + arrow_size);
+                fctx.lineTo(loopx + loop_radius + cond_radius, outer_dia_y);
+                fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, outer_dia_y);
+                fctx.stroke();
+                fctx.fillText("\u2300o = " + (dia+1.0*conductor_diameter_slider.value).toPrecision(3).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
+
                 // Write loop inductance:
                 fctx.font = "12px arial";
+                fctx.textAlign = "left";
                 const L = getInductance() * 1.0e+6;
                 fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
                 fctx.fillText("C = " + (multiloopCapacitance()*1e12).toFixed(1) + " pF", 8, 32);
                 fctx.fillText("Rdc = " + dcResistance().toFixed(2) + " \u03A9", 8, 46);
-                fctx.fillText("SRF = " + (selfResonantFrequency()*1e-6).toFixed(3) + " MHz", 8, 60);
-
-                // Write loop diameter symbol:
-                fctx.font = "12px arial";
-                fctx.textAlign = "center";
-                const dia = 1.0 * loop_diameter_slider.value;
-                fctx.fillText("\u2300b = " + dia.toPrecision(3).toString() + "mm", loopx, y_offset + 14);
+                fctx.fillText("SRF = " + (selfResonantFrequency()*1e-6).toFixed(1) + " MHz", 8, 60);
 
                 // Draw conductor diameter arrow:
                 fctx.beginPath();
@@ -320,6 +369,7 @@
                 fctx.stroke();
                 //fctx.textAlign = "right";
                 const cond_dia = 1.0 * conductor_diameter_slider.value;
+                fctx.textAlign = "center";
                 fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + "mm", loopx, loopy - 6);
 
 
