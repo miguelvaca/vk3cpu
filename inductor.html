@@ -3,11 +3,11 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>VK3CPU Inductor Calculator</title>
+        <title>VK3CPU RF Inductor Calculator</title>
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Designer v1</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1</header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -107,11 +107,11 @@
                 const n_turns = 1.0 * loop_turns_slider.value;
                 const coil_length = b_conductor_radius * 2.0 * loop_spacing_slider.value * n_turns;
                 var retval = (n_turns**2.0) * mu0 * Math.PI * (a_coil_radius**2.0) * nagaokaCoefficient() / coil_length;
-                return retval;
+                return retval; // In Henries
             }
 
             function inductiveReactance(frequency) {
-                return 2.0 * Math.PI * frequency * getInductance();
+                return 2.0 * Math.PI * frequency * getInductance(); // In Ohms
             }
 
             function nagaokaCoefficient() {
