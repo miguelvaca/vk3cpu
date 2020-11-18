@@ -531,7 +531,7 @@
                 fctx.lineTo(start_x + cond_spacing, dim_y + 7);
                 fctx.stroke();
 
-                // Draw right lenthg arrow:
+                // Draw right length arrow:
                 fctx.beginPath();
                 fctx.moveTo(start_x + loop_turns_slider.value*cond_spacing + 20, dim_y);
                 fctx.lineTo(start_x + loop_turns_slider.value*cond_spacing, dim_y);
@@ -541,6 +541,18 @@
                 fctx.moveTo(start_x + loop_turns_slider.value*cond_spacing, dim_y - 7);
                 fctx.lineTo(start_x + loop_turns_slider.value*cond_spacing, dim_y + 7);
                 fctx.stroke();
+
+                // Extended lines:
+                fctx.strokeStyle = "grey";
+                fctx.beginPath();
+                fctx.moveTo(start_x, bot_y + 35);
+                fctx.lineTo(start_x, dim_y - 12);
+                fctx.moveTo(start_x + cond_spacing, bot_y + 15);
+                fctx.lineTo(start_x + cond_spacing, dim_y - 12);
+                fctx.moveTo(start_x + loop_turns_slider.value*cond_spacing, bot_y + 35);
+                fctx.lineTo(start_x + loop_turns_slider.value*cond_spacing, dim_y - 12);
+                fctx.stroke();
+                fctx.strokeStyle = "black";
 
                 fctx.font = "12px arial";
                 fctx.textAlign = "right";
