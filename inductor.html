@@ -566,10 +566,11 @@
                 fctx.textAlign = "center";
                 fctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.56);
                 
-                // Draw spacing text:
+                // Draw spacing text: (gap is to avoid collision of spacing and length texts)
                 fctx.textAlign = "right";
+                var gap = ((loop_turns_slider.value*cond_spacing - cond_spacing) < 60) ? (60 - (loop_turns_slider.value*cond_spacing - cond_spacing)) : 0;
                 const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
-                fctx.fillText("c = " + spc.toFixed(1).toString() + "mm", start_x + cond_spacing + 20, dim_y + 20);
+                fctx.fillText("c = " + spc.toFixed(1).toString() + "mm", start_x + cond_spacing + 20 - gap, dim_y + 20);
 
                 // Draw length text:
                 const sol_len = loop_turns_slider.value*spc;
