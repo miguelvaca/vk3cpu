@@ -281,13 +281,13 @@
                 // Draw loop ends first, then draw the loop after:
                 fctx.strokeStyle = "grey";
                 fctx.beginPath();
-                fctx.arc(loopx - 1.414*loop_radius, loopy + 1.414*loop_radius, loop_radius, 0.0, -0.25 * Math.PI, true);
+                fctx.arc(loopx - 0.5*loop_radius, loopy + 1.414*loop_radius, 0.5 * loop_radius, 0.0, -0.40 * Math.PI, true);
                 fctx.lineWidth = cond_radius * 2.0;
                 fctx.stroke();
                 fctx.strokeStyle = "black";
 
                 fctx.beginPath();
-                fctx.arc(loopx + 1.414*loop_radius, loopy + 1.414*loop_radius, loop_radius, Math.PI, -0.75 * Math.PI, false);
+                fctx.arc(loopx + 0.5*loop_radius, loopy + 1.414*loop_radius, 0.5 * loop_radius, Math.PI, -0.60 * Math.PI, false);
                 fctx.lineWidth = cond_radius * 2.0;
                 fctx.stroke();
 
