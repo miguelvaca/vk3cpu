@@ -16,19 +16,19 @@
             </div>
             <div class="slider_container">
                 <div class="sliders">
-                    <label for="loop_diameter_slider">&#8960a:</label>
-                    <input type="range" id="loop_diameter_slider" min="0.2" max="5.0" value="1.0" step="0.05">
+                    <label for="conductor_diameter_slider">&#8960a:</label>
+                    <input type="range" id="conductor_diameter_slider" min="5" max="40" value="19" step="0.5">
                 </div>
                 <div class="sliders">
-                    <label for="conductor_diameter_slider">&#8960b:</label>
-                    <input type="range" id="conductor_diameter_slider" min="5" max="40" value="19" step="0.5">
+                    <label for="loop_diameter_slider">&#8960b:</label>
+                    <input type="range" id="loop_diameter_slider" min="0.2" max="5.0" value="1.0" step="0.05">
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
                     <input type="range" id="loop_turns_slider" min="1" max="8" value="1.0" step="1.0">
                 </div>
                 <div class="sliders">
-                    <label for="loop_spacing_slider">c/b:</label>
+                    <label for="loop_spacing_slider">c/a:</label>
                     <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.01">
                 </div>
                 <div class="sliders">
@@ -43,6 +43,34 @@
             <div id="antenna-side-container" class="antennaSide-container" style="position: relative;">
                 <canvas id="antennaSide2D" class="antennaSideClass" width="150" height="150">
                 </canvas>
+            </div>
+            <div class="notes">
+            <b><u>Notes:</u></b><br>
+            The Magloop Antenna Calculator was developed to predict the characteritics of a small-loop (aka "magloop")
+            antenna, given physical dimensions entered via slider widgets. There are many magloop calculators available
+            online. Some require installing a program on your computer, which is OS dependent. Some others are browser-based,
+            but require parameters to be input using a keyboard. I wanted to create a tool that took advantage of the 
+            touch-screens and high-speed of modern mobile phones, to allow users to get realtime feedback of the predicted
+            behaviour of a magloop antenna. This would help a radio amateur to decide on the characteristics for the build.<br>
+            <u>Inputs via the slider widgets:</u>
+            <ul> 
+                <li>&#8960a : Conductor diameter in millimeters (mm). Estimated equivalent AWG wire size is also displayed where appropriate.</li>
+                <li>&#8960b : Loop diameter in meters (m).</li>
+                <li>N : Number of turns or loops.</li>
+                <li>c/a : 'c' is the inter-winding spacing, and 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (Must be >= 1.1) 
+                    A low-value will increase the resistance due to the proximity effect.</li>
+                <li>Tx : The transmit power. This affects the predicted voltage across the capacitor.</li>
+            </ul>
+            <u>Calculated parameters:</u>
+            <ul>
+                <li>L : Inductance is calculated using Nagaoka's equation. Value in microhenries.</li>
+                <li>C : Capacitance for multi-turn loops, which is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
+                <li>c : Distance between windings, measured from the conductor centers (mm).</li>
+                <li>Tuning Cap (pF): The capacitance required to bring the loop into resonance at the given frequency. Value in picofarads.</li>
+                <li>Vcap (kV): The predicted voltage across the capacitance given the desired transmit power.</li>
+                <li>BW (kHz): The predicted 3dB bandwidth of the magloop antenna. This is calculated from the predicted Q and the center frequency.</li>
+                <li>Efficiency (%): Calculated from the radiation resistance divided by the sum of radiation resistance and the loss resistance.</li>
+            </ul>
             </div>
         </section>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
@@ -478,7 +506,7 @@
                 fctx.font = "12px arial";
                 fctx.textAlign = "center";
                 const dia = 1.0 * loop_diameter_slider.value;
-                fctx.fillText("\u2300a = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 6);
+                fctx.fillText("\u2300b = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 6);
 
                 // Draw conductor diameter arrow:
                 fctx.beginPath();
@@ -515,7 +543,7 @@
                 p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
                 //fctx.textAlign = "right";
                 const cond_dia = 1.0 * conductor_diameter_slider.value;
-                fctx.fillText("\u2300b = " + cond_dia.toPrecision(3).toString() + "mm", loopx, p1y+2);
+                fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + "mm", loopx, p1y+2);
             }
             
             const aside_canvas = document.getElementById("antennaSide2D");
