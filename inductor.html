@@ -43,7 +43,7 @@
                 <li>&#8960a : Conductor diameter in millimeters (mm). Estimated equivalent AWG wire size is also displayed where appropriate.</li>
                 <li>&#8960b : Loop diameter in millimeters (mm).</li>
                 <li>c/a : 'c' is the inter-winding spacing, and 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (Must be >= 1.1) 
-                    A low-value will increase the proximity effect.</li>
+                    A low-value will increase the resistance due to the proximity effect.</li>
                 <li>N : Number of turns or windings.</li>
                 <li>f : The frequency of interest (MHz) for some of the calculations.</li>
             </ul>
@@ -344,7 +344,7 @@
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, inner_dia_y);
                 fctx.stroke();
                 fctx.textAlign = "left";
-                fctx.fillText("\u2300i = " + (dia-1.0*conductor_diameter_slider.value).toPrecision(3).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
+                fctx.fillText("\u2300i = " + (dia-0.5*conductor_diameter_slider.value).toPrecision(3).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
 
                 // Draw outer-diameter arrows: (for using a winding former)
                 const outer_dia_y = loopy + loop_radius + 0;
@@ -365,7 +365,7 @@
                 fctx.lineTo(loopx + loop_radius + cond_radius, outer_dia_y);
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, outer_dia_y);
                 fctx.stroke();
-                fctx.fillText("\u2300o = " + (dia+1.0*conductor_diameter_slider.value).toPrecision(3).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
+                fctx.fillText("\u2300o = " + (dia+0.5*conductor_diameter_slider.value).toPrecision(3).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
 
                 // Write loop inductance:
                 fctx.font = "12px arial";
