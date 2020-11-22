@@ -505,13 +505,13 @@
                 fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
 
                 // Write Tx power text:
-                fctx.fillText("Tx = " + transmit_power_slider.value + "W", 8, win_height * 0.8 + 20);
+                fctx.fillText("Tx = " + transmit_power_slider.value + " W", 8, win_height * 0.8 + 20);
 
                 // Write loop diameter symbol:
                 fctx.font = "12px arial";
                 fctx.textAlign = "center";
                 const dia = 1.0 * loop_diameter_slider.value;
-                fctx.fillText("\u2300b = " + dia.toPrecision(3).toString() + "m", loopx, loopy - 6);
+                fctx.fillText("\u2300b = " + dia.toPrecision(3).toString() + " m", loopx, loopy - 6);
 
                 // Draw conductor diameter arrow:
                 fctx.beginPath();
@@ -548,7 +548,11 @@
                 p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
                 //fctx.textAlign = "right";
                 const cond_dia = 1.0 * conductor_diameter_slider.value;
-                fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + "mm", loopx, p1y+2);
+                fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + " mm", loopx, p1y+2);
+
+                // Write loop area:
+                fctx.textAlign = "right";
+                fctx.fillText("A = " + (Math.PI * dia**2).toPrecision(3).toString() + " m\u00B2", win_width-8, 18);
             }
             
             const aside_canvas = document.getElementById("antennaSide2D");
@@ -626,7 +630,7 @@
                 // Draw spacing text:
                 sctx.textAlign = "center";
                 const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
-                sctx.fillText("c = " + spc.toPrecision(3).toString() + "mm", start_x + cond_spacing, dim_y + 20);
+                sctx.fillText("c = " + spc.toPrecision(3).toString() + " mm", start_x + cond_spacing, dim_y + 20);
             }
             drawFrontDesign();
             drawSideDesign();
