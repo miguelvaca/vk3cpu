@@ -16,7 +16,7 @@
             <div class="slider_container">
                 <div class="sliders">
                     <label for="conductor_diameter_slider">&#8960a:</label>
-                    <input type="range" id="conductor_diameter_slider" min="0.010" max="0.250" value="0.032" step="0.001">
+                    <input type="range" id="conductor_diameter_slider" min="0.010" max="0.204" value="0.032" step="0.001">
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960b:</label>
@@ -295,6 +295,9 @@
                     case 0.010 : 
                         awg = "30 AWG";
                         break;
+                    case 0.013 : 
+                        awg = "~28 AWG";
+                        break;
                     case 0.016 : 
                         awg = "26 AWG";
                         break;
@@ -303,6 +306,9 @@
                         break;
                     case 0.020 : 
                         awg = "24 AWG";
+                        break;
+                    case 0.025 : 
+                        awg = "~22 AWG";
                         break;
                     case 0.032 : 
                         awg = "20 AWG";
@@ -313,20 +319,32 @@
                     case 0.051 : 
                         awg = "~16 AWG";
                         break;
+                    case 0.064 : 
+                        awg = "~14 AWG";
+                        break;
                     case 0.081 : 
                         awg = "~12 AWG";
                         break;
                     case 0.102 : 
-                        awg = "~10 AWG";
-                        break;
-                    case 0.128 : 
-                        awg = "~8 AWG";
+                        awg = "10 AWG";
                         break;
                     case 0.114 : 
                         awg = "~9 AWG";
                         break;
+                    case 0.128 : 
+                        awg = "~8 AWG";
+                        break;
+                    case 0.144 : 
+                        awg = "~7 AWG";
+                        break;
                     case 0.162 : 
                         awg = "6 AWG";
+                        break;
+                    case 0.182 : 
+                        awg = "5 AWG";
+                        break;
+                    case 0.204 : 
+                        awg = "~4 AWG";
                         break;
                 }
                 fctx.textAlign = "left";
