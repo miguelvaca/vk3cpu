@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1.0<br><a href="inductor_imp.html">[Imperial]</a> <a href="inductor_lrg.html">[Large Metric]</a></header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1.0<br><a href="inductor_imp.html">[Wire Imperial]</a> <a href="inductor_lrg.html">[Coax Metric]</a></header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -60,7 +60,7 @@
             </ul>
             <u>Calculated parameters:</u>
             <ul>
-                <li>L : Inductance is calculated using an equation incorporating the Nagaoka coefficient.</li>
+                <li>L : Inductance is calculated using Nagaoka's equation incorporating his coefficient.</li>
                 <li>C : Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
                 <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
                 <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. Currently using a lumped reactances model. (Looking into modifying the model to 

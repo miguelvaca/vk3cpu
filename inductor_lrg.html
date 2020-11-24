@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1.0<br><a href="inductor_imp.html">[Imperial]</a> <a href="inductor.html">[Small Metric]</a></header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1.0<br><a href="inductor_imp.html">[Wire Imperial]</a> <a href="inductor.html">[Wire Metric]</a></header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -16,7 +16,7 @@
             <div class="slider_container">
                 <div class="sliders">
                     <label for="conductor_diameter_slider">&#8960a:</label>
-                    <input type="range" id="conductor_diameter_slider" min="2.5" max="10.0" value="4.95" step="0.05">
+                    <input type="range" id="conductor_diameter_slider" min="2.0" max="10.0" value="3.50" step="0.02">
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960b:</label>
@@ -24,7 +24,7 @@
                 </div>
                 <div class="sliders">
                     <label for="loop_spacing_slider">c/a:</label>
-                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="1.1" step="0.01">
+                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="1.4" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
@@ -60,7 +60,7 @@
             </ul>
             <u>Calculated parameters:</u>
             <ul>
-                <li>L : Inductance is calculated using an equation incorporating the Nagaoka coefficient.</li>
+                <li>L : Inductance is calculated using Nagaoka's equation incorporating his coefficient.</li>
                 <li>C : Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
                 <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
                 <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. Currently using a lumped reactances model. (Looking into modifying the model to 
@@ -279,89 +279,26 @@
                 fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + "mm", loopx, loopy - 6);
                 var awg = "";
                 switch(cond_dia) {
-                    case 0.100 : 
-                        awg = "~38 AWG";
-                        break;
-                   case 0.150 : 
-                        awg = "~35 AWG";
-                        break;
-                    case 0.200 : 
-                        awg = "~32 AWG";
-                        break;
-                   case 0.250 : 
-                        awg = "~30 AWG";
-                        break;
-                    case 0.300 : 
-                        awg = "~29 AWG";
-                        break;
-                    case 0.350 : 
-                        awg = "~27 AWG";
-                        break;
-                    case 0.400 : 
-                        awg = "~26 AWG";
-                        break;
-                    case 0.450 : 
-                        awg = "~25 AWG";
-                        break;
-                    case 0.500 : 
-                        awg = "~24 AWG";
-                        break;
-                    case 0.550 : 
-                        awg = "~23 AWG";
-                        break;
-                    case 0.650 : 
-                        awg = "~22 AWG";
-                        break;
-                    case 0.700 : 
-                        awg = "~21 AWG";
-                        break;
-                    case 0.800 : 
-                        awg = "~20 AWG";
-                        break;
-                    case 0.900 : 
-                        awg = "~19 AWG";
-                        break;
-                    case 1.00 : 
-                        awg = "~18 AWG";
-                        break;
-                    case 1.15 : 
-                        awg = "~17 AWG";
-                        break;
-                    case 1.30 : 
-                        awg = "~16 AWG";
-                        break;
-                    case 1.45 : 
-                        awg = "~15 AWG";
-                        break;
-                    case 1.55 : 
-                        awg = "~14 AWG";
-                        break;
-                    case 1.80 : 
-                        awg = "~13 AWG";
-                        break;
                     case 2.00 : 
-                        awg = "~12 AWG";
+                        awg = "RG316";
                         break;
-                    case 2.30 : 
-                        awg = "~11 AWG";
+                    case 3.50 : 
+                        awg = "RG58 LL195";
                         break;
-                    case 2.60 : 
-                        awg = "~10 AWG";
+                    case 4.40 : 
+                        awg = "RG59";
                         break;
-                    case 2.90 : 
-                        awg = "~9 AWG";
+                    case 4.52 : 
+                        awg = "LMR-240";
                         break;
-                    case 3.25 : 
-                        awg = "~8 AWG";
+                    case 6.30 : 
+                        awg = "RG-6";
                         break;
-                    case 3.65 : 
-                        awg = "~7 AWG";
+                    case 7.98 : 
+                        awg = "RG213 RG11";
                         break;
-                    case 4.10 : 
-                        awg = "~6 AWG";
-                        break;
-                    case 4.60 : 
-                        awg = "~5 AWG";
+                    case 8.14 : 
+                        awg = "RG-8 LL400";
                         break;
                 }
                 fctx.textAlign = "left";

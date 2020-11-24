@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1.0<br><a href="inductor.html">[Metric]</a> <a href="inductor_lrg.html">[Large Metric]</a></header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1.0<br><a href="inductor.html">[Wire Metric]</a> <a href="inductor_lrg.html">[Coax Metric]</a></header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -41,8 +41,8 @@
             RF Inductor Calculator was developed to help users predict the RF characteristics of a single-layer solenoid-style air-core inductor. <br><br>
             <u>Inputs via the slider widgets:</u>
             <ul> 
-                <li>&#8960a : Conductor diameter in millimeters (mm). Estimated equivalent AWG wire size is also displayed where appropriate.</li>
-                <li>&#8960b : Loop diameter in millimeters (mm).</li>
+                <li>&#8960a : Conductor diameter in decimal inches (inches). Estimated equivalent AWG wire size is also displayed where appropriate.</li>
+                <li>&#8960b : Loop diameter in decimal inches (inches).</li>
                 <li>c/a : 'c' is the inter-winding spacing, and 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (Must be >= 1.1) 
                     A low-value will increase the resistance due to the proximity effect.</li>
                 <li>N : Number of turns or windings.</li>
@@ -53,14 +53,14 @@
             relative to the conductor diameter are representative. </p>
             <u>Calculated dimensions:</u>
             <ul>
-                <li>&#8960o : Outer loop diameter (mm) </li>
-                <li>&#8960i : Inner loop diameter (mm) - corresponds to the diameter of the winding former.</li>
-                <li>c : Distance between windings, measured from the conductor centers (mm).</li>
-                <li>&#8467 : Length of the coil (mm). Equal to c x N.</li>
+                <li>&#8960o : Outer loop diameter (inches) </li>
+                <li>&#8960i : Inner loop diameter (inches) - corresponds to the diameter of the winding former.</li>
+                <li>c : Distance between windings, measured from the conductor centers (inches).</li>
+                <li>&#8467 : Length of the coil (inches). Equal to c x N.</li>
             </ul>
             <u>Calculated parameters:</u>
             <ul>
-                <li>L : Inductance is calculated using an equation incorporating the Nagaoka coefficient.</li>
+                <li>L : Inductance is calculated using Nagaoka's equation incorporating his coefficient.</li>
                 <li>C : Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
                 <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
                 <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. Currently using a lumped reactances model. (Looking into modifying the model to 
