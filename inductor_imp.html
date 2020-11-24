@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1.0<br><a href="inductor_imp.html">[Imperial]</a> <a href="inductor_lrg.html">[Large Metric]</a></header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1.0<br><a href="inductor.html">[Metric]</a> <a href="inductor_lrg.html">[Large Metric]</a></header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -16,11 +16,11 @@
             <div class="slider_container">
                 <div class="sliders">
                     <label for="conductor_diameter_slider">&#8960a:</label>
-                    <input type="range" id="conductor_diameter_slider" min="0.1" max="4.0" value="1.0" step="0.05">
+                    <input type="range" id="conductor_diameter_slider" min="0.010" max="0.250" value="0.032" step="0.001">
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960b:</label>
-                    <input type="range" id="loop_diameter_slider" min="5.0" max="50.0" value="10.0" step="0.1">
+                    <input type="range" id="loop_diameter_slider" min="0.25" max="2.0" value="0.50" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="loop_spacing_slider">c/a:</label>
@@ -92,8 +92,8 @@
             // Solve all the parameters, and re-draw the canvas:
             function recalculate() {
                 // Input variables:
-                const loop_diameter_meters = 0.001 * loop_diameter_slider.value;
-                const cond_diameter_meters = 0.001 * conductor_diameter_slider.value;
+                const loop_diameter_meters = 0.001 * loop_diameter_slider.value * 25.4; // Inches to mm then to m
+                const cond_diameter_meters = 0.001 * conductor_diameter_slider.value * 25.4; // Inches to mm then to m
                 const spacing_ratio = 1.0 * loop_spacing_slider.value;
                 const loop_turns = 1.0 * loop_turns_slider.value;
                 const frequency_hz = 1e6 * frequency_slider.value;
@@ -203,7 +203,7 @@
                 fctx.font = "12px arial";
                 fctx.textAlign = "right";
                 const loop_dia = 1.0 * loop_diameter_slider.value; // Convert from mm to inches
-                fctx.fillText("\u2300b = " + loop_dia.toPrecision(3).toString() + "mm", loopx - loop_radius - 2.0*arrow_size, y_offset - 2);
+                fctx.fillText("\u2300b = " + loop_dia.toPrecision(3).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, y_offset - 2);
 
                 // Draw inner-diameter arrows: (for using a winding former)
                 const inner_dia_y = loopy + loop_radius + 40;
@@ -225,7 +225,7 @@
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, inner_dia_y);
                 fctx.stroke();
                 fctx.textAlign = "left";
-                fctx.fillText("\u2300i = " + (loop_dia-0.5*conductor_diameter_slider.value).toPrecision(3).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
+                fctx.fillText("\u2300i = " + (loop_dia-0.5*conductor_diameter_slider.value).toPrecision(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
 
                 // Draw outer-diameter arrows: (for using a winding former)
                 const outer_dia_y = loopy + loop_radius + 0;
@@ -246,7 +246,7 @@
                 fctx.lineTo(loopx + loop_radius + cond_radius, outer_dia_y);
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, outer_dia_y);
                 fctx.stroke();
-                fctx.fillText("\u2300o = " + (loop_dia+0.5*conductor_diameter_slider.value).toPrecision(3).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
+                fctx.fillText("\u2300o = " + (loop_dia+0.5*conductor_diameter_slider.value).toPrecision(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
 
                 // Write loop inductance:
                 fctx.font = "12px arial";
@@ -276,92 +276,53 @@
                 //fctx.textAlign = "right";
                 const cond_dia = 1.0 * conductor_diameter_slider.value;
                 fctx.textAlign = "center";
-                fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + "mm", loopx, loopy - 6);
+                fctx.fillText("\u2300a = " + cond_dia.toPrecision(2).toString() + "\"", loopx, loopy - 6);
                 var awg = "";
                 switch(cond_dia) {
-                    case 0.100 : 
-                        awg = "~38 AWG";
+                    case 0.004 : 
+                        awg = "38 AWG";
                         break;
-                   case 0.150 : 
-                        awg = "~35 AWG";
+                    case 0.005 : 
+                        awg = "36 AWG";
                         break;
-                    case 0.200 : 
-                        awg = "~32 AWG";
+                    case 0.008 : 
+                        awg = "32 AWG";
                         break;
-                   case 0.250 : 
-                        awg = "~30 AWG";
+                    case 0.010 : 
+                        awg = "30 AWG";
                         break;
-                    case 0.300 : 
-                        awg = "~29 AWG";
+                    case 0.016 : 
+                        awg = "26 AWG";
                         break;
-                    case 0.350 : 
-                        awg = "~27 AWG";
+                    case 0.018 : 
+                        awg = "25 AWG";
                         break;
-                    case 0.400 : 
-                        awg = "~26 AWG";
+                    case 0.020 : 
+                        awg = "24 AWG";
                         break;
-                    case 0.450 : 
-                        awg = "~25 AWG";
+                    case 0.032 : 
+                        awg = "20 AWG";
                         break;
-                    case 0.500 : 
-                        awg = "~24 AWG";
-                        break;
-                    case 0.550 : 
-                        awg = "~23 AWG";
-                        break;
-                    case 0.650 : 
-                        awg = "~22 AWG";
-                        break;
-                    case 0.700 : 
-                        awg = "~21 AWG";
-                        break;
-                    case 0.800 : 
-                        awg = "~20 AWG";
-                        break;
-                    case 0.900 : 
-                        awg = "~19 AWG";
-                        break;
-                    case 1.00 : 
+                    case 0.040 : 
                         awg = "~18 AWG";
                         break;
-                    case 1.15 : 
-                        awg = "~17 AWG";
-                        break;
-                    case 1.30 : 
+                    case 0.051 : 
                         awg = "~16 AWG";
                         break;
-                    case 1.45 : 
-                        awg = "~15 AWG";
-                        break;
-                    case 1.55 : 
-                        awg = "~14 AWG";
-                        break;
-                    case 1.80 : 
-                        awg = "~13 AWG";
-                        break;
-                    case 2.00 : 
+                    case 0.081 : 
                         awg = "~12 AWG";
                         break;
-                    case 2.30 : 
-                        awg = "~11 AWG";
-                        break;
-                    case 2.60 : 
+                    case 0.102 : 
                         awg = "~10 AWG";
                         break;
-                    case 2.90 : 
-                        awg = "~9 AWG";
-                        break;
-                    case 3.25 : 
+                    case 0.128 : 
                         awg = "~8 AWG";
                         break;
-                    case 3.65 : 
-                        awg = "~7 AWG";
+                    case 0.114 : 
+                        awg = "~9 AWG";
                         break;
-                    case 4.10 : 
-                        awg = "~6 AWG";
-                        break;
-                    case 4.60 : 
-                        awg = "~5 AWG";
+                    case 0.162 : 
+                        awg = "6 AWG";
                         break;
                 }
                 fctx.textAlign = "left";
@@ -403,7 +364,7 @@
                 fctx.fillStyle = "black";
 
                 // Draw left spacing arrow:
-                const dim_y = win_height * 0.92;
+                const dim_y = win_height * 0.90;
                 fctx.beginPath();
                 fctx.moveTo(start_x - 20, dim_y);
                 fctx.lineTo(start_x, dim_y);
@@ -464,11 +425,11 @@
                 fctx.textAlign = "right";
                 var gap = ((loop_turns_slider.value*cond_spacing - cond_spacing) < 60) ? (60 - (loop_turns_slider.value*cond_spacing - cond_spacing)) : 0;
                 const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
-                fctx.fillText("c = " + spc.toFixed(1).toString() + "mm", start_x + cond_spacing + 20 - gap, dim_y + 20);
+                fctx.fillText("c = " + spc.toFixed(3).toString() + "\"", start_x + cond_spacing + 20 - gap, dim_y + 20);
 
                 // Draw length text:
                 const sol_len = loop_turns_slider.value*spc;
-                fctx.fillText("\u2113 = " + sol_len.toFixed(1).toString() + "mm", start_x + loop_turns_slider.value*cond_spacing + 20, dim_y + 20);
+                fctx.fillText("\u2113 = " + sol_len.toFixed(3).toString() + "\"", start_x + loop_turns_slider.value*cond_spacing + 20, dim_y + 20);
             }
             recalculate();
         </script>

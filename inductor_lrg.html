@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1.0<br><a href="inductor_imp.html">[Imperial]</a> <a href="inductor_lrg.html">[Large Metric]</a></header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator v1.0<br><a href="inductor_imp.html">[Imperial]</a> <a href="inductor.html">[Small Metric]</a></header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -16,19 +16,19 @@
             <div class="slider_container">
                 <div class="sliders">
                     <label for="conductor_diameter_slider">&#8960a:</label>
-                    <input type="range" id="conductor_diameter_slider" min="0.1" max="4.0" value="1.0" step="0.05">
+                    <input type="range" id="conductor_diameter_slider" min="2.5" max="10.0" value="4.95" step="0.05">
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960b:</label>
-                    <input type="range" id="loop_diameter_slider" min="5.0" max="50.0" value="10.0" step="0.1">
+                    <input type="range" id="loop_diameter_slider" min="20.0" max="200.0" value="50.0" step="1.0">
                 </div>
                 <div class="sliders">
                     <label for="loop_spacing_slider">c/a:</label>
-                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.01">
+                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="1.1" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
-                    <input type="range" id="loop_turns_slider" min="2" max="100" value="4.0" step="1.0">
+                    <input type="range" id="loop_turns_slider" min="2" max="100" value="10.0" step="1.0">
                 </div>
                 <div class="sliders">
                     <label for="frequency_slider">f:</label>
@@ -154,7 +154,7 @@
                 afront_canvas.height = win_height-12; 
 
                 fctx.clearRect(0, 0, win_width, win_height);
-                const loop_radius = 0.11 * win_height; //  100; // loop_diameter_slider.value * 80;
+                const loop_radius = 0.11 * win_height; 
                 var cond_radius = loop_radius * conductor_diameter_slider.value / loop_diameter_slider.value;
                 const loopx = win_width/2; 
                 const loopy = win_height/4;

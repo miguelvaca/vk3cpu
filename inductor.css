@@ -114,6 +114,35 @@ div input {
     }
 }
 
+@media screen and (min-width: 800px) {
+    section.gridLayoutClass {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        grid-template-areas: 
+        "inductor-container" "slider-container"
+        "inductor-container" "notes";
+        justify-items: stretch;
+    }
+
+    section div.inductor-container {
+        height: 100vh;
+        width: 50vw;
+        box-sizing: border-box; 
+    }
+    
+    section div.slider_container {
+        width: 100%;
+        height: 20%;
+    }
+    
+    section div.notes {
+        width: 100%;
+        height: 50%;
+    }
+}
+
+
 /*
 @media (orientation: landscape) {
     section.gridLayoutClass {
