@@ -217,6 +217,7 @@
                 const cond_dia = 1.0 * conductor_diameter_slider.value;
                 fctx.textAlign = "right";
                 fctx.fillText("\u2300a = " + cond_dia.toFixed(2).toString() + "mm", loopx - loop_radius - 2.0*arrow_size, loopy - 6);
+                fctx.fillText("(" + (cond_dia**2).toFixed(2).toString() + " mm\u00B2) ", loopx - loop_radius - 3.0*arrow_size, loopy + 6);
 
                 // Write loop diameter symbol:
                 const loop_dia = 1.0 * loop_diameter_slider.value; // Convert from mm to inches
