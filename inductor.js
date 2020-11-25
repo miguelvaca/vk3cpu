@@ -32,6 +32,10 @@ function inductiveReactance(frequency, inductance) {
     return 2.0 * Math.PI * frequency * inductance; // In Ohms
 }
 
+function capacitiveReactance(frequency, capacitance) {
+    return -1.0 / (2.0 * Math.PI * frequency * capacitance); // In Ohms
+}
+
 function nagaokaCoefficient(loop_diameter_meters, cond_diameter_meters, spacing_ratio, loop_turns) {
     // From Knight's 2016 paper on coil self-resonance, attributed to Wheeler's 1982 eqn as modified by Bob Weaver
     const c_spacing = spacing_ratio * cond_diameter_meters;
