@@ -15,12 +15,12 @@
             </div>
             <div class="slider_container">
                 <div class="sliders">
-                    <label for="conductor_diameter_slider">&#8960a:</label>
+                    <label for="conductor_diameter_slider">&#8960;a:</label>
                     <input type="range" id="conductor_diameter_slider" min="2.0" max="10.0" value="3.50" step="0.02">
                 </div>
                 <div class="sliders">
-                    <label for="loop_diameter_slider">&#8960b:</label>
-                    <input type="range" id="loop_diameter_slider" min="20.0" max="200.0" value="50.0" step="1.0">
+                    <label for="loop_diameter_slider">&#8960;b:</label>
+                    <input type="range" id="loop_diameter_slider" min="20.0" max="200.0" value="100.0" step="1.0">
                 </div>
                 <div class="sliders">
                     <label for="loop_spacing_slider">c/a:</label>
@@ -67,13 +67,15 @@
                 <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
                 <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. Currently using a lumped reactances model. (Looking into modifying the model to 
                     use the conductor length and velocity factor as described by Knight (2016).</li>
-                <li>Xl : Inductive reactance at the given frequency. (&#937)</li>
-                <li>&#948 : Skin depth due to skin effect (&#956m)</li>
+                <li>X&#8343; : Inductive reactance at the given frequency. (&#937;)</li>
+                <li>|Z| : Impedance at the given frequency. (&#937;)</li>
+                <li>&#948; : Skin depth due to skin effect (&#956;m)</li>
                 <li>Rac : AC resistance is calculated using the skin effect and proximity resistance from empirical data collected by Medhurst using the spacing ratio, and length-to-diameter ratio.</li>
                 <li>Q : Quality factor of device, based on reactance (X) &#247 resistance (Rac) at the given frequency.</li>
             </ul>
             </div>
         </section>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
         <script src="inductor.js"></script>
         <script>
             // Define global storage for calculated values, so we don't recalculate the same things multiple times:
@@ -83,7 +85,10 @@
                 Rdc : 0.0,
                 SRF : 0.0,
 
-                X : 0.0,
+                f : 0.0,
+                Xl : 0.0,
+                Xc : 0.0,
+                Z : 0.0,
                 skin_depth : 0.0,
                 Rac : 0.0,
                 Q : 0.0
@@ -92,7 +97,7 @@
             // Solve all the parameters, and re-draw the canvas:
             function recalculate() {
                 // Input variables:
-                const loop_diameter_meters = 0.001 * loop_diameter_slider.value;
+                const loop_diameter_meters = 0.001 * loop_diameter_slider.value; 
                 const cond_diameter_meters = 0.001 * conductor_diameter_slider.value;
                 const spacing_ratio = 1.0 * loop_spacing_slider.value;
                 const loop_turns = 1.0 * loop_turns_slider.value;
@@ -103,10 +108,16 @@
                 inductor.Rdc = dcResistance(loop_diameter_meters, cond_diameter_meters, spacing_ratio, loop_turns);
                 inductor.SRF = selfResonantFrequency(inductor.L, inductor.C);
                 // Frequency dependent characteristics:
-                inductor.X = inductiveReactance(frequency_hz, inductor.L);
+                inductor.f = frequency_hz;
+                inductor.Xl = inductiveReactance(frequency_hz, inductor.L);
+                inductor.Xc = capacitiveReactance(frequency_hz, inductor.C);
                 inductor.skin_depth = skinDepth(frequency_hz);
                 inductor.Rac = acResistance(loop_diameter_meters, cond_diameter_meters, spacing_ratio, loop_turns, frequency_hz);
-                inductor.Q = qualityFactor(inductor.X, inductor.Rac);
+                inductor.Q = qualityFactor(inductor.Xl, inductor.Rac);
+                // Calculate impedance:
+                var Zl = math.complex(inductor.Rac, inductor.Xl);
+                var Zc = math.complex(0, inductor.Xc);
+                inductor.Z = math.divide(math.multiply(Zl, Zc), math.add(Zl, Zc)).toPolar();
                 // Redraw the canvas:
                 drawDesign();
             }
@@ -203,11 +214,14 @@
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, y_offset);
                 fctx.stroke();
 
-                // Write loop diameter symbol:
+                // Write conductor diameter symbol:
                 fctx.font = "12px arial";
                 fctx.textAlign = "right";
+                const cond_dia = 1.0 * conductor_diameter_slider.value;
+                fctx.fillText("\u2300a = " + cond_dia.toFixed(2).toString() + "mm", loopx - loop_radius - 2.0*arrow_size, loopy - 6);
+                // Write loop diameter symbol:
                 const loop_dia = 1.0 * loop_diameter_slider.value; // Convert from mm to inches
-                fctx.fillText("\u2300b = " + loop_dia.toPrecision(3).toString() + "mm", loopx - loop_radius - 2.0*arrow_size, y_offset - 2);
+                fctx.fillText("\u2300b = " + loop_dia.toFixed(1).toString() + "mm", loopx - loop_radius - 2.0*arrow_size, y_offset - 2);
 
                 // Draw inner-diameter arrows: (for using a winding former)
                 const inner_dia_y = loopy + loop_radius + 40;
@@ -263,24 +277,21 @@
 
                 // Draw conductor diameter arrow:
                 fctx.beginPath();
-                fctx.moveTo(loopx + loop_radius - cond_radius, loopy);
-                fctx.lineTo(loopx + loop_radius - cond_radius - arrow_size, loopy - arrow_size);
-                fctx.lineTo(loopx + loop_radius - cond_radius - arrow_size, loopy + arrow_size);
-                fctx.lineTo(loopx + loop_radius - cond_radius, loopy);
-                fctx.lineTo(loopx - 0.6*loop_radius, loopy);
+                fctx.moveTo(loopx - loop_radius - cond_radius, loopy);
+                fctx.lineTo(loopx - loop_radius - cond_radius - arrow_size, loopy - arrow_size);
+                fctx.lineTo(loopx - loop_radius - cond_radius - arrow_size, loopy + arrow_size);
+                fctx.lineTo(loopx - loop_radius - cond_radius, loopy);
+                fctx.lineTo(loopx - loop_radius - 3.0*arrow_size, loopy);
                 fctx.stroke();
 
                 fctx.beginPath();
-                fctx.moveTo(loopx + loop_radius + cond_radius, loopy);
-                fctx.lineTo(loopx + loop_radius + cond_radius + arrow_size, loopy - arrow_size);
-                fctx.lineTo(loopx + loop_radius + cond_radius + arrow_size, loopy + arrow_size);
-                fctx.lineTo(loopx + loop_radius + cond_radius, loopy);
-                fctx.lineTo(loopx + loop_radius + cond_radius + 2.0*arrow_size, loopy);
+                fctx.moveTo(loopx - loop_radius + cond_radius, loopy);
+                fctx.lineTo(loopx - loop_radius + cond_radius + arrow_size, loopy - arrow_size);
+                fctx.lineTo(loopx - loop_radius + cond_radius + arrow_size, loopy + arrow_size);
+                fctx.lineTo(loopx - loop_radius + cond_radius, loopy);
+                fctx.lineTo(loopx - loop_radius + cond_radius + 2.0*arrow_size, loopy);
                 fctx.stroke();
-                //fctx.textAlign = "right";
-                const cond_dia = 1.0 * conductor_diameter_slider.value;
-                fctx.textAlign = "center";
-                fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + "mm", loopx, loopy - 6);
+
                 var awg = "";
                 switch(cond_dia) {
                     case 2.00 : 
@@ -305,10 +316,8 @@
                         awg = "RG-8 LL400";
                         break;
                 }
-                fctx.textAlign = "left";
-                fctx.fillText(awg, loopx + loop_radius + cond_radius + 2.0*arrow_size, loopy - 6);
-
-
+                fctx.textAlign = "center";
+                fctx.fillText(awg, loopx, loopy - 6);
 
                 var cond_spacing = 2.0 * cond_radius * loop_spacing_slider.value;
                 if((cond_spacing * loop_turns_slider.value) > (0.8 * win_width)) {
@@ -393,10 +402,11 @@
                 fctx.textAlign = "right";
                 var freq = 1.0 * frequency_slider.value;
                 fctx.fillText("f = " + freq.toFixed(1) + " MHz", win_width-18, 18);
-                fctx.fillText("Xl = " + inductor.X.toFixed(1) + " \u03A9", win_width-18, 32);
-                fctx.fillText("\u03B4 = " + (inductor.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 46);
-                fctx.fillText("Rac = " + inductor.Rac.toFixed(2) + " \u03A9", win_width-18, 60);
-                fctx.fillText("Q = " + inductor.Q.toFixed(1), win_width-18, 74);
+                fctx.fillText("X\u2097 = " + inductor.Xl.toFixed(1) + " \u03A9", win_width-18, 32);
+                fctx.fillText("|Z| = " + inductor.Z.r.toFixed(1) + " \u03A9", win_width-18, 46);
+                fctx.fillText("\u03B4 = " + (inductor.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 60);
+                fctx.fillText("Rac = " + inductor.Rac.toFixed(2) + " \u03A9", win_width-18, 74);
+                fctx.fillText("Q = " + inductor.Q.toFixed(1), win_width-18, 88);
 
                 fctx.textAlign = "center";
                 fctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.52);

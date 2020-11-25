@@ -65,8 +65,9 @@
                 <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
                 <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. Currently using a lumped reactances model. (Looking into modifying the model to 
                     use the conductor length and velocity factor as described by Knight (2016).</li>
-                <li>Xl : Inductive reactance at the given frequency. (&#937)</li>
-                <li>&#948 : Skin depth due to skin effect (&#956m)</li>
+                <li>X&#8343; : Inductive reactance at the given frequency. (&#937;)</li>
+                <li>|Z| : Impedance at the given frequency. (&#937;)</li>
+                <li>&#948; : Skin depth due to skin effect (&#956;m)</li>
                 <li>Rac : AC resistance is calculated using the skin effect and proximity resistance from empirical data collected by Medhurst using the spacing ratio, and length-to-diameter ratio.</li>
                 <li>Q : Quality factor of device, based on reactance (X) &#247 resistance (Rac) at the given frequency.</li>
             </ul>
@@ -115,7 +116,6 @@
                 var Zl = math.complex(inductor.Rac, inductor.Xl);
                 var Zc = math.complex(0, inductor.Xc);
                 inductor.Z = math.divide(math.multiply(Zl, Zc), math.add(Zl, Zc)).toPolar();
-
                 // Redraw the canvas:
                 drawDesign();
             }
