@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator<br><a href="inductor.html">[Wire Metric]</a> <a href="inductor_imp.html">[Wire AWG]</a> <a href="inductor_swg.html">[Wire SWG]</a></header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator<br><a href="inductor.html">[Wire Metric]</a> <a href="inductor_imp.html">[Wire AWG]</a> <a href="inductor_lrg.html">[Coax Metric]</a></header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -15,20 +15,20 @@
             </div>
             <div class="slider_container">
                 <div class="sliders">
-                    <label for="conductor_diameter_slider">&#8960;a:</label>
-                    <input type="range" id="conductor_diameter_slider" min="2.0" max="10.0" value="3.50" step="0.02">
+                    <label for="conductor_diameter_slider">&#8960a:</label>
+                    <input type="range" id="conductor_diameter_slider" min="0" max="50" value="20" step="1">
                 </div>
                 <div class="sliders">
-                    <label for="loop_diameter_slider">&#8960;b:</label>
-                    <input type="range" id="loop_diameter_slider" min="20.0" max="200.0" value="100.0" step="1.0">
+                    <label for="loop_diameter_slider">&#8960b:</label>
+                    <input type="range" id="loop_diameter_slider" min="0.25" max="2.0" value="1.00" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="loop_spacing_slider">c/a:</label>
-                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="1.4" step="0.01">
+                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
-                    <input type="range" id="loop_turns_slider" min="2" max="100" value="10.0" step="1.0">
+                    <input type="range" id="loop_turns_slider" min="2" max="100" value="8.0" step="1.0">
                 </div>
                 <div class="sliders">
                     <label for="frequency_slider">f:</label>
@@ -38,14 +38,12 @@
             <div id="notes" class="notes">
             <br>
             <b><u>Notes:</u></b><br>
-            RF Inductor Calculator was developed to help users predict the RF characteristics of a large single-layer solenoid-style air-core inductor. <br>
-            This version is suitable for larger inductors such as for calculating the choking impedance of a coax choke.
-            <br><br>
+            RF Inductor Calculator was developed to help users predict the RF characteristics of a single-layer solenoid-style air-core inductor. <br><br>
             <u>Inputs via the slider widgets:</u>
             <ul> 
-                <li>&#8960;a : Outer conductor diameter in millimeters (mm). Equivalent coax cable size is also displayed.</li>
-                <li>&#8960;b : Loop diameter in millimeters (mm).</li>
-                <li>c/a : 'c' is the inter-winding spacing, and 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (Must be >= 1.1) 
+                <li>&#8960;a : Conductor diameter slider changes SWG from 0-50. Actual diameter displayed in decimal inches.</li>
+                <li>&#8960;b : Loop diameter in decimal inches (inches).</li>
+                <li>c/a : 'c' is the winding-to-winding distance, measured from the conductor mid-points. The 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (c/a >= 1.1) 
                     A low-value will increase the resistance due to the proximity effect.</li>
                 <li>N : Number of turns or windings.</li>
                 <li>f : The frequency of interest (MHz) for some of the calculations.</li>
@@ -55,10 +53,10 @@
             relative to the conductor diameter are representative. </p>
             <u>Calculated dimensions:</u>
             <ul>
-                <li>&#8960;o : Outer loop diameter (mm) </li>
-                <li>&#8960;i : Inner loop diameter (mm) - corresponds to the diameter of the winding former.</li>
-                <li>c : Distance between windings, measured from the conductor centers (mm).</li>
-                <li>&#8467; : Length of the coil (mm). Equal to c x N.</li>
+                <li>&#8960;o : Outer loop diameter (inches) </li>
+                <li>&#8960;i : Inner loop diameter (inches) - corresponds to the diameter of the winding former.</li>
+                <li>c : Distance between windings, measured from the conductor centers (inches).</li>
+                <li>&#8467; : Length of the coil (inches). Equal to c x N.</li>
             </ul>
             <u>Calculated parameters:</u>
             <ul>
@@ -78,14 +76,77 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
         <script src="inductor.js"></script>
         <script>
+            function swgToMm(swg) {
+                //
+                switch (swg) {
+                    case 50: return 0.0254;
+                    case 49: return 0.0305;
+                    case 48: return 0.0406;
+                    case 47: return 0.0508;
+                    case 46: return 0.0610;
+                    case 45: return 0.0711;
+                    case 44: return 0.0813;
+                    case 43: return 0.0914;
+                    case 42: return 0.1016;
+                    case 41: return 0.1118;
+                    case 40: return 0.1219;
+                    case 39: return 0.1321;
+                    case 38: return 0.1524;
+                    case 37: return 0.1727;
+                    case 36: return 0.1930;
+                    case 35: return 0.2134;
+                    case 34: return 0.2337;
+                    case 33: return 0.2540;
+                    case 32: return 0.2743;
+                    case 31: return 0.2946;
+                    case 30: return 0.3150;
+                    case 29: return 0.3454;
+                    case 28: return 0.3759;
+                    case 27: return 0.4166;
+                    case 26: return 0.4572;
+                    case 25: return 0.508;
+                    case 24: return 0.559;
+                    case 23: return 0.610;
+                    case 22: return 0.711;
+                    case 21: return 0.813;
+                    case 20: return 0.914;
+                    case 19: return 1.016;
+                    case 18: return 1.219;
+                    case 17: return 1.422;
+                    case 16: return 1.626;
+                    case 15: return 1.829;
+                    case 14: return 2.032;
+                    case 13: return 2.337;
+                    case 12: return 2.642;
+                    case 11: return 2.946;
+                    case 10: return 3.251;
+                    case  9: return 3.658;
+                    case  8: return 4.064;
+                    case  7: return 4.470;
+                    case  6: return 4.877;
+                    case  5: return 5.385;
+                    case  4: return 5.893;
+                    case  3: return 6.401;
+                    case  2: return 7.010;
+                    case  1: return 7.620; 
+                    case  0: return 8.230; 
+                    default: return 0.0;
+                }
+            }
+
             // Define global storage for calculated values, so we don't recalculate the same things multiple times:
             var inductor = {
+                loop_diameter_meters : 0.0,
+                cond_diameter_meters : 0.0,
+                spacing_ratio : 0.0,
+                loop_turns : 0.0,
+                frequency_hz : 0.0,
+
                 L : 0.0,
                 C : 0.0,
                 Rdc : 0.0,
                 SRF : 0.0,
 
-                f : 0.0,
                 Xl : 0.0,
                 Xc : 0.0,
                 Z : 0.0,
@@ -97,22 +158,21 @@
             // Solve all the parameters, and re-draw the canvas:
             function recalculate() {
                 // Input variables:
-                const loop_diameter_meters = 0.001 * loop_diameter_slider.value; 
-                const cond_diameter_meters = 0.001 * conductor_diameter_slider.value;
-                const spacing_ratio = 1.0 * loop_spacing_slider.value;
-                const loop_turns = 1.0 * loop_turns_slider.value;
-                const frequency_hz = 1e6 * frequency_slider.value;
+                inductor.loop_diameter_meters = 0.001 * loop_diameter_slider.value * 25.4; // Inches to mm then to m
+                inductor.cond_diameter_meters = 0.001 * swgToMm(1.0 * conductor_diameter_slider.value); 
+                inductor.spacing_ratio = 1.0 * loop_spacing_slider.value;
+                inductor.loop_turns = 1.0 * loop_turns_slider.value;
+                inductor.frequency_hz = 1e6 * frequency_slider.value;
                 // Frequency independent characteristics:
-                inductor.L = getInductance(loop_diameter_meters, cond_diameter_meters, spacing_ratio, loop_turns);
-                inductor.C = multiloopCapacitance(loop_diameter_meters, cond_diameter_meters, spacing_ratio, loop_turns);
-                inductor.Rdc = dcResistance(loop_diameter_meters, cond_diameter_meters, spacing_ratio, loop_turns);
+                inductor.L = getInductance(inductor.loop_diameter_meters, inductor.cond_diameter_meters, inductor.spacing_ratio, inductor.loop_turns);
+                inductor.C = multiloopCapacitance(inductor.loop_diameter_meters, inductor.cond_diameter_meters, inductor.spacing_ratio, inductor.loop_turns);
+                inductor.Rdc = dcResistance(inductor.loop_diameter_meters, inductor.cond_diameter_meters, inductor.spacing_ratio, inductor.loop_turns);
                 inductor.SRF = selfResonantFrequency(inductor.L, inductor.C);
                 // Frequency dependent characteristics:
-                inductor.f = frequency_hz;
-                inductor.Xl = inductiveReactance(frequency_hz, inductor.L);
-                inductor.Xc = capacitiveReactance(frequency_hz, inductor.C);
-                inductor.skin_depth = skinDepth(frequency_hz);
-                inductor.Rac = acResistance(loop_diameter_meters, cond_diameter_meters, spacing_ratio, loop_turns, frequency_hz);
+                inductor.Xl = inductiveReactance(inductor.frequency_hz, inductor.L);
+                inductor.Xc = capacitiveReactance(inductor.frequency_hz, inductor.C);
+                inductor.skin_depth = skinDepth(inductor.frequency_hz);
+                inductor.Rac = acResistance(inductor.loop_diameter_meters, inductor.cond_diameter_meters, inductor.spacing_ratio, inductor.loop_turns, inductor.frequency_hz);
                 inductor.Q = qualityFactor(inductor.Xl, inductor.Rac);
                 // Calculate impedance:
                 var Zl = math.complex(inductor.Rac, inductor.Xl);
@@ -166,13 +226,16 @@
 
                 fctx.clearRect(0, 0, win_width, win_height);
                 const loop_radius = 0.11 * win_height; 
-                var cond_radius = loop_radius * conductor_diameter_slider.value / loop_diameter_slider.value;
+                var cond_radius = loop_radius * (inductor.cond_diameter_meters / inductor.loop_diameter_meters);
                 const loopx = win_width/2; 
                 const loopy = win_height/4;
 
+                const loop_diameter_inches = inductor.loop_diameter_meters * 1000.0 / 25.4;
+                const cond_diameter_inches = inductor.cond_diameter_meters * 1000.0 / 25.4;
+
                 fctx.font = "bold 14px arial";
                 fctx.textAlign = "center";
-                fctx.fillText("Coax - Metric", win_width*0.5, 18);
+                fctx.fillText("Wire - SWG", win_width*0.5, 18);
 
                 // Draw loop ends first, then draw the loop after:
                 fctx.strokeStyle = "grey";
@@ -217,11 +280,10 @@
                 // Write conductor diameter symbol:
                 fctx.font = "12px arial";
                 fctx.textAlign = "right";
-                const cond_dia = 1.0 * conductor_diameter_slider.value;
-                fctx.fillText("\u2300a = " + cond_dia.toFixed(2).toString() + "mm", loopx - loop_radius - 2.0*arrow_size, loopy - 6);
+                fctx.fillText("\u2300a = " + cond_diameter_inches.toFixed(4).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, loopy - 6);
+
                 // Write loop diameter symbol:
-                const loop_dia = 1.0 * loop_diameter_slider.value; // Convert from mm to inches
-                fctx.fillText("\u2300b = " + loop_dia.toFixed(1).toString() + "mm", loopx - loop_radius - 2.0*arrow_size, y_offset - 2);
+                fctx.fillText("\u2300b = " + loop_diameter_inches.toFixed(2).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, y_offset - 2);
 
                 // Draw inner-diameter arrows: (for using a winding former)
                 const inner_dia_y = loopy + loop_radius + 40;
@@ -243,7 +305,7 @@
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, inner_dia_y);
                 fctx.stroke();
                 fctx.textAlign = "left";
-                fctx.fillText("\u2300i = " + (loop_dia-0.5*conductor_diameter_slider.value).toFixed(1).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
+                fctx.fillText("\u2300i = " + (loop_diameter_inches-0.5*cond_diameter_inches).toFixed(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
 
                 // Draw outer-diameter arrows: (for using a winding former)
                 const outer_dia_y = loopy + loop_radius + 0;
@@ -264,7 +326,7 @@
                 fctx.lineTo(loopx + loop_radius + cond_radius, outer_dia_y);
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, outer_dia_y);
                 fctx.stroke();
-                fctx.fillText("\u2300o = " + (loop_dia+0.5*conductor_diameter_slider.value).toFixed(1).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
+                fctx.fillText("\u2300o = " + (loop_diameter_inches+0.5*cond_diameter_inches).toFixed(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
 
                 // Write loop inductance:
                 fctx.font = "12px arial";
@@ -292,43 +354,21 @@
                 fctx.lineTo(loopx - loop_radius + cond_radius + 2.0*arrow_size, loopy);
                 fctx.stroke();
 
-                var awg = "";
-                switch(cond_dia) {
-                    case 2.00 : 
-                        awg = "RG316";
-                        break;
-                    case 3.50 : 
-                        awg = "RG58 LL195";
-                        break;
-                    case 4.40 : 
-                        awg = "RG59";
-                        break;
-                    case 4.52 : 
-                        awg = "LMR-240";
-                        break;
-                    case 6.30 : 
-                        awg = "RG-6";
-                        break;
-                    case 7.98 : 
-                        awg = "RG213 RG11";
-                        break;
-                    case 8.14 : 
-                        awg = "RG-8 LL400";
-                        break;
-                }
                 fctx.textAlign = "center";
-                fctx.fillText(awg, loopx, loopy - 6);
+                fctx.font = "14px courier";
+                fctx.fillText(conductor_diameter_slider.value.toString() + " SWG", loopx, loopy - 6);
+                fctx.font = "12px arial";
 
-                var cond_spacing = 2.0 * cond_radius * loop_spacing_slider.value;
-                if((cond_spacing * loop_turns_slider.value) > (0.8 * win_width)) {
-                    cond_radius = ((0.8 * win_width) / (loop_turns_slider.value * 2.0*loop_spacing_slider.value));
-                    cond_spacing = 2.0 * cond_radius * loop_spacing_slider.value;
+                var cond_spacing = 2.0 * cond_radius * inductor.spacing_ratio;
+                if((cond_spacing * inductor.loop_turns) > (0.8 * win_width)) {
+                    cond_radius = ((0.8 * win_width) / (inductor.loop_turns * 2.0*inductor.spacing_ratio));
+                    cond_spacing = 2.0 * cond_radius * inductor.spacing_ratio;
                 } 
-                var start_x = win_width/2.0 - loop_turns_slider.value * cond_spacing * 0.5;
+                var start_x = win_width/2.0 - inductor.loop_turns * cond_spacing * 0.5;
                 var top_y = win_height * 0.56;
-                var bot_y = top_y + 2.0 * cond_radius * (loop_diameter_slider.value / conductor_diameter_slider.value);
-
-                for (let i = 0; i < loop_turns_slider.value; i++) {
+                var bot_y = top_y + 2.0 * cond_radius * (inductor.loop_diameter_meters / inductor.cond_diameter_meters);
+                
+                for (let i = 0; i < inductor.loop_turns; i++) {
                     fctx.beginPath();
                     fctx.moveTo(start_x + ((0.5 + i) * cond_spacing) + cond_radius, top_y);
                     fctx.lineTo(start_x + (i+1) * cond_spacing + cond_radius, bot_y);
@@ -349,11 +389,11 @@
                 // Draw the wire ends:
                 fctx.fillRect(start_x - cond_radius, bot_y, 2.0 * cond_radius, 30);
                 fctx.fillStyle = "grey";
-                fctx.fillRect(start_x + loop_turns_slider.value*cond_spacing  - cond_radius, bot_y, 2.0 * cond_radius, 30);
+                fctx.fillRect(start_x + inductor.loop_turns * cond_spacing  - cond_radius, bot_y, 2.0 * cond_radius, 30);
                 fctx.fillStyle = "black";
 
                 // Draw left spacing arrow:
-                const dim_y = win_height * 0.92;
+                const dim_y = win_height * 0.90;
                 fctx.beginPath();
                 fctx.moveTo(start_x - 20, dim_y);
                 fctx.lineTo(start_x, dim_y);
@@ -377,13 +417,13 @@
 
                 // Draw right length arrow:
                 fctx.beginPath();
-                fctx.moveTo(start_x + loop_turns_slider.value*cond_spacing + 20, dim_y);
-                fctx.lineTo(start_x + loop_turns_slider.value*cond_spacing, dim_y);
-                fctx.lineTo(start_x + loop_turns_slider.value*cond_spacing + 7, dim_y + 7)
-                fctx.lineTo(start_x + loop_turns_slider.value*cond_spacing + 7, dim_y - 7)
-                fctx.lineTo(start_x + loop_turns_slider.value*cond_spacing, dim_y);
-                fctx.moveTo(start_x + loop_turns_slider.value*cond_spacing, dim_y - 7);
-                fctx.lineTo(start_x + loop_turns_slider.value*cond_spacing, dim_y + 7);
+                fctx.moveTo(start_x + inductor.loop_turns * cond_spacing + 20, dim_y);
+                fctx.lineTo(start_x + inductor.loop_turns * cond_spacing, dim_y);
+                fctx.lineTo(start_x + inductor.loop_turns * cond_spacing + 7, dim_y + 7)
+                fctx.lineTo(start_x + inductor.loop_turns * cond_spacing + 7, dim_y - 7)
+                fctx.lineTo(start_x + inductor.loop_turns * cond_spacing, dim_y);
+                fctx.moveTo(start_x + inductor.loop_turns * cond_spacing, dim_y - 7);
+                fctx.lineTo(start_x + inductor.loop_turns * cond_spacing, dim_y + 7);
                 fctx.stroke();
 
                 // Extended lines:
@@ -393,14 +433,14 @@
                 fctx.lineTo(start_x, dim_y - 12);
                 fctx.moveTo(start_x + cond_spacing, bot_y + 15);
                 fctx.lineTo(start_x + cond_spacing, dim_y - 12);
-                fctx.moveTo(start_x + loop_turns_slider.value*cond_spacing, bot_y + 35);
-                fctx.lineTo(start_x + loop_turns_slider.value*cond_spacing, dim_y - 12);
+                fctx.moveTo(start_x + inductor.loop_turns * cond_spacing, bot_y + 35);
+                fctx.lineTo(start_x + inductor.loop_turns * cond_spacing, dim_y - 12);
                 fctx.stroke();
                 fctx.strokeStyle = "black";
 
                 fctx.font = "12px arial";
                 fctx.textAlign = "right";
-                var freq = 1.0 * frequency_slider.value;
+                var freq = 1e-6 * inductor.frequency_hz;
                 fctx.fillText("f = " + freq.toFixed(1) + " MHz", win_width-18, 18);
                 fctx.fillText("X\u2097 = " + inductor.Xl.toFixed(1) + " \u03A9", win_width-18, 32);
                 fctx.fillText("|Z| = " + inductor.Z.r.toFixed(1) + " \u03A9", win_width-18, 46);
@@ -409,17 +449,17 @@
                 fctx.fillText("Q = " + inductor.Q.toFixed(1), win_width-18, 88);
 
                 fctx.textAlign = "center";
-                fctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.52);
+                fctx.fillText("N = " + inductor.loop_turns.toString(), win_width/2, win_height * 0.52);
                 
                 // Draw spacing text: (gap is to avoid collision of spacing and length texts)
                 fctx.textAlign = "right";
-                var gap = ((loop_turns_slider.value*cond_spacing - cond_spacing) < 68) ? (68 - (loop_turns_slider.value*cond_spacing - cond_spacing)) : 0;
-                const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
-                fctx.fillText("c = " + spc.toFixed(1).toString() + "mm", start_x + cond_spacing + 20 - gap, dim_y + 20);
+                var gap = ((inductor.loop_turns * cond_spacing - cond_spacing) < 60) ? (60 - (inductor.loop_turns * cond_spacing - cond_spacing)) : 0;
+                const spc = inductor.spacing_ratio * cond_diameter_inches;
+                fctx.fillText("c = " + spc.toFixed(3).toString() + "\"", start_x + cond_spacing + 20 - gap, dim_y + 20);
 
                 // Draw length text:
-                const sol_len = loop_turns_slider.value*spc;
-                fctx.fillText("\u2113 = " + sol_len.toFixed(1).toString() + "mm", start_x + loop_turns_slider.value*cond_spacing + 20, dim_y + 20);
+                const sol_len = inductor.loop_turns * spc;
+                fctx.fillText("\u2113 = " + sol_len.toFixed(3).toString() + "\"", start_x + inductor.loop_turns * cond_spacing + 20, dim_y + 20);
             }
             recalculate();
         </script>
