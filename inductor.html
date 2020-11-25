@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator<br><a href="inductor_imp.html">[Wire Imperial]</a> <a href="inductor_lrg.html">[Coax Metric]</a></header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator<br><a href="inductor_imp.html">[Wire AWG]</a> <a href="inductor_lrg.html">[Coax Metric]</a></header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -216,7 +216,7 @@
                 fctx.font = "12px arial";
                 const cond_dia = 1.0 * conductor_diameter_slider.value;
                 fctx.textAlign = "right";
-                fctx.fillText("\u2300a = " + cond_dia.toFixed(3).toString() + "mm", loopx - loop_radius - 2.0*arrow_size, loopy - 6);
+                fctx.fillText("\u2300a = " + cond_dia.toFixed(2).toString() + "mm", loopx - loop_radius - 2.0*arrow_size, loopy - 6);
 
                 // Write loop diameter symbol:
                 const loop_dia = 1.0 * loop_diameter_slider.value; // Convert from mm to inches
@@ -242,7 +242,7 @@
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, inner_dia_y);
                 fctx.stroke();
                 fctx.textAlign = "left";
-                fctx.fillText("\u2300i = " + (loop_dia-0.5*conductor_diameter_slider.value).toFixed(1).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
+                fctx.fillText("\u2300i = " + (loop_dia-0.5*conductor_diameter_slider.value).toFixed(2).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
 
                 // Draw outer-diameter arrows: (for using a winding former)
                 const outer_dia_y = loopy + loop_radius + 0;
@@ -263,7 +263,7 @@
                 fctx.lineTo(loopx + loop_radius + cond_radius, outer_dia_y);
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, outer_dia_y);
                 fctx.stroke();
-                fctx.fillText("\u2300o = " + (loop_dia+0.5*conductor_diameter_slider.value).toFixed(1).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
+                fctx.fillText("\u2300o = " + (loop_dia+0.5*conductor_diameter_slider.value).toFixed(2).toString() + "mm", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
 
                 // Write loop inductance:
                 fctx.font = "12px arial";
