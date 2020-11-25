@@ -94,8 +94,8 @@
             // Solve all the parameters, and re-draw the canvas:
             function recalculate() {
                 // Input variables:
-                const loop_diameter_meters = 0.001 * loop_diameter_slider.value * 25.4; // Inches to mm then to m
-                const cond_diameter_meters = 0.001 * conductor_diameter_slider.value * 25.4; // Inches to mm then to m
+                const loop_diameter_meters = 0.001 * loop_diameter_slider.value; 
+                const cond_diameter_meters = 0.001 * conductor_diameter_slider.value;
                 const spacing_ratio = 1.0 * loop_spacing_slider.value;
                 const loop_turns = 1.0 * loop_turns_slider.value;
                 const frequency_hz = 1e6 * frequency_slider.value;
