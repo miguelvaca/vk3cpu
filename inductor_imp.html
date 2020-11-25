@@ -515,7 +515,7 @@
                 fctx.textAlign = "right";
                 var freq = 1.0 * frequency_slider.value;
                 fctx.fillText("f = " + freq.toFixed(1) + " MHz", win_width-18, 18);
-                fctx.fillText("Xl = " + inductor.Xl.toFixed(1) + " \u03A9", win_width-18, 32);
+                fctx.fillText("X\u2097 = " + inductor.Xl.toFixed(1) + " \u03A9", win_width-18, 32);
                 fctx.fillText("|Z| = " + inductor.Z.r.toFixed(1) + " \u03A9", win_width-18, 46);
                 fctx.fillText("\u03B4 = " + (inductor.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 60);
                 fctx.fillText("Rac = " + inductor.Rac.toFixed(2) + " \u03A9", win_width-18, 74);
