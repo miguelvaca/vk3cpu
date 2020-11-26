@@ -222,6 +222,8 @@
 
                 const loop_diameter_inches = inductor.loop_diameter_meters * 1000.0 / 25.4;
                 const cond_diameter_inches = inductor.cond_diameter_meters * 1000.0 / 25.4;
+                const loop_diameter_mm = inductor.loop_diameter_meters * 1000.0;
+                const cond_diameter_mm = inductor.cond_diameter_meters * 1000.0;
 
                 fctx.font = "bold 14px arial";
                 fctx.textAlign = "center";
@@ -271,9 +273,11 @@
                 fctx.font = "12px arial";
                 fctx.textAlign = "right";
                 fctx.fillText("\u2300a = " + cond_diameter_inches.toFixed(4).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, loopy - 6);
+                fctx.fillText("(" + cond_diameter_mm.toFixed(3).toString() + "mm)", loopx - loop_radius - 2.0*arrow_size, loopy + 12);
 
                 // Write loop diameter symbol:
-                fctx.fillText("\u2300b = " + loop_diameter_inches.toFixed(2).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, y_offset - 2);
+                fctx.fillText("\u2300b = " + loop_diameter_inches.toFixed(2).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, y_offset - 4);
+                fctx.fillText("(" + loop_diameter_mm.toFixed(2).toString() + "mm)", loopx - loop_radius - 2.0*arrow_size, y_offset + 12);
 
                 // Draw inner-diameter arrows: (for using a winding former)
                 const inner_dia_y = loopy + loop_radius + 40;
@@ -296,6 +300,7 @@
                 fctx.stroke();
                 fctx.textAlign = "left";
                 fctx.fillText("\u2300i = " + (loop_diameter_inches-0.5*cond_diameter_inches).toFixed(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
+                fctx.fillText("(" + (loop_diameter_mm-0.5*cond_diameter_mm).toFixed(2).toString() + "mm)", loopx + loop_radius + 2.0*arrow_size, inner_dia_y + 12);
 
                 // Draw outer-diameter arrows: (for using a winding former)
                 const outer_dia_y = loopy + loop_radius + 0;
@@ -317,6 +322,7 @@
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, outer_dia_y);
                 fctx.stroke();
                 fctx.fillText("\u2300o = " + (loop_diameter_inches+0.5*cond_diameter_inches).toFixed(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
+                fctx.fillText("(" + (loop_diameter_mm+0.5*cond_diameter_mm).toFixed(2).toString() + "mm)", loopx + loop_radius + 2.0*arrow_size, outer_dia_y + 12);
 
                 // Write loop inductance:
                 fctx.font = "12px arial";
@@ -374,13 +380,13 @@
                 }
 
                 // Draw the wire ends:
-                fctx.fillRect(start_x - cond_radius, bot_y, 2.0 * cond_radius, 30);
+                fctx.fillRect(start_x - cond_radius, bot_y, 2.0 * cond_radius, 20);
                 fctx.fillStyle = "grey";
-                fctx.fillRect(start_x + inductor.loop_turns * cond_spacing  - cond_radius, bot_y, 2.0 * cond_radius, 30);
+                fctx.fillRect(start_x + inductor.loop_turns * cond_spacing  - cond_radius, bot_y, 2.0 * cond_radius, 20);
                 fctx.fillStyle = "black";
 
                 // Draw left spacing arrow:
-                const dim_y = win_height * 0.90;
+                const dim_y = win_height * 0.88;
                 fctx.beginPath();
                 fctx.moveTo(start_x - 20, dim_y);
                 fctx.lineTo(start_x, dim_y);
@@ -416,11 +422,11 @@
                 // Extended lines:
                 fctx.strokeStyle = "grey";
                 fctx.beginPath();
-                fctx.moveTo(start_x, bot_y + 35);
+                fctx.moveTo(start_x, bot_y + 25);
                 fctx.lineTo(start_x, dim_y - 12);
-                fctx.moveTo(start_x + cond_spacing, bot_y + 15);
+                fctx.moveTo(start_x + cond_spacing, bot_y + 10);
                 fctx.lineTo(start_x + cond_spacing, dim_y - 12);
-                fctx.moveTo(start_x + inductor.loop_turns * cond_spacing, bot_y + 35);
+                fctx.moveTo(start_x + inductor.loop_turns * cond_spacing, bot_y + 25);
                 fctx.lineTo(start_x + inductor.loop_turns * cond_spacing, dim_y - 12);
                 fctx.stroke();
                 fctx.strokeStyle = "black";
@@ -443,10 +449,12 @@
                 var gap = ((inductor.loop_turns * cond_spacing - cond_spacing) < 60) ? (60 - (inductor.loop_turns * cond_spacing - cond_spacing)) : 0;
                 const spc = inductor.spacing_ratio * cond_diameter_inches;
                 fctx.fillText("c = " + spc.toFixed(3).toString() + "\"", start_x + cond_spacing + 20 - gap, dim_y + 20);
+                fctx.fillText("(" + (spc*25.4).toFixed(3).toString() + "mm)", start_x + cond_spacing + 20 - gap, dim_y + 34);
 
                 // Draw length text:
                 const sol_len = inductor.loop_turns * spc;
                 fctx.fillText("\u2113 = " + sol_len.toFixed(3).toString() + "\"", start_x + inductor.loop_turns * cond_spacing + 20, dim_y + 20);
+                fctx.fillText("(" + (sol_len*25.4).toFixed(1).toString() + "mm)", start_x + inductor.loop_turns * cond_spacing + 20, dim_y + 34);
             }
             recalculate();
         </script>
