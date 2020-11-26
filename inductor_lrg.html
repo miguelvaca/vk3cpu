@@ -20,7 +20,7 @@
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960;b:</label>
-                    <input type="range" id="loop_diameter_slider" min="20.0" max="200.0" value="100.0" step="1.0">
+                    <input type="range" id="loop_diameter_slider" min="20.0" max="300.0" value="100.0" step="1.0">
                 </div>
                 <div class="sliders">
                     <label for="loop_spacing_slider">c/a:</label>
@@ -28,7 +28,7 @@
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
-                    <input type="range" id="loop_turns_slider" min="2" max="100" value="10.0" step="1.0">
+                    <input type="range" id="loop_turns_slider" min="2" max="80" value="10.0" step="1.0">
                 </div>
                 <div class="sliders">
                     <label for="frequency_slider">f:</label>
@@ -270,7 +270,7 @@
                 fctx.font = "12px arial";
                 fctx.textAlign = "left";
                 const L = inductor.L * 1.0e+6;
-                fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
+                fctx.fillText("L = " + L.toFixed(2).toString() + " \u03bcH", 8, 18);
                 fctx.fillText("C = " + (inductor.C * 1e12).toFixed(1) + " pF", 8, 32);
                 fctx.fillText("Rdc = " + inductor.Rdc.toFixed(2) + " \u03A9", 8, 46);
                 fctx.fillText("SRF = " + (inductor.SRF * 1e-6).toFixed(1) + " MHz", 8, 60);
