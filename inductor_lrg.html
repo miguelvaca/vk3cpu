@@ -287,7 +287,7 @@
                 fctx.fillText("Rdc = " + inductor.Rdc.toFixed(2) + " \u03A9", 8, 46);
                 fctx.fillText("SRF = " + (inductor.SRF * 1e-6).toFixed(1) + " MHz", 8, 60);
                 const wire_length_m = Math.sqrt((inductor.loop_turns * inductor.spacing_ratio * inductor.cond_diameter_meters)**2 + (Math.PI * inductor.loop_diameter_meters * inductor.loop_turns)**2);
-                fctx.fillText("wire = " + (wire_length_m*100.0).toFixed(1) + " cm", 8, 74);
+                fctx.fillText("wire = " + wire_length_m.toFixed(2) + " m", 8, 74);
 
                 // Draw conductor diameter arrow:
                 fctx.beginPath();
