@@ -220,10 +220,10 @@
                 const loopx = win_width/2; 
                 const loopy = win_height/4;
 
-                const loop_diameter_inches = inductor.loop_diameter_meters * 1000.0 / 25.4;
-                const cond_diameter_inches = inductor.cond_diameter_meters * 1000.0 / 25.4;
                 const loop_diameter_mm = inductor.loop_diameter_meters * 1000.0;
                 const cond_diameter_mm = inductor.cond_diameter_meters * 1000.0;
+                const loop_diameter_inches = loop_diameter_mm / 25.4;
+                const cond_diameter_inches = cond_diameter_mm / 25.4;
 
                 fctx.font = "bold 14px arial";
                 fctx.textAlign = "center";
@@ -299,7 +299,7 @@
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, inner_dia_y);
                 fctx.stroke();
                 fctx.textAlign = "left";
-                fctx.fillText("\u2300i = " + (loop_diameter_inches-0.5*cond_diameter_inches).toFixed(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 2);
+                fctx.fillText("\u2300i = " + (loop_diameter_inches-0.5*cond_diameter_inches).toFixed(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, inner_dia_y - 4);
                 fctx.fillText("(" + (loop_diameter_mm-0.5*cond_diameter_mm).toFixed(2).toString() + "mm)", loopx + loop_radius + 2.0*arrow_size, inner_dia_y + 12);
 
                 // Draw outer-diameter arrows: (for using a winding former)
@@ -321,7 +321,7 @@
                 fctx.lineTo(loopx + loop_radius + cond_radius, outer_dia_y);
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, outer_dia_y);
                 fctx.stroke();
-                fctx.fillText("\u2300o = " + (loop_diameter_inches+0.5*cond_diameter_inches).toFixed(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 2);
+                fctx.fillText("\u2300o = " + (loop_diameter_inches+0.5*cond_diameter_inches).toFixed(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 4);
                 fctx.fillText("(" + (loop_diameter_mm+0.5*cond_diameter_mm).toFixed(2).toString() + "mm)", loopx + loop_radius + 2.0*arrow_size, outer_dia_y + 12);
 
                 // Write loop inductance:
