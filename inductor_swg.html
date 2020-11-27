@@ -376,25 +376,22 @@
                 var start_x = win_width/2.0 - inductor.loop_turns * cond_spacing * 0.5;
                 var top_y = win_height * 0.56;
                 var bot_y = top_y + 2.0 * cond_radius * (inductor.loop_diameter_meters / inductor.cond_diameter_meters);
+                var angle = math.atan2((cond_spacing * 0.5), (bot_y - top_y));
                 
                 for (let i = 0; i < inductor.loop_turns; i++) {
                     fctx.beginPath();
-                    fctx.moveTo(start_x + ((0.5 + i) * cond_spacing) + cond_radius, top_y);
-                    fctx.lineTo(start_x + (i+1) * cond_spacing + cond_radius, bot_y);
-                    fctx.arc(start_x + (i+1) * cond_spacing, bot_y, cond_radius, 0, Math.PI, false);
-                    fctx.lineTo(start_x + ((0.5 + i) * cond_spacing) - cond_radius, top_y);
+                    fctx.arc(start_x + (i+0.5) * cond_spacing, top_y, cond_radius, Math.PI-angle, -angle, false);
+                    fctx.arc(start_x + (i+1) * cond_spacing, bot_y, cond_radius, -angle, Math.PI-angle, false);
                     fctx.fillStyle = "grey";
                     fctx.fill();
 
                     fctx.beginPath();
-                    fctx.arc(start_x + (i * cond_spacing), bot_y, cond_radius, 0, Math.PI);
-                    fctx.arc(start_x + (cond_spacing * 0.5) + i * cond_spacing, top_y, cond_radius, Math.PI, 0);
-                    fctx.lineTo(start_x + (i * cond_spacing) + cond_radius, bot_y);
-                    fctx.closePath();
+                    fctx.arc(start_x + (i * cond_spacing), bot_y, cond_radius, angle, Math.PI+angle);
+                    fctx.arc(start_x + (cond_spacing * 0.5) + i * cond_spacing, top_y, cond_radius, Math.PI+angle, angle);
                     fctx.fillStyle = "black";
                     fctx.fill();
                 }
-
+                
                 // Draw the wire ends:
                 fctx.fillRect(start_x - cond_radius, bot_y, 2.0 * cond_radius, 20);
                 fctx.fillStyle = "grey";
