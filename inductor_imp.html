@@ -149,7 +149,7 @@
             function recalculate() {
                 // Input variables:
                 inductor.loop_diameter_meters = 0.001 * loop_diameter_slider.value * 25.4; // Inches to mm then to m
-                inductor.cond_diameter_meters = 0.001 * awgToMm(1.0 * conductor_diameter_slider.value); 
+                inductor.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
                 inductor.spacing_ratio = 1.0 * loop_spacing_slider.value;
                 inductor.loop_turns = 1.0 * loop_turns_slider.value;
                 inductor.frequency_hz = 1e6 * frequency_slider.value;
@@ -354,7 +354,7 @@
 
                 fctx.textAlign = "center";
                 fctx.font = "14px courier";
-                fctx.fillText(conductor_diameter_slider.value.toString() + "AWG", loopx, loopy - 6);
+                fctx.fillText((40-conductor_diameter_slider.value).toString() + "AWG", loopx, loopy - 6);
                 fctx.font = "12px arial";
 
                 var cond_spacing = 2.0 * cond_radius * inductor.spacing_ratio;

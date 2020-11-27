@@ -16,7 +16,7 @@
             <div class="slider_container">
                 <div class="sliders">
                     <label for="conductor_diameter_slider">&#8960a:</label>
-                    <input type="range" id="conductor_diameter_slider" min="0" max="50" value="21" step="1">
+                    <input type="range" id="conductor_diameter_slider" min="0" max="50" value="29" step="1">
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960b:</label>
@@ -159,7 +159,7 @@
             function recalculate() {
                 // Input variables:
                 inductor.loop_diameter_meters = 0.001 * loop_diameter_slider.value * 25.4; // Inches to mm then to m
-                inductor.cond_diameter_meters = 0.001 * swgToMm(1.0 * conductor_diameter_slider.value); 
+                inductor.cond_diameter_meters = 0.001 * swgToMm(50.0 - conductor_diameter_slider.value); 
                 inductor.spacing_ratio = 1.0 * loop_spacing_slider.value;
                 inductor.loop_turns = 1.0 * loop_turns_slider.value;
                 inductor.frequency_hz = 1e6 * frequency_slider.value;
@@ -364,7 +364,7 @@
 
                 fctx.textAlign = "center";
                 fctx.font = "14px courier";
-                fctx.fillText(conductor_diameter_slider.value.toString() + "SWG", loopx, loopy - 6);
+                fctx.fillText((50-conductor_diameter_slider.value).toString() + "SWG", loopx, loopy - 6);
                 fctx.font = "12px arial";
 
                 var cond_spacing = 2.0 * cond_radius * inductor.spacing_ratio;
