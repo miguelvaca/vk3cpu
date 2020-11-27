@@ -284,6 +284,7 @@
                 fctx.textAlign = "right";
                 fctx.fillText("\u2300a = " + cond_diameter_inches.toFixed(4).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, loopy - 6);
                 fctx.fillText("(" + cond_diameter_mm.toFixed(3).toString() + "mm)", loopx - loop_radius - 2.0*arrow_size, loopy + 12);
+                fctx.fillText("(A=" + (cond_diameter_mm**2).toFixed(2).toString() + " mm\u00B2)", loopx - loop_radius - 2.0*arrow_size, loopy + 28);
 
                 // Write loop diameter symbol:
                 fctx.fillText("\u2300b = " + loop_diameter_inches.toFixed(2).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, y_offset - 4);
@@ -343,7 +344,7 @@
                 fctx.fillText("Rdc = " + inductor.Rdc.toFixed(2) + " \u03A9", 8, 46);
                 fctx.fillText("SRF = " + (inductor.SRF * 1e-6).toFixed(1) + " MHz", 8, 60);
                 const wire_length_m = Math.sqrt((inductor.loop_turns * inductor.spacing_ratio * inductor.cond_diameter_meters)**2 + (Math.PI * inductor.loop_diameter_meters * inductor.loop_turns)**2);
-                fctx.fillText("wire = " + (wire_length_m*3.2808).toFixed(2) + " \'", 8, 74);
+                fctx.fillText("wire = " + (wire_length_m*3.2808).toFixed(2) + "\' (" + wire_length_m.toFixed(2) + "m)", 8, 74);
 
                 // Draw conductor diameter arrow:
                 fctx.beginPath();
