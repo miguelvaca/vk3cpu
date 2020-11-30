@@ -20,7 +20,7 @@
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960;b:</label>
-                    <input type="range" id="loop_diameter_slider" min="20.0" max="350.0" value="100.0" step="1.0">
+                    <input type="range" id="loop_diameter_slider" min="20.0" max="400.0" value="100.0" step="1.0">
                 </div>
                 <div class="sliders">
                     <label for="loop_spacing_slider">c/a:</label>
@@ -307,7 +307,7 @@
                 fctx.stroke();
 
                 var coax = "";
-                switch(cond_diameter_mm) {
+                switch(1.0*conductor_diameter_slider.value) {
                     case 2.00 : 
                         coax = "RG316";
                         break;
