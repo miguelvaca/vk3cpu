@@ -57,7 +57,7 @@
                 <li>&#8960a : Conductor diameter in millimeters (mm). Estimated equivalent AWG wire size is also displayed where appropriate.</li>
                 <li>&#8960b : Loop diameter in meters (m).</li>
                 <li>N : Number of turns or loops.</li>
-                <li>c/a : 'c' is the inter-winding spacing, and 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (Must be >= 1.1) 
+                <li>c/a : 'c' is the inter-winding spacing measured between conductor centers, and 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (Must be >= 1.1) 
                     A low-value will increase the resistance due to the proximity effect.</li>
                 <li>Tx : The transmit power. This affects the predicted voltage across the capacitor.</li>
             </ul>
@@ -71,7 +71,7 @@
                 <li>Vcap (kV): The predicted voltage across the capacitance given the desired transmit power.</li>
                 <li>BW (kHz): The predicted 3dB bandwidth of the magloop antenna. This is calculated from the predicted Q and the center frequency.</li>
                 <li>Efficiency (%): Calculated from the radiation resistance divided by the sum of radiation resistance and the loss resistance.</li>
-                <li>R-radiation (): The calculated radiation resistance of the loop in ohms.</li>
+                <li>R-radiation (&#937): The calculated radiation resistance of the loop in ohms.</li>
                 <li>R-loss (&#937): The calculated loss resistance of the loop in ohms, due to the combination of conductance, skin-effect and proximity effects.</li>
                 <li>Reactance (j&#937): The inductive reactance of the loop in ohms.</li>
                 <li>Q : The quality factor, which is the reactance divided by the resistance of the loop at that frequency.</li>
@@ -803,7 +803,7 @@
                                 fontStyle: 'bold'
                             },
                             ticks: {
-                                max: 3000.0,
+                                max: 2000.0,
                             },
                             position: 'left',
                             id: 'pfID'
