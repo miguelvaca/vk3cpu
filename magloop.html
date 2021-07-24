@@ -66,6 +66,7 @@
                 <li>L : Inductance is calculated using Nagaoka's equation. Value in microhenries.</li>
                 <li>A : Loop area in square meters.</li>
                 <li>C : Capacitance for multi-turn loops, which is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
+                <li>circ : Circumference of the main loop in meters.</li>
                 <li>c : Distance between windings, measured from the conductor centers (mm).</li>
                 <li>Tuning Cap (pF): The capacitance required to bring the loop into resonance at the given frequency. Value in picofarads.</li>
                 <li>Vcap (kV): The predicted voltage across the capacitance given the desired transmit power.</li>
@@ -554,6 +555,10 @@
                 // Write loop area:
                 fctx.textAlign = "right";
                 fctx.fillText("A = " + (Math.PI * (0.5*dia)**2).toPrecision(3).toString() + " m\u00B2", win_width-8, 18);
+                
+                // Write Tx power text:
+                fctx.fillText("circ = " + (Math.PI * dia).toPrecision(3).toString() + " m", win_width-8, win_height * 0.8 + 20);
+
             }
             
             const aside_canvas = document.getElementById("antennaSide2D");
