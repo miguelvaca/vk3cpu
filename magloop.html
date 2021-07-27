@@ -47,17 +47,18 @@
             <div class="notes">
             <b><u>Notes:</u></b><br>
             The Magloop Antenna Calculator was developed to predict the characteritics of a small-loop (aka "magloop")
-            antenna, given physical dimensions entered via slider widgets. There are many magloop calculators available
+            antenna, given physical dimensions entered via slider widgets. It assumes the main loop is made from a round
+            copper conductor. There are many magloop calculators available
             online. Some require installing a program on your computer, which is OS dependent. Some others are browser-based,
             but require parameters to be input using a keyboard. I wanted to create a tool that took advantage of the 
             touch-screens and high-speed of modern mobile phones, to allow users to get realtime feedback of the predicted
-            behaviour of a magloop antenna. This would help a radio amateur to decide on the characteristics for the build.<br>
+            behaviour of a magloop antenna. This would help a radio amateur to decide on the characteristics for the build.<br><br>
             <u>Inputs via the slider widgets:</u>
             <ul> 
-                <li>&#8960a : Copper conductor diameter in millimeters (mm). Estimated equivalent AWG wire size is also displayed where appropriate.</li>
+                <li>&#8960a : Copper conductor diameter in millimeters (mm).</li>
                 <li>&#8960b : Loop diameter in meters (m).</li>
                 <li>N : Number of turns or loops.</li>
-                <li>c/a : 'c' is the inter-winding spacing for multi-turn loops measured between conductor centers, and 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (Must be >= 1.1) 
+                <li>c/a : is the spacing ratio; based on 'c' being the inter-winding spacing for multi-turn loops measured between conductor centers, and 'a' is the conductor diameter. (Must be >= 1.1) 
                     A low-value will increase the resistance due to the proximity effect.</li>
                 <li>Tx : The transmit power. This affects the predicted voltage across the capacitor.</li>
             </ul>
