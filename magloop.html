@@ -624,8 +624,6 @@
                     const L = multiloopCapacitance() * 1e+12;
                     sctx.textAlign = "right";
                     sctx.fillText("C = " + L.toFixed(0).toString() + " pF", win_width-8, 18);
-                    sctx.fillText("cond = " , win_width-8, dim_y + 08);
-                    sctx.fillText((Math.PI * loop_diameter_slider.value * loop_turns_slider.value).toPrecision(3).toString() + " m", win_width-8, dim_y + 20);
                     sctx.textAlign = "left";
                     sctx.fillText("N = " + loop_turns_slider.value.toString(), 8, win_height * 0.1 + 3);
                 } else {
@@ -635,6 +633,10 @@
                     sctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.1 + 3);
                 }
                 
+                sctx.textAlign = "right";
+                sctx.fillText("cond = " , win_width-8, dim_y + 08);
+                sctx.fillText((Math.PI * loop_diameter_slider.value * loop_turns_slider.value).toPrecision(3).toString() + " m", win_width-8, dim_y + 20);
+                    
                 // Draw spacing text:
                 sctx.textAlign = "center";
                 const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
