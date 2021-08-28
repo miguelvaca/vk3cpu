@@ -21,7 +21,7 @@
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960b:</label>
-                    <input type="range" id="loop_diameter_slider" min="0.2" max="5.0" value="1.0" step="0.02">
+                    <input type="range" id="loop_diameter_slider" min="0.2" max="4.0" value="1.0" step="0.02">
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
@@ -65,8 +65,8 @@
             behaviour of a magloop antenna. This would help a radio amateur to decide on the characteristics for the build.<br><br>
             <u>Inputs via the slider and radio widgets:</u>
             <ul> 
-                <li>&#8960a : Copper conductor diameter in millimeters (mm).</li>
-                <li>&#8960b : Loop diameter in meters (m).</li>
+                <li>&#8960a : Copper conductor diameter in millimeters (mm) or inches.</li>
+                <li>&#8960b : Loop diameter in meters (m) or feet.</li>
                 <li>N : Number of turns or loops.</li>
                 <li>c/a : is the spacing ratio; based on 'c' being the inter-winding spacing for multi-turn loops measured between conductor centers, and 'a' is the conductor diameter. (Must be >= 1.1) 
                     A low-value will increase the resistance due to the proximity effect.</li>
@@ -77,7 +77,7 @@
             <u>Calculated parameters:</u>
             <ul>
                 <li>L : Inductance is calculated using Nagaoka's equation. Value in microhenries.</li>
-                <li>A : Loop area in square meters.</li>
+                <li>A : Loop area in square meters or square feet.</li>
                 <li>C : Capacitance for multi-turn loops, which is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
                 <li>circ : Circumference of the main loop in meters.</li>
                 <li>c : Distance between windings, measured from the conductor centers (mm).</li>
