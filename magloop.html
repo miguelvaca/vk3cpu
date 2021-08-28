@@ -715,7 +715,7 @@
                     
                 // Draw spacing text:
                 sctx.textAlign = "center";
-                const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
+                const spc = (loop_turns_slider.value > 1) ? loop_spacing_slider.value * conductor_diameter_slider.value : 0.0;
                 if(units == "metric") {
                     sctx.fillText("c = " + spc.toPrecision(3).toString() + " mm", start_x + cond_spacing, dim_y + 20);
                 } else {
