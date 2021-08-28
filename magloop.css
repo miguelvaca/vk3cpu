@@ -98,7 +98,7 @@ section div.antennaSide-container {
     section.gridLayoutClass {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(3, 1fr) 150px 150px 300px;
+        grid-template-rows: repeat(3, 1fr) 150px 135px 300px;
         justify-items: stretch;
     }
 
@@ -164,13 +164,6 @@ section div.antennaSide-container {
         grid-column-end: 3; 
         grid-row-start: 3; 
         grid-row-end: 4;
-    }
-    
-    section div.radio_container {
-        grid-column-start: 1; 
-        grid-column-end: 3; 
-        grid-row-start: 4; 
-        grid-row-end: 5;
     }
     
     section div.antennaFront-container {
