@@ -60,8 +60,8 @@ section div.radios {
     background:white;
     display: inline-block;
     font-size: small;
-    margin: 0px;
-    padding: 0px;
+    margin: 3px;
+    padding: 3px;
     width: auto;
     height: auto;
 }
@@ -96,7 +96,7 @@ section div.antennaSide-container {
     section.gridLayoutClass {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(3, 1fr) 150px 150px 300px;
+        grid-template-rows: repeat(3, 1fr) 150px 160px 300px;
         justify-items: stretch;
     }
 
