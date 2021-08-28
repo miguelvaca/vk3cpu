@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator v2</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator v3</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -17,11 +17,11 @@
             <div class="slider_container">
                 <div class="sliders">
                     <label for="conductor_diameter_slider">&#8960a:</label>
-                    <input type="range" id="conductor_diameter_slider" min="5" max="40" value="19" step="0.5">
+                    <input type="range" id="conductor_diameter_slider" min="5" max="40" value="19" step="0.2">
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960b:</label>
-                    <input type="range" id="loop_diameter_slider" min="0.2" max="5.0" value="1.0" step="0.05">
+                    <input type="range" id="loop_diameter_slider" min="0.2" max="5.0" value="1.0" step="0.02">
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
@@ -34,6 +34,20 @@
                 <div class="sliders">
                     <label for="transmit_power_slider">Tx:</label>
                     <input type="range" id="transmit_power_slider" min="5" max="1500" value="400" step="5">
+                </div>
+                <div class="radios">
+                    <label>
+                        <input type="radio" name="unit_radio" id="metric_radio" value="metric" checked/>Metric
+                    </label>
+                    <label>
+                        <input type="radio" name="unit_radio" id="imperial_radio" value="imperial"/>Imperial
+                    </label>
+                    <label>
+                        <input type="radio" name="metal_radio" id="copper_radio" value="copper" checked/>Cu
+                    </label>
+                    <label>
+                        <input type="radio" name="metal_radio" id="aluminium_radio" value="aluminium"/>Al
+                    </label>
                 </div>
             </div>
             <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
@@ -88,21 +102,15 @@
             var frequencies = [];
 
             var loop_diameter_slider = document.getElementById("loop_diameter_slider");
-            var loop_diameter_value = document.getElementById("loop_diameter_value");
-            var val = loop_diameter_slider.value * 1.0;
-
             var conductor_diameter_slider = document.getElementById("conductor_diameter_slider");
-            var conductor_diameter_value = document.getElementById("conductor_diameter_value");
-            
             var loop_turns_slider = document.getElementById("loop_turns_slider");
-            var loop_turns_value = document.getElementById("loop_turns_value");
-
             var loop_spacing_slider = document.getElementById("loop_spacing_slider");
-            var loop_spacing_value = document.getElementById("loop_spacing_value");
-            val = loop_spacing_slider.value * 1.0;
-
             var transmit_power_slider = document.getElementById("transmit_power_slider");
-            var transmit_power_value = document.getElementById("transmit_power_value");
+            var metric_radio = document.getElementById("metric_radio");
+            var imperial_radio = document.getElementById("imperial_radio");
+            
+            var units = "metric";
+            var conductivity = 58e6; // Default is copper
 
             function updateFrequencies() {
                 const hamFrequencies = [
@@ -266,9 +274,9 @@
                 const loop_spacing_ratio = loop_spacing_slider.value;
                 const mu0 = 4.0 * Math.PI * 1e-7;
                 const k = (n_turns * a_coil_radius / b_conductor_radius);
-                const cu_sigma = 58e6; // Copper conductance value
+                //const cu_sigma = 58e6; // Copper conductance value 58e6; Aluminium 35e6;
                 const Rp = getProximityResFromSpacing(loop_spacing_ratio);
-                const Rs = Math.sqrt(Math.PI * frequency * mu0 / cu_sigma);
+                const Rs = Math.sqrt(Math.PI * frequency * mu0 / conductivity);
                 const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
                 const R_ohmic = k * Rs * (Rp / R0 + 1.0);
                 return R_ohmic;
@@ -353,6 +361,54 @@
                     retval.push({x:freq, y:cc});
                 });
                 return retval;
+            }
+
+            metric_radio.oninput = function() {
+                units = metric_radio.value;
+                //console.log(units);
+                drawFrontDesign();
+                drawSideDesign();
+            }
+
+            imperial_radio.oninput = function() {
+                units = imperial_radio.value;
+                //console.log(units);
+                drawFrontDesign();
+                drawSideDesign();
+            }
+
+            copper_radio.oninput = function() {
+                conductivity = 58e6;
+                drawFrontDesign();
+                drawSideDesign();
+                updateFrequencies();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
+            aluminium_radio.oninput = function() {
+                conductivity = 35e6;
+                drawFrontDesign();
+                drawSideDesign();
+                updateFrequencies();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
             }
 
             loop_diameter_slider.oninput = function() {
@@ -515,7 +571,11 @@
                 fctx.font = "12px arial";
                 fctx.textAlign = "center";
                 const dia = 1.0 * loop_diameter_slider.value;
-                fctx.fillText("\u2300b = " + dia.toPrecision(3).toString() + " m", loopx, loopy - 6);
+                if(units == "metric") {
+                    fctx.fillText("\u2300b = " + dia.toPrecision(3).toString() + " m", loopx, loopy - 6);
+                } else {
+                    fctx.fillText("\u2300b = " + (dia*3.28084).toPrecision(3).toString() + "\'", loopx, loopy - 6);
+                }
 
                 // Draw conductor diameter arrow:
                 fctx.beginPath();
@@ -552,14 +612,27 @@
                 p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
                 //fctx.textAlign = "right";
                 const cond_dia = 1.0 * conductor_diameter_slider.value;
-                fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + " mm", loopx, p1y+2);
-
-                // Write loop area:
-                fctx.textAlign = "right";
-                fctx.fillText("A = " + (Math.PI * (0.5*dia)**2).toPrecision(3).toString() + " m\u00B2", win_width-8, 18);
+                fctx.textAlign = "center";
+                if(units == "metric") {
+                    fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + " mm", loopx, p1y+2);
+                    
+                    // Write loop area:
+                    fctx.textAlign = "right";
+                    fctx.fillText("A = " + (Math.PI * (0.5*dia)**2).toPrecision(3).toString() + " m\u00B2", win_width-8, 18);
                 
-                // Write Tx power text:
-                fctx.fillText("circ = " + (Math.PI * dia).toPrecision(3).toString() + " m", win_width-8, win_height * 0.8 + 20);
+                    // Write Tx power text:
+                    fctx.fillText("circ = " + (Math.PI * dia).toPrecision(3).toString() + " m", win_width-8, win_height * 0.8 + 20);
+                } else {
+                    fctx.fillText("\u2300a = " + (cond_dia/25.4).toPrecision(3).toString() + "\"", loopx, p1y+2);
+                    
+                    // Write loop area:
+                    fctx.textAlign = "right";
+                    fctx.fillText("A = " + (Math.PI * (0.5*dia*3.28084)**2).toPrecision(3).toString() + " ft\u00B2", win_width-8, 18);
+                
+                    // Write Tx power text:
+                    fctx.fillText("circ = " + (Math.PI * dia*3.28084).toPrecision(3).toString() + " ft", win_width-8, win_height * 0.8 + 20);
+                }
+
             }
             
             const aside_canvas = document.getElementById("antennaSide2D");
@@ -636,12 +709,20 @@
                 
                 sctx.textAlign = "right";
                 sctx.fillText("cond = " , win_width-8, dim_y + 08);
-                sctx.fillText((Math.PI * loop_diameter_slider.value * loop_turns_slider.value).toPrecision(3).toString() + " m", win_width-8, dim_y + 20);
+                if(units == "metric") {
+                    sctx.fillText((Math.PI * loop_diameter_slider.value * loop_turns_slider.value).toPrecision(3).toString() + " m", win_width-8, dim_y + 20);
+                } else {
+                    sctx.fillText((Math.PI * loop_diameter_slider.value * 3.28084* loop_turns_slider.value).toPrecision(3).toString() + " ft", win_width-8, dim_y + 20);
+                }
                     
                 // Draw spacing text:
                 sctx.textAlign = "center";
                 const spc = loop_spacing_slider.value * conductor_diameter_slider.value;
-                sctx.fillText("c = " + spc.toPrecision(3).toString() + " mm", start_x + cond_spacing, dim_y + 20);
+                if(units == "metric") {
+                    sctx.fillText("c = " + spc.toPrecision(3).toString() + " mm", start_x + cond_spacing, dim_y + 20);
+                } else {
+                    sctx.fillText("c = " + (spc/25.4).toPrecision(3).toString() + " in", start_x + cond_spacing, dim_y + 20);
+                }
             }
             drawFrontDesign();
             drawSideDesign();
