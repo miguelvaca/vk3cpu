@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator v3</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator v3 Beta</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -36,18 +36,14 @@
                     <input type="range" id="transmit_power_slider" min="5" max="1500" value="400" step="5">
                 </div>
                 <div class="radios">
-                    <label>
-                        <input type="radio" name="unit_radio" id="metric_radio" value="metric" checked/>Metric
-                    </label>
-                    <label>
-                        <input type="radio" name="unit_radio" id="imperial_radio" value="imperial"/>Imperial
-                    </label>
-                    <label>
-                        <input type="radio" name="metal_radio" id="copper_radio" value="copper" checked/>Cu
-                    </label>
-                    <label>
-                        <input type="radio" name="metal_radio" id="aluminium_radio" value="aluminium"/>Al
-                    </label>
+                    <label>Metric</label>
+                    <input type="radio" name="unit_radio" id="metric_radio" value="metric" checked/>
+                    <label>Imperial</label>
+                    <input type="radio" name="unit_radio" id="imperial_radio" value="imperial"/>
+                    <label>Cu</label>
+                    <input type="radio" name="metal_radio" id="copper_radio" value="copper" checked/>
+                    <label>Al</label>
+                    <input type="radio" name="metal_radio" id="aluminium_radio" value="aluminium"/>
                 </div>
             </div>
             <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
