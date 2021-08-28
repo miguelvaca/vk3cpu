@@ -58,8 +58,8 @@
             <b><u>Notes:</u></b><br>
             The Magloop Antenna Calculator was developed to predict the characteritics of a small-loop (aka "magloop")
             antenna, given physical dimensions entered via slider widgets. It assumes the main loop is made from a round
-            copper conductor. There are many magloop calculators available
-            online. Some require installing a program on your computer, which is OS dependent. Some others are browser-based,
+            copper or aluminium conductor. There are many magloop calculators available online. Some require installing 
+            a program on your computer, which is OS dependent. Some others are browser-based,
             but require parameters to be input using a keyboard. I wanted to create a tool that took advantage of the 
             touch-screens and high-speed of modern mobile phones, to allow users to get realtime feedback of the predicted
             behaviour of a magloop antenna. This would help a radio amateur to decide on the characteristics for the build.<br><br>
@@ -79,9 +79,9 @@
                 <li>L : Inductance is calculated using Nagaoka's equation. Value in microhenries.</li>
                 <li>A : Loop area in square meters or square feet.</li>
                 <li>C : Capacitance for multi-turn loops, which is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
-                <li>circ : Circumference of the main loop in meters.</li>
-                <li>c : Distance between windings, measured from the conductor centers (mm).</li>
-                <li>cond : Conductor length in meters. Equal to the circumference * number of turns.</li>
+                <li>circ : Circumference of the main loop in meters or feet.</li>
+                <li>c : Distance between windings, measured from the conductor centers in mm or inches.</li>
+                <li>cond : Conductor length in meters or feet. Equal to the circumference * number of turns.</li>
                 <li>Tuning Cap (pF): The capacitance required to bring the loop into resonance at the given frequency. Value in picofarads.</li>
                 <li>Vcap (kV): The predicted voltage across the capacitance given the desired transmit power.</li>
                 <li>BW (kHz): The predicted 3dB bandwidth of the magloop antenna. This is calculated from the predicted Q and the center frequency.</li>
@@ -91,7 +91,7 @@
                 <li>Reactance (j&#937): The inductive reactance of the loop in ohms.</li>
                 <li>Q : The quality factor, which is the reactance divided by the resistance of the loop at that frequency.</li>
                 <li>Ia (A): The RMS loop current in amps.</li>
-            </ul>
+            </ul><br><br>
             </div>
         </section>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
