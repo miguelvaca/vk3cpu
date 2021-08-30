@@ -108,19 +108,18 @@
             var imperial_radio = document.getElementById("imperial_radio");
             
             var units = "metric";
-            var conductivity = 58e6; // Default is copper
+            var conductivity = 58e6; // Default is annealed copper
 
             function updateFrequencies() {
                 const hamFrequencies = [
                     //1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
                     //0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
-                    0.1365, 0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
+                    0.1365, 0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0, 54.0
                     //0.1357, 0.1378, 0.472, 0.479, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
                 ];
                 
                 // Max frequency is for multi-turn loops:
-                var max_freq = (loop_turns_slider.value > 1) ? calculateSRF() : 100000000.0;
-                
+                var max_freq = calculateSRF();
                 frequencies = [];
                 hamFrequencies.forEach(freq => {
                     const wavelength = 3e8 / (freq * 1e6);
@@ -187,7 +186,6 @@
                 const w = -0.47 / (0.755 + x)**1.44;
                 const p = k0 + 3.437/x + k2/x**2 + w;
                 retval = zk * (Math.log(1 + 1/zk) + 1/p);
-                // console.log(x, retval);
                 return retval;
             }
 
@@ -363,7 +361,7 @@
             }
             
             function calculateSRF() {
-                const capacitance = (loop_turns_slider.value > 1) ? multiloopCapacitance() : 1e-12;
+                const capacitance = (loop_turns_slider.value > 1) ? multiloopCapacitance() : 1e-12;  // Assume 1 pF for a single loop. Yes it is wrong, but we just don't want a divide-by-zero error below.
                 const inductance = getInductance();
                 return (1.0 / (2.0 * Math.PI * ((inductance * capacitance) ** 0.5)));
             }
