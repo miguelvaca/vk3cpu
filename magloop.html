@@ -176,9 +176,6 @@
                 // From Knight's 2016 paper on coil self-resonance, attributed to Wheeler's 1982 eqn as modified by Bob Weaver
                 var retval;
                 const c_spacing = 1e-3 * loop_spacing_slider.value * conductor_diameter_slider.value;
-                //const corr_factor = Math.sqrt(1.0 + (c_spacing**2 / loop_diameter_slider.value**2));
-                //const conductor_length = Math.PI * loop_diameter_slider.value * loop_turns_slider.value * corr_factor;
-                // const x = loop_diameter_slider.value / conductor_length;
                 const x = loop_diameter_slider.value / (c_spacing * loop_turns_slider.value); 
                 const zk = 2.0 / (Math.PI * x);
                 const k0 = 1.0 / (Math.log(8.0 / Math.PI) - 0.5);
@@ -257,7 +254,8 @@
                 for (i = 0; i < (proximityResistance[0].length-1); i++) {
                     if(spacing_ratio <= proximityResistance[0][i+1]) {
                         // Linear interpolation between empirical proximity resistance values:
-                        retval = (((spacing_ratio - proximityResistance[0][i]) / (proximityResistance[0][i+1] - proximityResistance[0][i]) * (proximityResistance[n_turns][i+1] - proximityResistance[n_turns][i])) + proximityResistance[n_turns][i]);
+                        retval = (((spacing_ratio - proximityResistance[0][i]) / (proximityResistance[0][i+1] - proximityResistance[0][i]) 
+                            * (proximityResistance[n_turns][i+1] - proximityResistance[n_turns][i])) + proximityResistance[n_turns][i]);
                         break;
                     }
                 }
@@ -272,7 +270,6 @@
                 const loop_spacing_ratio = loop_spacing_slider.value;
                 const mu0 = 4.0 * Math.PI * 1e-7;
                 const k = (n_turns * a_coil_radius / b_conductor_radius);
-                //const cu_sigma = 58e6; // Copper conductance value 58e6; Aluminium 35e6;
                 const Rp = getProximityResFromSpacing(loop_spacing_ratio);
                 const Rs = Math.sqrt(Math.PI * frequency * mu0 / conductivity);
                 const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
@@ -359,6 +356,12 @@
                     retval.push({x:freq, y:cc});
                 });
                 return retval;
+            }
+            
+            function calculateSRF() {
+                const capacitance = (loop_turns_slider.value > 1) ? multiloopCapacitance() : 1e-12;
+                const inductance = getInductance();
+                return (1.0 / (2.0 * Math.PI * ((inductance * capacitance) ** 0.5)));
             }
 
             metric_radio.oninput = function() {
@@ -694,10 +697,12 @@
                 sctx.font = "12px arial";
                 if(loop_turns_slider.value > 1) {
                     const L = multiloopCapacitance() * 1e+12;
+                    const srf = calculateSRF();
                     sctx.textAlign = "right";
                     sctx.fillText("C = " + L.toFixed(0).toString() + " pF", win_width-8, 18);
                     sctx.textAlign = "left";
                     sctx.fillText("N = " + loop_turns_slider.value.toString(), 8, win_height * 0.1 + 3);
+                    sctx.fillText("SRF = " + (srf*1e-6).toPrecision(3).toString() + " MHz", 8, dim_y + 20);
                 } else {
                     // Draw turns number text:
                     //sctx.font = "12px arial";
