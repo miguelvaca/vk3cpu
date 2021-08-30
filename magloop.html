@@ -117,11 +117,13 @@
                     0.1365, 0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
                     //0.1357, 0.1378, 0.472, 0.479, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0
                 ];
+                
+                var max_freq = (loop_turns_slider.value > 1) ? calculateSRF() : 100000000.0;
                 frequencies = [];
                 hamFrequencies.forEach(freq => {
                     const wavelength = 3e8 / (freq * 1e6);
                     const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-                    if (l <= 0.30) {
+                    if ((l <= 0.30) && ((freq * 1e6) < max_freq)) {
                         frequencies.push(freq);
                     }
                 });
@@ -450,6 +452,7 @@
                 //loop_turns_value.innerHTML = this.value;
                 drawFrontDesign();
                 drawSideDesign();
+                updateFrequencies();
                 myChart.data.datasets[0].data = calculateTuningCapacitor();
                 myChart.data.datasets[1].data = calculateCapacitorVoltage();
                 myChart.data.datasets[2].data = calculateBandwidth();
