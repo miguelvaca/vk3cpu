@@ -17,11 +17,11 @@
             <div class="slider_container">
                 <div class="sliders">
                     <label for="conductor_diameter_slider">&#8960a:</label>
-                    <input type="range" id="conductor_diameter_slider" min="5" max="40" value="19" step="0.2">
+                    <input type="range" id="conductor_diameter_slider" min="5" max="40" value="19" step="0.5">
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960b:</label>
-                    <input type="range" id="loop_diameter_slider" min="0.2" max="4.0" value="1.0" step="0.02">
+                    <input type="range" id="loop_diameter_slider" min="0.2" max="5.0" value="1.0" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
@@ -33,7 +33,7 @@
                 </div>
                 <div class="sliders">
                     <label for="transmit_power_slider">Tx:</label>
-                    <input type="range" id="transmit_power_slider" min="5" max="1500" value="400" step="5">
+                    <input type="range" id="transmit_power_slider" min="5" max="1500" value="100" step="5">
                 </div>
                 <div class="radios">
                     <label>Metric</label>
@@ -133,6 +133,7 @@
             // Update the frequencies, now that we have the sliders available:
             updateFrequencies();
 
+            /*
             function getInductance() {
                 const a_coil_radius = loop_diameter_slider.value * 0.5;
                 const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
@@ -140,6 +141,26 @@
                 const mu0 = 4.0 * Math.PI * 1e-7;
                 var retval = (n_turns ** 2.0) * mu0 * a_coil_radius * (Math.log(8.0 * a_coil_radius / b_conductor_radius) - 2.0);
                 return retval;
+            }
+            */
+
+            function getInductance() {
+                const mu0 = Math.PI * 4e-7;
+                const loop_diameter_meters = loop_diameter_slider.value;
+                const cond_diameter_meters = conductor_diameter_slider.value * 1e-3;
+                const spacing_ratio = loop_spacing_slider.value;
+                const loop_turns = loop_turns_slider.value;
+                
+                const a_coil_radius = loop_diameter_meters * 0.5;
+                const coil_length = cond_diameter_meters * spacing_ratio * loop_turns;
+                var retval = 0.0;
+                if(loop_turns > 1) {
+                    retval = (loop_turns**2.0) * mu0 * Math.PI * (a_coil_radius**2.0) * nagaokaCoefficient() / coil_length;
+                } else {
+                    const b_conductor_radius = cond_diameter_meters * 0.5;
+                    retval = (loop_turns ** 2.0) * mu0 * a_coil_radius * (Math.log(8.0 * a_coil_radius / b_conductor_radius) - 2.0);
+                }
+                return retval; // In Henries
             }
 
             function radiationResistance(frequency) {
