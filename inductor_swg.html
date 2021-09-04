@@ -59,16 +59,21 @@
                 <li>&#8467; : Length of the coil (inches). Equal to c x N.</li>
             </ul>
             <u>Calculated parameters:</u>
-            <ul>
+            <ul> Frequency independent:
                 <li>L : Inductance is calculated using Nagaoka's equation incorporating his coefficient.</li>
                 <li>C : Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
                 <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
                 <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. </li>
-                <li>X&#8343; : Inductive reactance at the given frequency. (&#937;)</li>
-                <li>|Z| : Impedance at the given frequency. (&#937;)</li>
+                <li>wire : Length of wire required to wind the inductor. </li>
+            </ul>
+            <ul> Frequency dependent: (Text goes <font color="red">RED</font> when selected frequency > SRF. Inductor model is not accurate once SRF is exceeded.)
+                <li>f : Selected frequency in MHz</li>
                 <li>&#948; : Skin depth due to skin effect (&#956;m)</li>
                 <li>Rac : AC resistance is calculated using the skin effect and proximity resistance from empirical data collected by Medhurst using the spacing ratio, and length-to-diameter ratio.</li>
-                <li>Q : Quality factor of device, based on reactance (X) &#247 resistance (Rac) at the given frequency.</li>
+                <li>X&#8343; : Inductive reactance at the given frequency. (&#937;)</li>
+                <li>Z : Complex impedance at the given frequency. (&#937;)</li>
+                <li>|Z| : Impedance magnitude at the given frequency. (&#937;)</li>
+                <li>Q : Effective Quality Factor of the inductor at the given frequency. (|Z.im|/Z.re)</li>
             </ul>
             </div>
         </section>
