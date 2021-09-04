@@ -172,11 +172,12 @@
                 inductor.Xc = capacitiveReactance(inductor.frequency_hz, inductor.C);
                 inductor.skin_depth = skinDepth(inductor.frequency_hz);
                 inductor.Rac = acResistance(inductor.loop_diameter_meters, inductor.cond_diameter_meters, inductor.spacing_ratio, inductor.loop_turns, inductor.frequency_hz);
-                inductor.Q = qualityFactor(inductor.Xl, inductor.Rac);
+                //inductor.Q = qualityFactor(inductor.Xl, inductor.Rac);
                 // Calculate impedance:
                 var Zl = math.complex(inductor.Rac, inductor.Xl);
                 var Zc = math.complex(0, inductor.Xc);
-                inductor.Z = math.divide(math.multiply(Zl, Zc), math.add(Zl, Zc)).toPolar();
+                inductor.Z = math.divide(math.multiply(Zl, Zc), math.add(Zl, Zc));
+                inductor.Q = Math.abs(inductor.Z.im) / inductor.Z.re;
                 // Redraw the canvas:
                 drawDesign();
             }
@@ -443,16 +444,6 @@
                 fctx.stroke();
                 fctx.strokeStyle = "black";
 
-                fctx.font = "12px arial";
-                fctx.textAlign = "right";
-                var freq = 1e-6 * inductor.frequency_hz;
-                fctx.fillText("f = " + freq.toFixed(2) + " MHz", win_width-18, 18);
-                fctx.fillText("X\u2097 = " + inductor.Xl.toFixed(1) + " \u03A9", win_width-18, 32);
-                fctx.fillText("|Z| = " + inductor.Z.r.toFixed(1) + " \u03A9", win_width-18, 46);
-                fctx.fillText("\u03B4 = " + (inductor.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 60);
-                fctx.fillText("Rac = " + inductor.Rac.toFixed(2) + " \u03A9", win_width-18, 74);
-                fctx.fillText("Q = " + inductor.Q.toFixed(1), win_width-18, 88);
-
                 fctx.textAlign = "center";
                 fctx.fillText("N = " + inductor.loop_turns.toString(), win_width/2, win_height * 0.52);
                 
@@ -467,6 +458,24 @@
                 const sol_len = inductor.loop_turns * spc;
                 fctx.fillText("\u2113 = " + sol_len.toFixed(3).toString() + "\"", start_x + inductor.loop_turns * cond_spacing + 20, dim_y + 20);
                 fctx.fillText("(" + (sol_len*25.4).toFixed(1).toString() + "mm)", start_x + inductor.loop_turns * cond_spacing + 20, dim_y + 34);
+                
+                fctx.strokeStyle = "black";
+                if(inductor.frequency_hz <= inductor.SRF) {
+                    fctx.fillStyle = "black";
+                } else {
+                    fctx.fillStyle = "red";
+                }
+
+                fctx.font = "12px arial";
+                fctx.textAlign = "right";
+                var freq = 1e-6 * inductor.frequency_hz;
+                fctx.fillText("f = " + freq.toFixed(2) + " MHz", win_width-18, 18);
+                fctx.fillText("\u03B4 = " + (inductor.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 32);
+                fctx.fillText("Rac = " + inductor.Rac.toFixed(2) + " \u03A9", win_width-18, 46);
+                fctx.fillText("X\u2097 = " + inductor.Xl.toFixed(1) + " \u03A9", win_width-18, 60);
+                fctx.fillText("Z = " + inductor.Z.re.toFixed(1) + " " + inductor.Z.im.toFixed(1) + "j \u03A9", win_width-18, 74);
+                fctx.fillText("|Z| = " + inductor.Z.toPolar().r.toFixed(1) + " \u03A9", win_width-18, 88);
+                fctx.fillText("Q = " + inductor.Q.toFixed(1), win_width-18, 102);
             }
             recalculate();
         </script>

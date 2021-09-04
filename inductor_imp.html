@@ -432,6 +432,7 @@
                 fctx.moveTo(start_x + inductor.loop_turns * cond_spacing, bot_y + 25);
                 fctx.lineTo(start_x + inductor.loop_turns * cond_spacing, dim_y - 12);
                 fctx.stroke();
+                fctx.strokeStyle = "black";
 
                 fctx.textAlign = "center";
                 fctx.fillText("N = " + inductor.loop_turns.toString(), win_width/2, win_height * 0.52);
@@ -448,9 +449,6 @@
                 fctx.fillText("\u2113 = " + sol_len.toFixed(3).toString() + "\"", start_x + inductor.loop_turns * cond_spacing + 20, dim_y + 20);
                 fctx.fillText("(" + (sol_len*25.4).toFixed(1).toString() + "mm)", start_x + inductor.loop_turns * cond_spacing + 20, dim_y + 34);
                 
-                
-                //console.log(inductor.frequency_hz);
-                //console.log(inductor.SRF);
                 fctx.strokeStyle = "black";
                 if(inductor.frequency_hz <= inductor.SRF) {
                     fctx.fillStyle = "black";
