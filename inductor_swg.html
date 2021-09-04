@@ -59,14 +59,14 @@
                 <li>&#8467; : Length of the coil (inches). Equal to c x N.</li>
             </ul>
             <u>Calculated parameters:</u>
-            <ul> Frequency independent:
+            <ul> <b>Frequency independent:[L]</b> 
                 <li>L : Inductance is calculated using Nagaoka's equation incorporating his coefficient.</li>
                 <li>C : Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
                 <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
                 <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. </li>
                 <li>wire : Length of wire required to wind the inductor. </li>
             </ul>
-            <ul> Frequency dependent: (Text goes <font color="red">RED</font> when selected frequency > SRF. Inductor model is not accurate once SRF is exceeded.)
+            <ul> <b>Frequency dependent:[R]</b> (Text goes <font color="red">RED</font> when selected frequency > SRF. Inductor model is not accurate once SRF is exceeded.)
                 <li>f : Selected frequency in MHz</li>
                 <li>&#948; : Skin depth due to skin effect (&#956;m)</li>
                 <li>Rac : AC resistance is calculated using the skin effect and proximity resistance from empirical data collected by Medhurst using the spacing ratio, and length-to-diameter ratio.</li>
