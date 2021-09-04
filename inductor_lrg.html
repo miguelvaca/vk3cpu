@@ -443,7 +443,15 @@
                 fctx.fillText("\u03B4 = " + (inductor.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 32);
                 fctx.fillText("Rac = " + inductor.Rac.toFixed(2) + " \u03A9", win_width-18, 46);
                 fctx.fillText("X\u2097 = " + inductor.Xl.toFixed(1) + " \u03A9", win_width-18, 60);
-                fctx.fillText("Z = " + inductor.Z.re.toFixed(1) + " " + inductor.Z.im.toFixed(1) + "j \u03A9", win_width-18, 74);
+                var str = "Z = " + inductor.Z.re.toFixed(1);
+                if(inductor.Z.im >= 0.0) {
+                    str += " + j";
+                } else {
+                    str += " - j";
+                }
+                str += Math.abs(inductor.Z.im).toFixed(1) + " \u03A9";
+                fctx.fillText(str, win_width-18, 74);
+                //fctx.fillText("Z = " + inductor.Z.re.toFixed(1) + " " + inductor.Z.im.toFixed(1) + "j \u03A9", win_width-18, 74);
                 fctx.fillText("|Z| = " + inductor.Z.toPolar().r.toFixed(1) + " \u03A9", win_width-18, 88);
                 fctx.fillText("Q = " + inductor.Q.toFixed(1), win_width-18, 102);
             }
