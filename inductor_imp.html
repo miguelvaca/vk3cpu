@@ -174,35 +174,78 @@
                 inductor.Z = math.divide(math.multiply(Zl, Zc), math.add(Zl, Zc));
                 inductor.Q = Math.abs(inductor.Z.im) / inductor.Z.re;
                 // Redraw the canvas:
+                //drawDesign();
+            }
+            
+            var loop_dia_timer_handler = 0;
+            var loop_dia_font = "12px arial";
+            
+            loop_diameter_slider.oninput = function() {
+                recalculate();
+                if(loop_dia_timer_handler == 0) {
+                    loop_dia_font = "bold 13px arial";
+                    loop_dia_timer_handler = setTimeout(function(){
+                        loop_dia_font = "12px arial";
+                        drawDesign();
+                        loop_dia_timer_handler = 0;
+                    }, 2000);
+                } else {
+                    clearTimeout(loop_dia_timer_handler);
+                    loop_dia_timer_handler = setTimeout(function(){
+                        loop_dia_font = "12px arial";
+                        drawDesign();
+                        loop_dia_timer_handler = 0;
+                    }, 2000);
+                }
                 drawDesign();
             }
 
-            loop_diameter_slider.oninput = function() {
-                recalculate();
-            }
-
+            var cond_dia_timer_handler = 0;
+            var cond_dia_font = "12px arial";
+            
             conductor_diameter_slider.oninput = function() {
                 recalculate();
+                if(cond_dia_timer_handler == 0) {
+                    cond_dia_font = "bold 13px arial";
+                    cond_dia_timer_handler = setTimeout(function(){
+                        cond_dia_font = "12px arial";
+                        drawDesign();
+                        cond_dia_timer_handler = 0;
+                    }, 2000);
+                } else {
+                    clearTimeout(cond_dia_timer_handler);
+                    cond_dia_timer_handler = setTimeout(function(){
+                        cond_dia_font = "12px arial";
+                        drawDesign();
+                        cond_dia_timer_handler = 0;
+                    }, 2000);
+                }
+                drawDesign();
             }
 
             loop_turns_slider.oninput = function() {
                 recalculate();
+                drawDesign();
             }
 
             loop_spacing_slider.oninput = function() {
                 recalculate();
+                drawDesign();
             }
 
             frequency_slider.oninput = function() {
                 recalculate();
+                drawDesign();
             }
 
             window.onresize = function() {
                 recalculate();
+                drawDesign();
             }
 
             window.onorientationchange = function() {
                 recalculate();
+                drawDesign();
             }
 
             window.onbeforeprint = function() {
@@ -275,15 +318,23 @@
                 fctx.stroke();
 
                 // Write conductor diameter symbol:
-                fctx.font = "12px arial";
+                fctx.font = cond_dia_font;
                 fctx.textAlign = "right";
                 fctx.fillText("\u2300a = " + cond_diameter_inches.toFixed(4).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, loopy - 6);
                 fctx.fillText("(" + cond_diameter_mm.toFixed(3).toString() + "mm)", loopx - loop_radius - 2.0*arrow_size, loopy + 12);
                 fctx.fillText("(A=" + (cond_diameter_mm**2).toFixed(2).toString() + " mm\u00B2)", loopx - loop_radius - 2.0*arrow_size, loopy + 28);
 
+                fctx.textAlign = "center";
+                //fctx.font = "14px courier";
+                fctx.fillText((40-conductor_diameter_slider.value).toString() + "AWG", loopx, loopy - 6);
+                //fctx.font = "12px arial";
+
+                fctx.textAlign = "right";
+                fctx.font = loop_dia_font;
                 // Write loop diameter symbol:
                 fctx.fillText("\u2300b = " + loop_diameter_inches.toFixed(2).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, y_offset - 4);
                 fctx.fillText("(" + loop_diameter_mm.toFixed(2).toString() + "mm)", loopx - loop_radius - 2.0*arrow_size, y_offset + 12);
+                fctx.font = "12px arial";
 
                 // Draw inner-diameter arrows: (for using a winding former)
                 const inner_dia_y = loopy + loop_radius + 40;
@@ -358,10 +409,10 @@
                 fctx.lineTo(loopx - loop_radius + cond_radius + 2.0*arrow_size, loopy);
                 fctx.stroke();
 
-                fctx.textAlign = "center";
-                fctx.font = "14px courier";
-                fctx.fillText((40-conductor_diameter_slider.value).toString() + "AWG", loopx, loopy - 6);
-                fctx.font = "12px arial";
+                //fctx.textAlign = "center";
+                //fctx.font = "14px courier";
+                //fctx.fillText((40-conductor_diameter_slider.value).toString() + "AWG", loopx, loopy - 6);
+                //fctx.font = "12px arial";
 
                 var cond_spacing = 2.0 * cond_radius * inductor.spacing_ratio;
                 if((cond_spacing * inductor.loop_turns) > (0.8 * win_width)) {
@@ -481,6 +532,7 @@
                 fctx.fillText("Q = " + inductor.Q.toFixed(1), win_width-18, 102);
             }
             recalculate();
+            drawDesign();
         </script>
     </body>
 </html>
