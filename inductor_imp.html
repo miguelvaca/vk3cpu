@@ -180,6 +180,7 @@
             // Specify fonts for changing parameters controlled by the sliders:
             var normal_font = "12px arial";
             var emphasis_font = "bold 14px arial";
+            const emphasis_delay = 1200;
             
             var loop_dia_timer_handler = 0;
             var loop_dia_font = normal_font;
@@ -192,14 +193,14 @@
                         loop_dia_font = normal_font;
                         drawDesign();
                         loop_dia_timer_handler = 0;
-                    }, 1500);
+                    }, emphasis_delay);
                 } else {
                     clearTimeout(loop_dia_timer_handler);
                     loop_dia_timer_handler = setTimeout(function(){
                         loop_dia_font = normal_font;
                         drawDesign();
                         loop_dia_timer_handler = 0;
-                    }, 1500);
+                    }, emphasis_delay);
                 }
                 drawDesign();
             }
@@ -215,14 +216,14 @@
                         cond_dia_font = normal_font;
                         drawDesign();
                         cond_dia_timer_handler = 0;
-                    }, 1500);
+                    }, emphasis_delay);
                 } else {
                     clearTimeout(cond_dia_timer_handler);
                     cond_dia_timer_handler = setTimeout(function(){
                         cond_dia_font = normal_font;
                         drawDesign();
                         cond_dia_timer_handler = 0;
-                    }, 1500);
+                    }, emphasis_delay);
                 }
                 drawDesign();
             }
@@ -238,14 +239,14 @@
                         turns_font = normal_font;
                         drawDesign();
                         turns_timer_handler = 0;
-                    }, 1500);
+                    }, emphasis_delay);
                 } else {
                     clearTimeout(turns_timer_handler);
                     turns_timer_handler = setTimeout(function(){
                         turns_font = normal_font;
                         drawDesign();
                         turns_timer_handler = 0;
-                    }, 1500);
+                    }, emphasis_delay);
                 }
                 drawDesign();
             }
@@ -261,14 +262,14 @@
                         spacing_font = normal_font;
                         drawDesign();
                         spacing_timer_handler = 0;
-                    }, 1500);
+                    }, emphasis_delay);
                 } else {
                     clearTimeout(spacing_timer_handler);
                     spacing_timer_handler = setTimeout(function(){
                         spacing_font = normal_font;
                         drawDesign();
                         spacing_timer_handler = 0;
-                    }, 1500);
+                    }, emphasis_delay);
                 }
                 drawDesign();
             }
@@ -284,14 +285,14 @@
                         frequency_font = normal_font;
                         drawDesign();
                         frequency_timer_handler = 0;
-                    }, 1500);
+                    }, emphasis_delay);
                 } else {
                     clearTimeout(frequency_timer_handler);
                     frequency_timer_handler = setTimeout(function(){
                         frequency_font = normal_font;
                         drawDesign();
                         frequency_timer_handler = 0;
-                    }, 1500);
+                    }, emphasis_delay);
                 }
                 drawDesign();
             }
