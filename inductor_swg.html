@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator<br><a href="inductor.html">[Wire Metric]</a> <a href="inductor_imp.html">[Wire AWG]</a> <a href="inductor_lrg.html">[Coax Metric]</a></header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Inductor Calculator<br><a href="inductor.html">[Wire Metric]</a> <a href="inductor_swg.html">[Wire SWG]</a> <a href="inductor_lrg.html">[Coax Metric]</a></header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -184,35 +184,137 @@
                 inductor.Z = math.divide(math.multiply(Zl, Zc), math.add(Zl, Zc));
                 inductor.Q = Math.abs(inductor.Z.im) / inductor.Z.re;
                 // Redraw the canvas:
+                //drawDesign();
+            }
+
+            // Specify fonts for changing parameters controlled by the sliders:
+            var normal_font = "12px arial";
+            var emphasis_font = "bold 14px arial";
+            const emphasis_delay = 1200;
+            
+            var loop_dia_timer_handler = 0;
+            var loop_dia_font = normal_font;
+            
+            loop_diameter_slider.oninput = function() {
+                recalculate();
+                if(loop_dia_timer_handler == 0) {
+                    loop_dia_font = emphasis_font;
+                    loop_dia_timer_handler = setTimeout(function(){
+                        loop_dia_font = normal_font;
+                        drawDesign();
+                        loop_dia_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(loop_dia_timer_handler);
+                    loop_dia_timer_handler = setTimeout(function(){
+                        loop_dia_font = normal_font;
+                        drawDesign();
+                        loop_dia_timer_handler = 0;
+                    }, emphasis_delay);
+                }
                 drawDesign();
             }
 
-            loop_diameter_slider.oninput = function() {
-                recalculate();
-            }
-
+            var cond_dia_timer_handler = 0;
+            var cond_dia_font = normal_font;
+            
             conductor_diameter_slider.oninput = function() {
                 recalculate();
+                if(cond_dia_timer_handler == 0) {
+                    cond_dia_font = emphasis_font;
+                    cond_dia_timer_handler = setTimeout(function(){
+                        cond_dia_font = normal_font;
+                        drawDesign();
+                        cond_dia_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(cond_dia_timer_handler);
+                    cond_dia_timer_handler = setTimeout(function(){
+                        cond_dia_font = normal_font;
+                        drawDesign();
+                        cond_dia_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                drawDesign();
             }
 
+            var turns_timer_handler = 0;
+            var turns_font = normal_font;
+            
             loop_turns_slider.oninput = function() {
                 recalculate();
+                if(turns_timer_handler == 0) {
+                    turns_font = emphasis_font;
+                    turns_timer_handler = setTimeout(function(){
+                        turns_font = normal_font;
+                        drawDesign();
+                        turns_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(turns_timer_handler);
+                    turns_timer_handler = setTimeout(function(){
+                        turns_font = normal_font;
+                        drawDesign();
+                        turns_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                drawDesign();
             }
 
+            var spacing_timer_handler = 0;
+            var spacing_font = normal_font;
+            
             loop_spacing_slider.oninput = function() {
                 recalculate();
+                if(spacing_timer_handler == 0) {
+                    spacing_font = emphasis_font;
+                    spacing_timer_handler = setTimeout(function(){
+                        spacing_font = normal_font;
+                        drawDesign();
+                        spacing_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(spacing_timer_handler);
+                    spacing_timer_handler = setTimeout(function(){
+                        spacing_font = normal_font;
+                        drawDesign();
+                        spacing_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                drawDesign();
             }
 
+            var frequency_timer_handler = 0;
+            var frequency_font = normal_font;
+            
             frequency_slider.oninput = function() {
                 recalculate();
+                if(frequency_timer_handler == 0) {
+                    frequency_font = emphasis_font;
+                    frequency_timer_handler = setTimeout(function(){
+                        frequency_font = normal_font;
+                        drawDesign();
+                        frequency_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(frequency_timer_handler);
+                    frequency_timer_handler = setTimeout(function(){
+                        frequency_font = normal_font;
+                        drawDesign();
+                        frequency_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                drawDesign();
             }
 
             window.onresize = function() {
                 recalculate();
+                drawDesign();
             }
 
             window.onorientationchange = function() {
                 recalculate();
+                drawDesign();
             }
 
             window.onbeforeprint = function() {
@@ -285,15 +387,23 @@
                 fctx.stroke();
 
                 // Write conductor diameter symbol:
-                fctx.font = "12px arial";
+                fctx.font = cond_dia_font;
                 fctx.textAlign = "right";
                 fctx.fillText("\u2300a = " + cond_diameter_inches.toFixed(4).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, loopy - 6);
                 fctx.fillText("(" + cond_diameter_mm.toFixed(3).toString() + "mm)", loopx - loop_radius - 2.0*arrow_size, loopy + 12);
-                fctx.fillText("(A=" + (cond_diameter_mm**2).toFixed(2).toString() + " mm\u00B2)", loopx - loop_radius - 2.0*arrow_size, loopy + 28);
 
+                fctx.textAlign = "center";
+                //fctx.font = "14px courier";
+                fctx.fillText((40-conductor_diameter_slider.value).toString() + "SWG", loopx, loopy + 3);
+                //fctx.font = "12px arial";
+
+                fctx.textAlign = "right";
+                fctx.font = loop_dia_font;
                 // Write loop diameter symbol:
                 fctx.fillText("\u2300b = " + loop_diameter_inches.toFixed(2).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, y_offset - 4);
                 fctx.fillText("(" + loop_diameter_mm.toFixed(2).toString() + "mm)", loopx - loop_radius - 2.0*arrow_size, y_offset + 12);
+                fctx.font = "12px arial";
+                fctx.fillText("(A=" + (cond_diameter_mm**2).toFixed(2).toString() + " mm\u00B2)", loopx - loop_radius - 2.0*arrow_size, loopy + 28);
 
                 // Draw inner-diameter arrows: (for using a winding former)
                 const inner_dia_y = loopy + loop_radius + 40;
@@ -368,10 +478,10 @@
                 fctx.lineTo(loopx - loop_radius + cond_radius + 2.0*arrow_size, loopy);
                 fctx.stroke();
 
-                fctx.textAlign = "center";
-                fctx.font = "14px courier";
-                fctx.fillText((50-conductor_diameter_slider.value).toString() + "SWG", loopx, loopy - 6);
-                fctx.font = "12px arial";
+                //fctx.textAlign = "center";
+                //fctx.font = "14px courier";
+                //fctx.fillText((50-conductor_diameter_slider.value).toString() + "SWG", loopx, loopy - 6);
+                //fctx.font = "12px arial";
 
                 var cond_spacing = 2.0 * cond_radius * inductor.spacing_ratio;
                 if((cond_spacing * inductor.loop_turns) > (0.8 * win_width)) {
@@ -449,8 +559,17 @@
                 fctx.stroke();
                 fctx.strokeStyle = "black";
 
-                fctx.textAlign = "center";
-                fctx.fillText("N = " + inductor.loop_turns.toString(), win_width/2, win_height * 0.52);
+                //fctx.textAlign = "center";
+                
+                fctx.font = spacing_font;
+                fctx.textAlign = "right";
+                fctx.fillText("c/a = " + inductor.spacing_ratio.toFixed(2).toString() + "  ", win_width/2, win_height * 0.52);
+                
+                fctx.font = turns_font;
+                fctx.textAlign = "left";
+                fctx.fillText("  N = " + inductor.loop_turns.toString(), win_width/2, win_height * 0.52);
+                
+                fctx.font = "12px arial";
                 
                 // Draw spacing text: (gap is to avoid collision of spacing and length texts)
                 fctx.textAlign = "right";
@@ -471,10 +590,12 @@
                     fctx.fillStyle = "red";
                 }
 
-                fctx.font = "12px arial";
+                //fctx.font = "12px courier";
                 fctx.textAlign = "right";
                 var freq = 1e-6 * inductor.frequency_hz;
+                fctx.font = frequency_font;
                 fctx.fillText("f = " + freq.toFixed(2) + " MHz", win_width-18, 18);
+                fctx.font = "12px arial";
                 fctx.fillText("\u03B4 = " + (inductor.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 32);
                 fctx.fillText("Rac = " + inductor.Rac.toFixed(2) + " \u03A9", win_width-18, 46);
                 fctx.fillText("X\u2097 = " + inductor.Xl.toFixed(1) + " \u03A9", win_width-18, 60);
@@ -491,6 +612,7 @@
                 fctx.fillText("Q = " + inductor.Q.toFixed(1), win_width-18, 102);
             }
             recalculate();
+            drawDesign();
         </script>
     </body>
 </html>
