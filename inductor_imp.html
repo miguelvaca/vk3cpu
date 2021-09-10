@@ -188,14 +188,14 @@
                         loop_dia_font = "12px arial";
                         drawDesign();
                         loop_dia_timer_handler = 0;
-                    }, 2000);
+                    }, 1500);
                 } else {
                     clearTimeout(loop_dia_timer_handler);
                     loop_dia_timer_handler = setTimeout(function(){
                         loop_dia_font = "12px arial";
                         drawDesign();
                         loop_dia_timer_handler = 0;
-                    }, 2000);
+                    }, 1500);
                 }
                 drawDesign();
             }
@@ -211,30 +211,84 @@
                         cond_dia_font = "12px arial";
                         drawDesign();
                         cond_dia_timer_handler = 0;
-                    }, 2000);
+                    }, 1500);
                 } else {
                     clearTimeout(cond_dia_timer_handler);
                     cond_dia_timer_handler = setTimeout(function(){
                         cond_dia_font = "12px arial";
                         drawDesign();
                         cond_dia_timer_handler = 0;
-                    }, 2000);
+                    }, 1500);
                 }
                 drawDesign();
             }
 
+            var turns_timer_handler = 0;
+            var turns_font = "12px arial";
+            
             loop_turns_slider.oninput = function() {
                 recalculate();
+                if(turns_timer_handler == 0) {
+                    turns_font = "bold 13px arial";
+                    turns_timer_handler = setTimeout(function(){
+                        turns_font = "12px arial";
+                        drawDesign();
+                        turns_timer_handler = 0;
+                    }, 1500);
+                } else {
+                    clearTimeout(turns_timer_handler);
+                    turns_timer_handler = setTimeout(function(){
+                        turns_font = "12px arial";
+                        drawDesign();
+                        turns_timer_handler = 0;
+                    }, 1500);
+                }
                 drawDesign();
             }
 
+            var spacing_timer_handler = 0;
+            var spacing_font = "12px arial";
+            
             loop_spacing_slider.oninput = function() {
                 recalculate();
+                if(spacing_timer_handler == 0) {
+                    spacing_font = "bold 13px arial";
+                    spacing_timer_handler = setTimeout(function(){
+                        spacing_font = "12px arial";
+                        drawDesign();
+                        spacing_timer_handler = 0;
+                    }, 1500);
+                } else {
+                    clearTimeout(spacing_timer_handler);
+                    spacing_timer_handler = setTimeout(function(){
+                        spacing_font = "12px arial";
+                        drawDesign();
+                        spacing_timer_handler = 0;
+                    }, 1500);
+                }
                 drawDesign();
             }
 
+            var frequency_timer_handler = 0;
+            var frequency_font = "12px arial";
+            
             frequency_slider.oninput = function() {
                 recalculate();
+                if(frequency_timer_handler == 0) {
+                    frequency_font = "bold 13px arial";
+                    frequency_timer_handler = setTimeout(function(){
+                        frequency_font = "12px arial";
+                        drawDesign();
+                        frequency_timer_handler = 0;
+                    }, 1500);
+                } else {
+                    clearTimeout(frequency_timer_handler);
+                    frequency_timer_handler = setTimeout(function(){
+                        frequency_font = "12px arial";
+                        drawDesign();
+                        frequency_timer_handler = 0;
+                    }, 1500);
+                }
                 drawDesign();
             }
 
@@ -490,8 +544,17 @@
                 fctx.stroke();
                 fctx.strokeStyle = "black";
 
-                fctx.textAlign = "center";
-                fctx.fillText("N = " + inductor.loop_turns.toString(), win_width/2, win_height * 0.52);
+                //fctx.textAlign = "center";
+                
+                fctx.font = spacing_font;
+                fctx.textAlign = "right";
+                fctx.fillText("c/a = " + inductor.spacing_ratio.toFixed(2).toString() + "  ", win_width/2, win_height * 0.52);
+                
+                fctx.font = turns_font;
+                fctx.textAlign = "left";
+                fctx.fillText("  N = " + inductor.loop_turns.toString(), win_width/2, win_height * 0.52);
+                
+                fctx.font = "12px arial";
                 
                 // Draw spacing text: (gap is to avoid collision of spacing and length texts)
                 fctx.textAlign = "right";
@@ -512,10 +575,12 @@
                     fctx.fillStyle = "red";
                 }
 
-                fctx.font = "12px arial";
+                //fctx.font = "12px courier";
                 fctx.textAlign = "right";
                 var freq = 1e-6 * inductor.frequency_hz;
+                fctx.font = frequency_font;
                 fctx.fillText("f = " + freq.toFixed(2) + " MHz", win_width-18, 18);
+                fctx.font = "12px arial";
                 fctx.fillText("\u03B4 = " + (inductor.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 32);
                 fctx.fillText("Rac = " + inductor.Rac.toFixed(2) + " \u03A9", win_width-18, 46);
                 fctx.fillText("X\u2097 = " + inductor.Xl.toFixed(1) + " \u03A9", win_width-18, 60);
