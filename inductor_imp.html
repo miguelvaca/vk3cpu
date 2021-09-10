@@ -177,22 +177,26 @@
                 //drawDesign();
             }
             
+            // Specify fonts for changing parameters controlled by the sliders:
+            var normal_font = "12px arial";
+            var emphasis_font = "bold 14px arial";
+            
             var loop_dia_timer_handler = 0;
-            var loop_dia_font = "12px arial";
+            var loop_dia_font = normal_font;
             
             loop_diameter_slider.oninput = function() {
                 recalculate();
                 if(loop_dia_timer_handler == 0) {
-                    loop_dia_font = "bold 13px arial";
+                    loop_dia_font = emphasis_font;
                     loop_dia_timer_handler = setTimeout(function(){
-                        loop_dia_font = "12px arial";
+                        loop_dia_font = normal_font;
                         drawDesign();
                         loop_dia_timer_handler = 0;
                     }, 1500);
                 } else {
                     clearTimeout(loop_dia_timer_handler);
                     loop_dia_timer_handler = setTimeout(function(){
-                        loop_dia_font = "12px arial";
+                        loop_dia_font = normal_font;
                         drawDesign();
                         loop_dia_timer_handler = 0;
                     }, 1500);
@@ -201,21 +205,21 @@
             }
 
             var cond_dia_timer_handler = 0;
-            var cond_dia_font = "12px arial";
+            var cond_dia_font = normal_font;
             
             conductor_diameter_slider.oninput = function() {
                 recalculate();
                 if(cond_dia_timer_handler == 0) {
-                    cond_dia_font = "bold 13px arial";
+                    cond_dia_font = emphasis_font;
                     cond_dia_timer_handler = setTimeout(function(){
-                        cond_dia_font = "12px arial";
+                        cond_dia_font = normal_font;
                         drawDesign();
                         cond_dia_timer_handler = 0;
                     }, 1500);
                 } else {
                     clearTimeout(cond_dia_timer_handler);
                     cond_dia_timer_handler = setTimeout(function(){
-                        cond_dia_font = "12px arial";
+                        cond_dia_font = normal_font;
                         drawDesign();
                         cond_dia_timer_handler = 0;
                     }, 1500);
@@ -224,21 +228,21 @@
             }
 
             var turns_timer_handler = 0;
-            var turns_font = "12px arial";
+            var turns_font = normal_font;
             
             loop_turns_slider.oninput = function() {
                 recalculate();
                 if(turns_timer_handler == 0) {
-                    turns_font = "bold 13px arial";
+                    turns_font = emphasis_font;
                     turns_timer_handler = setTimeout(function(){
-                        turns_font = "12px arial";
+                        turns_font = normal_font;
                         drawDesign();
                         turns_timer_handler = 0;
                     }, 1500);
                 } else {
                     clearTimeout(turns_timer_handler);
                     turns_timer_handler = setTimeout(function(){
-                        turns_font = "12px arial";
+                        turns_font = normal_font;
                         drawDesign();
                         turns_timer_handler = 0;
                     }, 1500);
@@ -247,21 +251,21 @@
             }
 
             var spacing_timer_handler = 0;
-            var spacing_font = "12px arial";
+            var spacing_font = normal_font;
             
             loop_spacing_slider.oninput = function() {
                 recalculate();
                 if(spacing_timer_handler == 0) {
-                    spacing_font = "bold 13px arial";
+                    spacing_font = emphasis_font;
                     spacing_timer_handler = setTimeout(function(){
-                        spacing_font = "12px arial";
+                        spacing_font = normal_font;
                         drawDesign();
                         spacing_timer_handler = 0;
                     }, 1500);
                 } else {
                     clearTimeout(spacing_timer_handler);
                     spacing_timer_handler = setTimeout(function(){
-                        spacing_font = "12px arial";
+                        spacing_font = normal_font;
                         drawDesign();
                         spacing_timer_handler = 0;
                     }, 1500);
@@ -270,21 +274,21 @@
             }
 
             var frequency_timer_handler = 0;
-            var frequency_font = "12px arial";
+            var frequency_font = normal_font;
             
             frequency_slider.oninput = function() {
                 recalculate();
                 if(frequency_timer_handler == 0) {
-                    frequency_font = "bold 13px arial";
+                    frequency_font = emphasis_font;
                     frequency_timer_handler = setTimeout(function(){
-                        frequency_font = "12px arial";
+                        frequency_font = normal_font;
                         drawDesign();
                         frequency_timer_handler = 0;
                     }, 1500);
                 } else {
                     clearTimeout(frequency_timer_handler);
                     frequency_timer_handler = setTimeout(function(){
-                        frequency_font = "12px arial";
+                        frequency_font = normal_font;
                         drawDesign();
                         frequency_timer_handler = 0;
                     }, 1500);
