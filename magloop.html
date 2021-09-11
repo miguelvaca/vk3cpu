@@ -444,7 +444,31 @@
                 myChart.update();
             }
 
+            // Specify fonts for changing parameters controlled by the sliders:
+            var normal_font = "12px arial";
+            var emphasis_font = "bold 14px arial";
+            const emphasis_delay = 1200;
+            
+            var loop_dia_timer_handler = 0;
+            var loop_dia_font = normal_font;
+            
             loop_diameter_slider.oninput = function() {
+                if(loop_dia_timer_handler == 0) {
+                    loop_dia_font = emphasis_font;
+                    loop_dia_timer_handler = setTimeout(function(){
+                        loop_dia_font = normal_font;
+                        drawFrontDesign();
+                        loop_dia_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(loop_dia_timer_handler);
+                    loop_dia_timer_handler = setTimeout(function(){
+                        loop_dia_font = normal_font;
+                        drawFrontDesign();
+                        loop_dia_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                
                 drawFrontDesign();
                 drawSideDesign();
                 updateFrequencies();
@@ -460,7 +484,26 @@
                 myChart.update();
             }
 
+            var cond_dia_timer_handler = 0;
+            var cond_dia_font = normal_font;
+            
             conductor_diameter_slider.oninput = function() {
+                if(cond_dia_timer_handler == 0) {
+                    cond_dia_font = emphasis_font;
+                    cond_dia_timer_handler = setTimeout(function(){
+                        cond_dia_font = normal_font;
+                        drawFrontDesign();
+                        cond_dia_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(cond_dia_timer_handler);
+                    cond_dia_timer_handler = setTimeout(function(){
+                        cond_dia_font = normal_font;
+                        drawFrontDesign();
+                        cond_dia_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                
                 drawFrontDesign();
                 drawSideDesign();
                 myChart.data.datasets[0].data = calculateTuningCapacitor();
@@ -475,7 +518,26 @@
                 myChart.update();
             }
 
+            var turns_timer_handler = 0;
+            var turns_font = normal_font;
+            
             loop_turns_slider.oninput = function() {
+                if(turns_timer_handler == 0) {
+                    turns_font = emphasis_font;
+                    turns_timer_handler = setTimeout(function(){
+                        turns_font = normal_font;
+                        drawSideDesign();
+                        turns_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(turns_timer_handler);
+                    turns_timer_handler = setTimeout(function(){
+                        turns_font = normal_font;
+                        drawSideDesign();
+                        turns_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                
                 drawFrontDesign();
                 drawSideDesign();
                 updateFrequencies();
@@ -491,7 +553,26 @@
                 myChart.update();
             }
 
+            var spacing_timer_handler = 0;
+            var spacing_font = normal_font;
+            
             loop_spacing_slider.oninput = function() {
+                if(spacing_timer_handler == 0) {
+                    spacing_font = emphasis_font;
+                    spacing_timer_handler = setTimeout(function(){
+                        spacing_font = normal_font;
+                        drawSideDesign();
+                        spacing_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(spacing_timer_handler);
+                    spacing_timer_handler = setTimeout(function(){
+                        spacing_font = normal_font;
+                        drawSideDesign();
+                        spacing_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                
                 drawFrontDesign();
                 drawSideDesign();
                 if(loop_turns_slider.value > 1) {
@@ -601,11 +682,13 @@
                 fctx.font = "12px arial";
                 fctx.textAlign = "center";
                 const dia = 1.0 * loop_diameter_slider.value;
+                fctx.font = loop_dia_font;
                 if(units == "metric") {
                     fctx.fillText("\u2300b = " + dia.toPrecision(3).toString() + " m", loopx, loopy - 6);
                 } else {
                     fctx.fillText("\u2300b = " + (dia*3.28084).toPrecision(3).toString() + "\'", loopx, loopy - 6);
                 }
+                fctx.font = normal_font;
 
                 // Draw conductor diameter arrow:
                 fctx.beginPath();
@@ -644,8 +727,9 @@
                 const cond_dia = 1.0 * conductor_diameter_slider.value;
                 fctx.textAlign = "center";
                 if(units == "metric") {
+                    fctx.font = cond_dia_font;
                     fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + " mm", loopx, p1y+2);
-                    
+                    fctx.font = normal_font;
                     // Write loop area:
                     fctx.textAlign = "right";
                     fctx.fillText("A = " + (Math.PI * (0.5*dia)**2).toPrecision(3).toString() + " m\u00B2", win_width-8, 18);
@@ -653,8 +737,9 @@
                     // Write Tx power text:
                     fctx.fillText("circ = " + (Math.PI * dia).toPrecision(3).toString() + " m", win_width-8, win_height * 0.8 + 20);
                 } else {
+                    fctx.font = cond_dia_font;
                     fctx.fillText("\u2300a = " + (cond_dia/25.4).toPrecision(3).toString() + "\"", loopx, p1y+2);
-                    
+                    fctx.font = normal_font;
                     // Write loop area:
                     fctx.textAlign = "right";
                     fctx.fillText("A = " + (Math.PI * (0.5*dia*3.28084)**2).toPrecision(3).toString() + " ft\u00B2", win_width-8, 18);
@@ -723,11 +808,13 @@
                 sctx.lineTo(start_x + cond_spacing, dim_y + 7);
                 sctx.stroke();
 
-                sctx.font = "12px arial";
                 sctx.textAlign = "left";
+                sctx.font = turns_font; 
                 sctx.fillText("N = " + loop_turns_slider.value.toString(), 8, win_height * 0.1 + 3);
+                sctx.font = spacing_font;
                 sctx.fillText("c/a = ", 8, win_height * 0.1 + 18);
                 sctx.fillText((loop_spacing_slider.value*1.0).toPrecision(3).toString(), 8, win_height * 0.1 + 33);
+                sctx.font = normal_font; 
                 
                 // Multi-turn loop, so calculate C and SRF:
                 if(loop_turns_slider.value > 1) {
