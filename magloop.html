@@ -724,20 +724,26 @@
                 sctx.stroke();
 
                 sctx.font = "12px arial";
+                sctx.textAlign = "left";
+                sctx.fillText("N = " + loop_turns_slider.value.toString(), 8, win_height * 0.1 + 3);
+                sctx.fillText("c/a = ", 8, win_height * 0.1 + 18);
+                sctx.fillText((loop_spacing_slider.value*1.0).toPrecision(3).toString(), 8, win_height * 0.1 + 33);
+                
+                // Multi-turn loop, so calculate C and SRF:
                 if(loop_turns_slider.value > 1) {
                     const L = multiloopCapacitance() * 1e+12;
                     const srf = calculateSRF();
                     sctx.textAlign = "right";
                     sctx.fillText("C = " + L.toFixed(0).toString() + " pF", win_width-8, 18);
-                    sctx.textAlign = "left";
-                    sctx.fillText("N = " + loop_turns_slider.value.toString(), 8, win_height * 0.1 + 3);
-                    sctx.fillText("SRF = ", 8, win_height * 0.1 + 18);
-                    sctx.fillText((srf*1e-6).toPrecision(3).toString() + " MHz", 8, win_height * 0.1 + 33);
-                } else {
+                    sctx.fillText("SRF = ", win_width-8, win_height * 0.1 + 18);
+                    sctx.fillText((srf*1e-6).toPrecision(3).toString() + " MHz", win_width-8, win_height * 0.1 + 33);
+                }
+                
+                /* else {
                     // Draw turns number text:
                     sctx.textAlign = "center";
                     sctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.1 + 3);
-                }
+                } */
                 
                 sctx.textAlign = "right";
                 sctx.fillText("cond = " , win_width-8, dim_y + 08);
