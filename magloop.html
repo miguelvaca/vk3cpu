@@ -590,7 +590,26 @@
                 myChart.update();
             }
 
+            var tx_timer_handler = 0;
+            var tx_font = normal_font;
+            
             transmit_power_slider.oninput = function() {
+                if(tx_timer_handler == 0) {
+                    tx_font = emphasis_font;
+                    tx_timer_handler = setTimeout(function(){
+                        tx_font = normal_font;
+                        drawFrontDesign();
+                        tx_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(tx_timer_handler);
+                    tx_timer_handler = setTimeout(function(){
+                        tx_font = normal_font;
+                        drawFrontDesign();
+                        tx_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                
                 drawFrontDesign();
                 myChart.data.datasets[1].data = calculateCapacitorVoltage();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
@@ -671,15 +690,16 @@
                 fctx.stroke();
                 
                 // Write loop inductance:
-                fctx.font = "12px arial";
+                fctx.font = normal_font;
                 const L = getInductance() * 1.0e+6;
                 fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
 
                 // Write Tx power text:
+                fctx.font = tx_font;
                 fctx.fillText("Tx = " + transmit_power_slider.value + " W", 8, win_height * 0.8 + 20);
 
                 // Write loop diameter symbol:
-                fctx.font = "12px arial";
+                fctx.font = normal_font;
                 fctx.textAlign = "center";
                 const dia = 1.0 * loop_diameter_slider.value;
                 fctx.font = loop_dia_font;
