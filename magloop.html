@@ -63,12 +63,12 @@
             behaviour of a magloop antenna. This would help a radio amateur to decide on the characteristics for the build. <br>-- 73 de VK3CPU<br><br>
             <u>Inputs via the slider and radio widgets:</u>
             <ul> 
-                <li>&#8960a : Conductor diameter in millimeters (mm) or inches.</li>
-                <li>&#8960b : Loop diameter in meters (m) or feet.</li>
+                <li>&#8960a : Conductor diameter in millimeters (mm) or inches (").</li>
+                <li>&#8960b : Loop diameter in meters (m) or feet (').</li>
                 <li>N : Number of turns or loops.</li>
                 <li>c/a : is the spacing ratio; based on 'c' being the inter-winding spacing for multi-turn loops measured between conductor centers, and 'a' is the conductor diameter. (Must be >= 1.1) 
                     A low-value will increase the resistance due to the proximity effect.</li>
-                <li>Tx : The transmit power. This affects the predicted voltage across the capacitor (Vcap), and the RMS loop current (Ia).</li>
+                <li>Tx : The transmit power in Watts. This affects the predicted voltage across the capacitor (Vcap), and the RMS loop current (Ia).</li>
                 <li>Metric or Imperial : selects the measuring system.</li>
                 <li>Cu or Al : selects the type of metal conductor (annealed copper or aluminum).</li>
             </ul>
@@ -90,28 +90,14 @@
                 <li>Q : The quality factor, which is the reactance divided by the resistance of the loop at that frequency.</li>
                 <li>Ia (A): The RMS loop current in amps.</li>
             </ul>
-            <!-- u>Formula used for calculations:</u>
-            <ul>
-                <li>L : Inductance is calculated using Nagaoka's equation. Value in microhenries.</li>
-                <ul>
-                    <li>Single-turn loop : L = .</li>
-                    <li>Multi-turn loop : L = .</li>
-                </ul>
-                <li>A : Loop area in square meters or square feet.</li>
-                <li>C : Capacitance for multi-turn loops, which is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
-                <li>circ : Circumference of the main loop in meters or feet.</li>
-                <li>c : Distance between windings, measured from the conductor centers in mm or inches.</li>
-                <li>cond : Conductor length in meters or feet. Equal to the circumference * number of turns.</li>
-                <li>Tuning Cap (pF): The capacitance required to bring the loop into resonance at the given frequency. Value in picofarads.</li>
-                <li>Vcap (kV): The predicted voltage across the capacitance given the desired transmit power.</li>
-                <li>BW (kHz): The predicted 3dB bandwidth of the magloop antenna. This is calculated from the predicted Q and the center frequency.</li>
-                <li>Efficiency (%): Calculated from the radiation resistance divided by the sum of radiation resistance and the loss resistance.</li>
-                <li>R-radiation (&#937): The calculated radiation resistance of the loop in ohms.</li>
-                <li>R-loss (&#937): The calculated loss resistance of the loop in ohms, due to the combination of material conductance, skin-effect and proximity effects.</li>
-                <li>Reactance (j&#937): The inductive reactance of the loop in ohms.</li>
-                <li>Q : The quality factor, which is the reactance divided by the resistance of the loop at that frequency.</li>
-                <li>Ia (A): The RMS loop current in amps.</li>
-            </ul-->
+            Formula used for calculations:<br>
+            <img src="MagloopSingleTurnInductance.png" alt="magloop single-turn antenna inductance"><br>
+            <img src="MagloopMultiTurnInductance.png" alt="magloop multi-turn antenna inductance"><br>
+            <img src="MagloopLossResistance.png" alt="magloop multi-turn loss resistance"><br>
+            <img src="MagloopSurfaceResistance.png" alt="magloop surface resistance of conductor"><br>
+            <img src="MagloopRadiationResistance.png" alt="multi-turn magloop radiation resistance"><br>
+            <img src="MagloopEfficiency.png" alt="magloop antenna efficiency"><br>
+            <img src="MagloopQ.png" alt="magloop antenna Q factor"><br>
             <br>
             </div>
         </section>
@@ -166,7 +152,7 @@
                     retval = (loop_turns**2.0) * mu0 * Math.PI * (a_coil_radius**2.0) * nagaokaCoefficient() / coil_length;
                 } else {
                     const b_conductor_radius = cond_diameter_meters * 0.5;
-                    retval = (loop_turns ** 2.0) * mu0 * a_coil_radius * (Math.log(8.0 * a_coil_radius / b_conductor_radius) - 2.0);
+                    retval = mu0 * a_coil_radius * (Math.log(8.0 * a_coil_radius / b_conductor_radius) - 2.0);
                 }
                 return retval; // In Henries
             }
@@ -303,8 +289,9 @@
                 const k = (n_turns * a_coil_radius / b_conductor_radius);
                 const Rp = getProximityResFromSpacing(loop_spacing_ratio);
                 const Rs = Math.sqrt(Math.PI * frequency * mu0 / conductivity);
-                const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
-                const R_ohmic = k * Rs * (Rp / R0 + 1.0);
+                //const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
+                const R_ohmic = k * Rs * (Rp + 1.0);
+                //const R_ohmic = k * Rs * (Rp / R0 + 1.0);
                 return R_ohmic;
             }
 
@@ -650,7 +637,7 @@
                 afront_canvas.height = win_height-2; 
 
                 fctx.clearRect(0, 0, win_width, win_height);
-                const loop_radius = win_width < win_height ? 0.32 * win_width : 0.32 * win_height; //  100; // loop_diameter_slider.value * 80;
+                const loop_radius = win_width < win_height ? 0.32 * win_width : 0.32 * win_height; 
                 const cond_radius = conductor_diameter_slider.value / 6;
                 const loopx = win_width/2; 
                 const loopy = win_height/2;
@@ -845,12 +832,6 @@
                     sctx.fillText("SRF = ", win_width-8, win_height * 0.1 + 18);
                     sctx.fillText((srf*1e-6).toPrecision(3).toString() + " MHz", win_width-8, win_height * 0.1 + 33);
                 }
-                
-                /* else {
-                    // Draw turns number text:
-                    sctx.textAlign = "center";
-                    sctx.fillText("N = " + loop_turns_slider.value.toString(), win_width/2, win_height * 0.1 + 3);
-                } */
                 
                 sctx.textAlign = "right";
                 sctx.fillText("cond = " , win_width-8, dim_y + 08);
