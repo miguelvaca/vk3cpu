@@ -107,7 +107,7 @@ section div.antennaSide-container {
         grid-column-end: 3; 
         grid-row-start: 1; 
         grid-row-end: 4;
-        height: 80vh;
+        height: 70vh;
         width: 100%;
         box-sizing: border-box; 
     }
