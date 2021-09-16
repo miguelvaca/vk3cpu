@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V3</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V4</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -65,8 +65,7 @@
                 </canvas>
             </div>
             <div class="notes">
-            <b><u>Notes:</u></b><br>
-            The Magloop Antenna Calculator was developed to predict the characteristics of a small-loop (aka "magnetic loop" or "magloop")
+            <b><u>Notes:</u></b><br>             The Magloop Antenna Calculator was developed to predict the characteristics of a small-loop (aka "magnetic loop" or "magloop")
             antenna, given physical dimensions entered via slider widgets. It assumes the main loop is made from a round
             anodised copper or aluminium conductor. I developed this multi-turn capable magloop calculator to take advantage of the 
             touch-screens and high-speed of modern mobile phones, to allow users to get realtime feedback of the predicted
@@ -112,6 +111,8 @@
             <img src="I_loop.png" alt="magloop antenna loop current"><br>
             <br>
             <b><u>Change history:</u></b><br>
+            [16-Sep-21] : Updated equation used for Q to match the one use in the ARRL Antenna Book. Changed to V4. This will affect predictions for V_cap, I_loop and BW. Based on reading
+            "Impedance, Bandwidth, and Q of Antennas" by A D Yaghjian, IEEE Transactions on Antennas and Propagation, April 2005.<br>
             [16-Sep-21] : Added equation graphics for V_cap and I_loop formulas.<br>
             [12-Sep-21] : Set maximum values to Q, Vcap and I axes to stop autoscaling. Max Q set to 2000, Vcap to 20 kV and I to 100 A.<br>
             [12-Sep-21] : Added formula/equation graphics in Notes section. A few more complex ones, such as effective capacitance and SRF, are still needed.<br>
@@ -344,7 +345,7 @@
                 const Xl = inductiveReactance(frequency);
                 const Rl = lossResistance(frequency);
                 const Rr = radiationResistance(frequency);
-                const Q = Xl / (Rl + Rr);
+                const Q = Xl / (2.0 * (Rl + Rr));
                 return Q;
             }
 
@@ -1020,7 +1021,7 @@
                             },
                             ticks: {
                                 beginAtZero: true,
-                                max: 20.0,
+                                max: 10.0,
                             },
                             min: 0.0,
                             position: 'left',
@@ -1075,7 +1076,7 @@
                             },
                             ticks: {
                                 beginAtZero: true,
-                                max: 3000.0,
+                                max: 1800.0,
                             },
                             position: 'right',
                             id: 'qID'
