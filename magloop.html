@@ -110,11 +110,13 @@
             <img src="Vcap.png" alt="magloop antenna capacitor voltage"><br>
             <img src="I_loop.png" alt="magloop antenna loop current"><br>
             <img src="BW.png" alt="magloop antenna bandwidth"><br>
+            <!-- img src="MultiloopCapacitance.png" alt="magloop antenna multi-turn loop capacitance"><br-->
             <br>
             <b><u>Change history:</u></b><br>
-            [16-Sep-21] : Updated equation used for Q to match the one use in the ARRL Antenna Book. Changed to V4. This will affect predictions for V_cap, I_loop and BW. Based on reading
-            "Impedance, Bandwidth, and Q of Antennas" by A D Yaghjian, IEEE Transactions on Antennas and Propagation, April 2005.<br>
-            [16-Sep-21] : Added equation graphics for V_cap and I_loop formulas.<br>
+            [16-Sep-21] : Update to release V4: Updated equation used for Q to match the one use in the ARRL Antenna Book. This will affect predictions for V_cap, I_loop and BW. (Based on confirmation of correct Q equation used in
+            "Impedance, Bandwidth, and Q of Antennas" by A D Yaghjian, IEEE Transactions on Antennas and Propagation, April 2005.)<br>
+            [16-Sep-21] : Added equation graphics for V_cap, I_loop and BW formulas.<br>
+            [16-Sep-21] : Flipped the main-loop graphic to have the capacitor above the coupling capacitor.<br>
             [12-Sep-21] : Set maximum values to Q, Vcap and I axes to stop autoscaling. Max Q set to 2000, Vcap to 20 kV and I to 100 A.<br>
             [12-Sep-21] : Added formula/equation graphics in Notes section. A few more complex ones, such as effective capacitance and SRF, are still needed.<br>
             [12-Sep-21] : Fixed minor error in calculation of resistive loss due to proximity effect.<br>
@@ -458,16 +460,21 @@
             }
 
             // Specify fonts for changing parameters controlled by the sliders:
-            var normal_font = "12px arial";
-            var emphasis_font = "bold 14px arial";
+            const normal_font = "12px arial";
+            const emphasis_font = "bold 14px arial";
             const emphasis_delay = 1200;
+            
+            const normal_width = 1;
+            const emphasis_width = 3;
             
             var loop_dia_timer_handler = 0;
             var loop_dia_font = normal_font;
+            var loop_dia_thickness = normal_width;
             
             loop_diameter_slider.oninput = function() {
                 if(loop_dia_timer_handler == 0) {
                     loop_dia_font = emphasis_font;
+                    loop_dia_thickness = emphasis_width;
                     loop_dia_timer_handler = setTimeout(function(){
                         loop_dia_font = normal_font;
                         drawFrontDesign();
@@ -477,6 +484,7 @@
                     clearTimeout(loop_dia_timer_handler);
                     loop_dia_timer_handler = setTimeout(function(){
                         loop_dia_font = normal_font;
+                        loop_dia_thickness = normal_width;
                         drawFrontDesign();
                         loop_dia_timer_handler = 0;
                     }, emphasis_delay);
@@ -499,10 +507,12 @@
 
             var cond_dia_timer_handler = 0;
             var cond_dia_font = normal_font;
+            var cond_dia_thickness = normal_width;
             
             conductor_diameter_slider.oninput = function() {
                 if(cond_dia_timer_handler == 0) {
                     cond_dia_font = emphasis_font;
+                    cond_dia_thickness = emphasis_width;
                     cond_dia_timer_handler = setTimeout(function(){
                         cond_dia_font = normal_font;
                         drawFrontDesign();
@@ -512,6 +522,7 @@
                     clearTimeout(cond_dia_timer_handler);
                     cond_dia_timer_handler = setTimeout(function(){
                         cond_dia_font = normal_font;
+                        cond_dia_thickness = normal_width;
                         drawFrontDesign();
                         cond_dia_timer_handler = 0;
                     }, emphasis_delay);
@@ -670,27 +681,28 @@
 
                 // Draw loop:
                 fctx.beginPath();
-                fctx.arc(loopx, loopy, loop_radius + cond_radius, 0.5 * Math.PI + 0.02, 0.5 * Math.PI - 0.02, false);
-                fctx.arc(loopx, loopy, loop_radius - cond_radius, 0.5 * Math.PI - 0.025, 0.5 * Math.PI + 0.025, true);
+                fctx.arc(loopx, loopy, loop_radius + cond_radius, -0.5 * Math.PI + 0.025, -0.5 * Math.PI - 0.025, false);
+                fctx.arc(loopx, loopy, loop_radius - cond_radius, -0.5 * Math.PI - 0.025, -0.5 * Math.PI + 0.025, true);
                 fctx.closePath();
                 fctx.fill();
                 
                 // Draw cap:
                 fctx.lineWidth = 3;
                 fctx.beginPath();
-                fctx.moveTo(loopx - 3, loopy + loop_radius - 3*cond_radius);
-                fctx.lineTo(loopx - 3, loopy + loop_radius + 3*cond_radius);
-                fctx.moveTo(loopx + 3, loopy + loop_radius - 3*cond_radius);
-                fctx.lineTo(loopx + 3, loopy + loop_radius + 3*cond_radius);
+                fctx.moveTo(loopx - 3, loopy - loop_radius - 3*cond_radius);
+                fctx.lineTo(loopx - 3, loopy - loop_radius + 3*cond_radius);
+                fctx.moveTo(loopx + 3, loopy - loop_radius - 3*cond_radius);
+                fctx.lineTo(loopx + 3, loopy - loop_radius + 3*cond_radius);
                 fctx.stroke();
                 fctx.lineWidth = 1;
                 
                 // Draw coupling loop:
                 fctx.beginPath();
-                fctx.arc(loopx, loopy - (loop_radius - loop_radius/5) + cond_radius , loop_radius/5, 0, 2*Math.PI, true);
+                fctx.arc(loopx, loopy + (loop_radius - loop_radius/5) - cond_radius , loop_radius/5, 0, 2*Math.PI, true);
                 fctx.stroke();
 
                 // Draw loop diameter arrow:
+                fctx.lineWidth = loop_dia_thickness;
                 fctx.beginPath();
                 fctx.moveTo(loopx - loop_radius, loopy);
                 fctx.lineTo(loopx - loop_radius + 2*cond_radius, loopy - 2*cond_radius);
@@ -701,6 +713,7 @@
                 fctx.lineTo(loopx + loop_radius - 2*cond_radius, loopy - 2*cond_radius);
                 fctx.lineTo(loopx + loop_radius, loopy);
                 fctx.stroke();
+                fctx.lineWidth = normal_width;
                 
                 // Write loop inductance:
                 fctx.font = normal_font;
@@ -724,6 +737,7 @@
                 fctx.font = normal_font;
 
                 // Draw conductor diameter arrow:
+                fctx.lineWidth = cond_dia_thickness;
                 fctx.beginPath();
                 var p1x = loopx + 0.4 * (loop_radius - cond_radius);
                 var p1y = loopy + 0.4 * (loop_radius - cond_radius);
@@ -754,6 +768,8 @@
                 fctx.lineTo(p4x, p4y);
                 fctx.lineTo(p2x, p2y);
                 fctx.stroke();
+                fctx.lineWidth = normal_width;
+                
                 p1x = loopx + 0.4 * (loop_radius - cond_radius);
                 p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
                 //fctx.textAlign = "right";
@@ -761,7 +777,7 @@
                 fctx.textAlign = "center";
                 if(units == "metric") {
                     fctx.font = cond_dia_font;
-                    fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + " mm", loopx, p1y+2);
+                    fctx.fillText("\u2300a = " + cond_dia.toPrecision(3).toString() + " mm", loopx, p1y+1);
                     fctx.font = normal_font;
                     // Write loop area:
                     fctx.textAlign = "right";
@@ -771,7 +787,7 @@
                     fctx.fillText("circ = " + (Math.PI * dia).toPrecision(3).toString() + " m", win_width-8, win_height * 0.8 + 20);
                 } else {
                     fctx.font = cond_dia_font;
-                    fctx.fillText("\u2300a = " + (cond_dia/25.4).toPrecision(3).toString() + "\"", loopx, p1y+2);
+                    fctx.fillText("\u2300a = " + (cond_dia/25.4).toPrecision(3).toString() + "\"", loopx, p1y+1);
                     fctx.font = normal_font;
                     // Write loop area:
                     fctx.textAlign = "right";
