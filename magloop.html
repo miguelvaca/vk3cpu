@@ -36,14 +36,24 @@
                     <input type="range" id="transmit_power_slider" min="5" max="1500" value="100" step="5">
                 </div>
                 <div class="radios">
-                    <label>Metric</label>
+                    <label>Metr</label>
                     <input type="radio" name="unit_radio" id="metric_radio" value="metric" checked/>
-                    <label>Imperial</label>
+                    <label>Impr</label>
                     <input type="radio" name="unit_radio" id="imperial_radio" value="imperial"/>
                     <label>Cu</label>
                     <input type="radio" name="metal_radio" id="copper_radio" value="copper" checked/>
                     <label>Al</label>
                     <input type="radio" name="metal_radio" id="aluminium_radio" value="aluminium"/>
+                    <!--
+                    <label>Circ</label>
+                    <input type="radio" name="shape_radio" id="circle_radio" value="circle" checked/>
+                    <label>Oct</label>
+                    <input type="radio" name="shape_radio" id="oct_radio" value="oct"/>
+                    <label>Hex</label>
+                    <input type="radio" name="shape_radio" id="hex_radio" value="hex"/>
+                    <label>Sqr</label>
+                    <input type="radio" name="shape_radio" id="square_radio" value="square"/>
+                    -->
                 </div>
             </div>
             <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
@@ -98,8 +108,11 @@
             <img src="MagloopRadiationResistance.png" alt="multi-turn magloop radiation resistance"><br>
             <img src="MagloopEfficiency.png" alt="magloop antenna efficiency"><br>
             <img src="MagloopQ.png" alt="magloop antenna Q factor"><br>
+            <img src="Vcap.png" alt="magloop antenna capacitor voltage"><br>
+            <img src="I_loop.png" alt="magloop antenna loop current"><br>
             <br>
             <b><u>Change history:</u></b><br>
+            [16-Sep-21] : Added equation graphics for V_cap and I_loop formulas.
             [12-Sep-21] : Set maximum values to Q, Vcap and I axes to stop autoscaling. Max Q set to 2000, Vcap to 20 kV and I to 100 A.<br>
             [12-Sep-21] : Added formula/equation graphics in Notes section. A few more complex ones, such as effective capacitance and SRF, are still needed.<br>
             [12-Sep-21] : Fixed minor error in calculation of resistive loss due to proximity effect.<br>
