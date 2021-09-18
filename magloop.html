@@ -1200,41 +1200,6 @@
                 }
                 fctx.font = normal_font;
 
-                // Draw conductor diameter arrow:
-                /*
-                fctx.lineWidth = cond_dia_thickness;
-                fctx.beginPath();
-                var p1x = loopx + 0.4 * (loop_radius - cond_radius);
-                var p1y = loopy + 0.4 * (loop_radius - cond_radius);
-                var p2x = loopx + 0.707 * (loop_radius - cond_radius);
-                var p2y = loopy + 0.707 * (loop_radius - cond_radius);
-                var p3x = loopx + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
-                var p3y = loopy + 0.707 * (loop_radius - cond_radius);
-                var p4x = loopx + 0.707 * (loop_radius - cond_radius);
-                var p4y = loopy + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
-                fctx.moveTo(win_width-p1x, p1y);
-                fctx.lineTo(p1x, p1y);
-                fctx.lineTo(p2x, p2y);
-                fctx.lineTo(p3x, p3y);
-                fctx.lineTo(p4x, p4y);
-                fctx.lineTo(p2x, p2y);
-
-                p1x = loopx + 1.0 * (loop_radius + cond_radius);
-                p1y = loopy + 1.0 * (loop_radius + cond_radius);
-                p2x = loopx + 0.707 * (loop_radius + cond_radius);
-                p2y = loopy + 0.707 * (loop_radius + cond_radius);
-                p3x = loopx + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
-                p3y = loopy + 0.707 * (loop_radius + cond_radius);
-                p4x = loopx + 0.707 * (loop_radius + cond_radius);
-                p4y = loopy + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
-                fctx.moveTo(p1x, p1y);
-                fctx.lineTo(p2x, p2y);
-                fctx.lineTo(p3x, p3y);
-                fctx.lineTo(p4x, p4y);
-                fctx.lineTo(p2x, p2y);
-                fctx.stroke();
-                fctx.lineWidth = normal_width;
-                */
                 p1x = loopx + 0.45 * (loop_radius - cond_radius);
                 p1y = loopy + 0.45 * (loop_radius - cond_radius) - 5;
                 //fctx.textAlign = "right";
@@ -1335,7 +1300,6 @@
                 
                 sctx.textAlign = "right";
                 sctx.fillText("cond = " , win_width-8, dim_y + 08);
-                // const cond_length = ((((Math.PI * loop_diameter_slider.value * loop_turns_slider.value) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns_slider.value) ** 2.0)) ** 0.5);
                 if(units == "metric") {
                     sctx.fillText(conductor_length.toPrecision(4).toString() + " m", win_width-8, dim_y + 20);
                 } else {
