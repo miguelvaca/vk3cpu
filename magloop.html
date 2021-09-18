@@ -66,8 +66,14 @@
             <p style="text-align:center"><b><u><a href="./magloop_equations.html"> EQUATIONS USED </a></u></b></p>
             <b><u>Notes:</u></b><br>
             The Magloop Antenna Calculator was developed to predict the characteristics of a small-loop (aka "magnetic loop" or "magloop")
-            antenna, given physical dimensions entered via slider widgets. It assumes the main loop is made from a hollow round
-            anodised copper or aluminium conductor. I developed this multi-turn capable magloop calculator to take advantage of the 
+            antenna, given physical dimensions entered via slider widgets. <br>
+            It supports:
+            <ul>
+                <li>circular, octagonal, hexagonal and square-shaped loops</li>
+                <li>main loops made from either hollow round anodised-copper or aluminium conductors</li>
+                <li>metric and imperial units</li>
+            </ul>
+            I developed this multi-turn capable magloop calculator to take advantage of the 
             touch-screens and high-speed of modern mobile phones, to allow users to get realtime feedback of the predicted
             behaviour of a magloop antenna. This would help a radio amateur to decide on the characteristics for the build. <br>-- 73 de VK3CPU<br><br>
             <u><b>Inputs via the slider and radio widgets:</b></u>
@@ -255,7 +261,6 @@
                     const s = (100.0 * loop_diameter_meters) * 0.57735; // side length in cm
                     const l = (N>1) ? (coil_length * 100.0) : (cond_diameter_meters * 100.0); // coil length in cm
                     const bOn2r = l / (loop_diameter_meters * 115.470);
-                    //console.log(N, s, l);
                     //retval = 1e-6 * 0.012 * (N**2) * s * ( Math.log((2.0*s*N)/((N+1)*l)) + 0.65533 + ((0.1348*(N+1)*l) / (s*N)));
                     retval = 1e-6 * 0.012 * (N**2) * s * ( Math.log(1.0/bOn2r) + 0.65533 + 0.26960*bOn2r + 0.07736*bOn2r**2 - 0.05504*bOn2r**4);
                 } else
@@ -264,7 +269,6 @@
                     const s = (100.0 * loop_diameter_meters); // side length in cm
                     const l = (N>1) ? (coil_length * 100.0) : (cond_diameter_meters * 100.0); // coil length in cm
                     const bOn2r = l / (loop_diameter_meters * 141.4214);
-                    //console.log(N, s, l);
                     //retval = 1e-6 * 0.008 * (N**2) * s * ( Math.log((1.4142*s*N)/((N+1)*l)) + 0.37942 + ((0.3333*(N+1)*l)/(s*N)));
                     retval = 1e-6 * 0.008 * (N**2) * s * ( Math.log(1.0/bOn2r) + 0.37942 + 0.47140*bOn2r - 0.014298*bOn2r**2 - 0.02904*bOn2r**4);
                 }
