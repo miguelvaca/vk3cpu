@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V4</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V5</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -36,24 +36,22 @@
                     <input type="range" id="transmit_power_slider" min="5" max="1500" value="100" step="5">
                 </div>
                 <div class="radios">
-                    <label>Metr</label>
+                    <label>Met</label>
                     <input type="radio" name="unit_radio" id="metric_radio" value="metric" checked/>
-                    <label>Impr</label>
+                    <label>Imp</label>
                     <input type="radio" name="unit_radio" id="imperial_radio" value="imperial"/>
                     <label>Cu</label>
                     <input type="radio" name="metal_radio" id="copper_radio" value="copper" checked/>
                     <label>Al</label>
                     <input type="radio" name="metal_radio" id="aluminium_radio" value="aluminium"/>
-                    <!--
                     <label>Circ</label>
                     <input type="radio" name="shape_radio" id="circle_radio" value="circle" checked/>
                     <label>Oct</label>
-                    <input type="radio" name="shape_radio" id="oct_radio" value="oct"/>
+                    <input type="radio" name="shape_radio" id="oct_radio" value="octagon"/>
                     <label>Hex</label>
-                    <input type="radio" name="shape_radio" id="hex_radio" value="hex"/>
+                    <input type="radio" name="shape_radio" id="hex_radio" value="hexagon"/>
                     <label>Sqr</label>
                     <input type="radio" name="shape_radio" id="square_radio" value="square"/>
-                    -->
                 </div>
             </div>
             <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
@@ -65,8 +63,10 @@
                 </canvas>
             </div>
             <div class="notes">
-            <b><u>Notes:</u></b><br>             The Magloop Antenna Calculator was developed to predict the characteristics of a small-loop (aka "magnetic loop" or "magloop")
-            antenna, given physical dimensions entered via slider widgets. It assumes the main loop is made from a round
+            <p style="text-align:center"><b><u><a href="./magloop_equations.html"> EQUATIONS USED </a></u></b></p>
+            <b><u>Notes:</u></b><br>
+            The Magloop Antenna Calculator was developed to predict the characteristics of a small-loop (aka "magnetic loop" or "magloop")
+            antenna, given physical dimensions entered via slider widgets. It assumes the main loop is made from a hollow round
             anodised copper or aluminium conductor. I developed this multi-turn capable magloop calculator to take advantage of the 
             touch-screens and high-speed of modern mobile phones, to allow users to get realtime feedback of the predicted
             behaviour of a magloop antenna. This would help a radio amateur to decide on the characteristics for the build. <br>-- 73 de VK3CPU<br><br>
@@ -86,9 +86,9 @@
                 <li>L : Inductance in microhenries.</li>
                 <li>A : Loop area in square meters or square feet.</li>
                 <li>C : Effective capacitance for multi-turn loops in picofarads.</li>
-                <li>circ : Circumference of the main loop in meters or feet.</li>
+                <li>peri : Perimeter of the main loop in meters or feet.</li>
                 <li>c : Distance between windings, measured from the conductor centers in mm or inches.</li>
-                <li>cond : Total conductor length in meters or feet.</li>
+                <li>cond : Total required conductor length in meters or feet.</li>
                 <li>Tuning Cap (pF): The capacitance required to bring the loop into resonance at the given frequency. Value in picofarads.</li>
                 <li>Vcap (kV): The predicted voltage across the capacitance given the desired transmit power.</li>
                 <li>BW (kHz): The predicted 3dB bandwidth of the magloop antenna. This is calculated from the predicted Q and the center frequency.</li>
@@ -99,41 +99,38 @@
                 <li>Q : The quality factor, which is the reactance divided by the resistance of the loop at that frequency.</li>
                 <li>Ia (A): The RMS loop current in amps.</li>
             </ul>
-            <b><u>Formula used for calculations:</u></b><br>
-            <img src="MagloopSingleTurnInductance.png" alt="magloop single-turn antenna inductance"><br>
-            <img src="MagloopMultiTurnInductance.png" alt="magloop multi-turn antenna inductance"><br>
-            <img src="MagloopLossResistance.png" alt="magloop multi-turn loss resistance"><br>
-            <img src="MagloopSurfaceResistance.png" alt="magloop surface resistance of conductor"><br>
-            <img src="MagloopRadiationResistance.png" alt="multi-turn magloop radiation resistance"><br>
-            <img src="MagloopEfficiency.png" alt="magloop antenna efficiency"><br>
-            <img src="MagloopQ.png" alt="magloop antenna Q factor"><br>
-            <img src="Vcap.png" alt="magloop antenna capacitor voltage"><br>
-            <img src="I_loop.png" alt="magloop antenna loop current"><br>
-            <img src="BW.png" alt="magloop antenna bandwidth"><br>
-            <!-- img src="MultiloopCapacitance.png" alt="magloop antenna multi-turn loop capacitance"><br-->
             <br>
             <b><u>Change history:</u></b><br>
-            [16-Sep-21] : Update to release V4: Updated equation used for Q to match the one use in the ARRL Antenna Book. This will affect predictions for V_cap, I_loop and BW. (Based on confirmation of correct Q equation used in
-            "Impedance, Bandwidth, and Q of Antennas" by A D Yaghjian, IEEE Transactions on Antennas and Propagation, April 2005.)<br>
-            [16-Sep-21] : Added equation graphics for V_cap, I_loop and BW formulas.<br>
-            [16-Sep-21] : Flipped the main-loop graphic to have the capacitor above the coupling loop.<br>
-            [12-Sep-21] : Set maximum values to Q, Vcap and I axes to stop autoscaling. Max Q set to 2000, Vcap to 20 kV and I to 100 A.<br>
-            [12-Sep-21] : Added formula/equation graphics in Notes section. A few more complex ones, such as effective capacitance and SRF, are still needed.<br>
-            [12-Sep-21] : Fixed minor error in calculation of resistive loss due to proximity effect.<br>
-            [11-Sep-21] : Added visual cues for all slider-controlled parameters to highlight which parameter is being modified in the graphic representation.<br>
-            [10-Sep-21] : Added c/a display to graphic representation. Moved N from center to left.<br>
-            [30-Aug-21] : Added SRF calculation and display for multi-loop antennas.<br>
-            [28-Aug-21] : Added support for imperial units and for aluminum metal.<br>
-            [27-Jul-21] : Added total conductor length display.<br>
-            [24-Jul-21] : Added loop circumference display.<br>
+            <b>[18-Sep-21]</b> <br>
+            * Updated to V5; Added support for octagon, hexagon and square shaped loops. Moved and hyperlinked equations-used to a separate page for clarity.<br>
+            <b>[16-Sep-21]</b> <br>
+            * Updated to V4; Updated equation used for Q to match the one use in the ARRL Antenna Book. This will affect predictions for V_cap, I_loop and BW. (Based on confirmation of correct Q equation used in
+            <i>"Impedance, Bandwidth, and Q of Antennas"</i> by A D Yaghjian, IEEE Transactions on Antennas and Propagation, April 2005.)<br>
+            * Added equation graphics for V_cap, I_loop and BW formulas.<br>
+            * Flipped the main-loop graphic to have the capacitor above the coupling loop.<br>
+            <b>[12-Sep-21]</b> <br>
+            * Set maximum values to Q, Vcap and I axes to stop autoscaling. Max Q set to 2000, Vcap to 20 kV and I to 100 A.<br>
+            * Added formula/equation graphics in Notes section. A few more complex ones, such as effective capacitance and SRF, are still needed.<br>
+            * Fixed minor error in calculation of resistive loss due to proximity effect.<br>
+            <b>[11-Sep-21]</b> <br>
+            * Added visual cues for all slider-controlled parameters to highlight which parameter is being modified in the graphic representation.<br>
+            <b>[10-Sep-21]</b> <br>
+            * Added c/a display to graphic representation. Moved N from center to left.<br>
+            <b>[30-Aug-21]</b> <br>
+            * Added SRF calculation and display for multi-loop antennas.<br>
+            <b>[28-Aug-21]</b> <br>
+            * Added support for imperial units and for aluminum metal.<br>
+            <b>[27-Jul-21]</b> <br>
+            * Added total conductor length display.<br>
+            <b>[24-Jul-21]</b> <br>
+            * Added loop circumference display.<br>
             <br>
             </div>
         </section>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.1.2"></script>
         <script>
-            var frequencies = [];
-
+            // GUI control widgets:
             var loop_diameter_slider = document.getElementById("loop_diameter_slider");
             var conductor_diameter_slider = document.getElementById("conductor_diameter_slider");
             var loop_turns_slider = document.getElementById("loop_turns_slider");
@@ -141,9 +138,20 @@
             var transmit_power_slider = document.getElementById("transmit_power_slider");
             var metric_radio = document.getElementById("metric_radio");
             var imperial_radio = document.getElementById("imperial_radio");
+            var shape_radio = document.getElementById("shape_radio");
             
+            // Global variables:
             var units = "metric";
-            var conductivity = 58e6; // Default is annealed copper
+            var conductivity = 58e6;            // Default is annealed copper
+            var shape = "circle";               // Shape of the main loop
+            
+            var inductance = 0.0;
+            var area = 0.0;                     // Loop area in square meters. 
+            var perimeter = 0.0;                // Perimeter of a single turn of the main loop
+            var multiloop_capacitance = 0.0;    // Effective capacitance of a multi-turn loop
+            var conductor_length = 0.0;         // Total conductor length
+
+            var frequencies = [];
 
             function updateFrequencies() {
                 const hamFrequencies = [
@@ -162,9 +170,57 @@
                 });
             }
             
-            // Update the frequencies, now that we have the sliders available:
-            updateFrequencies();
-
+            function setGlobals() {
+                inductance = getInductance();
+                area = getArea();
+                perimeter = getPerimeter();
+                multiloop_capacitance = (loop_turns_slider.value > 1) ? multiloopCapacitance() : 0.0;
+                conductor_length = ((((perimeter* loop_turns_slider.value) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns_slider.value) ** 2.0)) ** 0.5);
+            }
+            
+            // Returns the loop area in square meters:
+            function getArea() {
+                var l_area = 0.0;
+                const width = loop_diameter_slider.value;
+                if(shape == "circle") {
+                    l_area = 3.141592 * (0.5 * width)**2;
+                } else
+                if(shape == "octagon") {
+                    const r = 0.4142135 * width;
+                    l_area = 4.8284 * r**2.0;
+                } else
+                if(shape == "hexagon") {
+                    const r = 0.5 * width;
+                    l_area = 3.4641 * r**2.0;
+                } else
+                if(shape == "square") {
+                    l_area = width **2.0;
+                }
+                return l_area;
+            }
+            
+            // Returns the loop area in square meters:
+            function getPerimeter() {
+                var l_perimeter = 0.0;
+                const width = loop_diameter_slider.value;
+                if(shape == "circle") {
+                    l_perimeter = 3.141592 * width;
+                } else
+                if(shape == "octagon") {
+                    const r = 0.4142135 * width;
+                    l_perimeter = 8 * r;
+                } else
+                if(shape == "hexagon") {
+                    const r = 0.5 * width;
+                    const t = 2.0 * r * 0.57735;
+                    l_perimeter = 6 * t;
+                } else
+                if(shape == "square") {
+                    l_perimeter = 4 * width;
+                }
+                return l_perimeter;
+            }
+            
             // Calculate the inductance of the coil. For single turn loops, use standard inductance equation. For multi-turn, use Nagaoka correction.
             function getInductance() {
                 const mu0 = Math.PI * 4e-7;
@@ -176,22 +232,57 @@
                 const a_coil_radius = loop_diameter_meters * 0.5;
                 const coil_length = cond_diameter_meters * spacing_ratio * loop_turns;
                 var retval = 0.0;
-                if(loop_turns > 1) {
-                    retval = (loop_turns**2.0) * mu0 * Math.PI * (a_coil_radius**2.0) * nagaokaCoefficient() / coil_length;
-                } else {
-                    const b_conductor_radius = cond_diameter_meters * 0.5;
-                    retval = mu0 * a_coil_radius * (Math.log(8.0 * a_coil_radius / b_conductor_radius) - 2.0);
+                
+                if(shape == "circle") {
+                    if(loop_turns > 1) {
+                        retval = (loop_turns**2.0) * mu0 * Math.PI * (a_coil_radius**2.0) * nagaokaCoefficient() / coil_length;
+                    } else {
+                        const b_conductor_radius = cond_diameter_meters * 0.5;
+                        retval = mu0 * a_coil_radius * (Math.log(8.0 * a_coil_radius / b_conductor_radius) - 2.0);
+                    }
+                } else
+                if(shape == "octagon") {
+                    const N = loop_turns; 
+                    const s = (100.0 * loop_diameter_meters) * 0.414213; // side length in cm
+                    const l = (N>1) ? (coil_length * 100.0) : (cond_diameter_meters * 100.0); // coil length in cm
+                    const bOn2r = l / (1.09868411*s);
+                    //retval = 1e-6 * 0.016 * (N**2) * s * ( Math.log((2.613*s*N)/((N+1)*l)) + 0.75143 + ((0.07153*(N+1)*l) / (s*N)));
+                    retval = 1e-6 * 0.016 * (N**2) * s * ( Math.log(1.0/bOn2r) + 0.75143 + 0.18693*bOn2r + 0.11969*bOn2r**2 - 0.08234*bOn2r**4);
+                } else
+                if(shape == "hexagon") {
+                    const N = loop_turns; 
+                    const s = (100.0 * loop_diameter_meters) * 0.57735; // side length in cm
+                    const l = (N>1) ? (coil_length * 100.0) : (cond_diameter_meters * 100.0); // coil length in cm
+                    const bOn2r = l / (loop_diameter_meters * 115.470);
+                    //console.log(N, s, l);
+                    //retval = 1e-6 * 0.012 * (N**2) * s * ( Math.log((2.0*s*N)/((N+1)*l)) + 0.65533 + ((0.1348*(N+1)*l) / (s*N)));
+                    retval = 1e-6 * 0.012 * (N**2) * s * ( Math.log(1.0/bOn2r) + 0.65533 + 0.26960*bOn2r + 0.07736*bOn2r**2 - 0.05504*bOn2r**4);
+                } else
+                if(shape == "square") {
+                    const N = loop_turns; 
+                    const s = (100.0 * loop_diameter_meters); // side length in cm
+                    const l = (N>1) ? (coil_length * 100.0) : (cond_diameter_meters * 100.0); // coil length in cm
+                    const bOn2r = l / (loop_diameter_meters * 141.4214);
+                    //console.log(N, s, l);
+                    //retval = 1e-6 * 0.008 * (N**2) * s * ( Math.log((1.4142*s*N)/((N+1)*l)) + 0.37942 + ((0.3333*(N+1)*l)/(s*N)));
+                    retval = 1e-6 * 0.008 * (N**2) * s * ( Math.log(1.0/bOn2r) + 0.37942 + 0.47140*bOn2r - 0.014298*bOn2r**2 - 0.02904*bOn2r**4);
                 }
                 return retval; // In Henries
             }
 
             function radiationResistance(frequency) {
                 const n_turns = loop_turns_slider.value;
-                const k = 20.0 * (Math.PI ** 2.0);
                 const wavelength = 3e8 / frequency;
-                const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-                const rr = (n_turns ** 2.0) * k * (l ** 4.0);
-                return rr;
+                var retval = 0.0;
+                
+                if(shape == "circle") {
+                    const k = 20.0 * (Math.PI ** 2.0);
+                    const l = (Math.PI * loop_diameter_slider.value) / wavelength;
+                    retval = (n_turns ** 2.0) * k * (l ** 4.0);
+                } else {
+                    retval = (31171.0 * n_turns**2.0 * area**2.0) / (wavelength**4.0);
+                }
+                return retval;
             }
 
             function calculateRadiationResistance() {
@@ -204,7 +295,7 @@
             }
 
             function inductiveReactance(frequency) {
-                const inductance = getInductance();
+                //const inductance = getInductance();
                 const reactance = 2.0 * Math.PI * frequency * inductance;
                 return reactance;
             }
@@ -229,6 +320,7 @@
                 const w = -0.47 / (0.755 + x)**1.44;
                 const p = k0 + 3.437/x + k2/x**2 + w;
                 retval = zk * (Math.log(1 + 1/zk) + 1/p);
+                //console.log(retval);
                 return retval;
             }
 
@@ -252,18 +344,24 @@
                 const ex = 1.0; // Assume external epsilon is air (or free-space)
                 const solenoid_length = loop_turns_slider.value * h;
                 const ff = solenoid_length / loop_diameter_slider.value;
-                var multiloop_capacitance = 1e-12 * (ctdw(ff, ei, ex) / Math.sqrt(1 - h**2 / loop_diameter_slider.value**2) + ciae(ff, ei, ex)) * loop_diameter_slider.value;
-                return multiloop_capacitance; // in Farads
+                
+                // How much longer is the perimeter compared to the circumference if it were circular:
+                const shape_factor = perimeter / (Math.PI * loop_diameter_slider.value);
+                
+                var l_multiloop_capacitance = 1e-12 * shape_factor * (ctdw(ff, ei, ex) / Math.sqrt(1 - h**2 / loop_diameter_slider.value**2) + ciae(ff, ei, ex)) * loop_diameter_slider.value;
+                return l_multiloop_capacitance; // in Farads
             }
 
             function tuningCapacitance(frequency) {
                 // frequency is in Hertz
                 const reactance = inductiveReactance(frequency);
+                /*
                 var multiloop_capacitance = 0.0;
                 if(loop_turns_slider.value > 1) {
                     // Only compensate for multiloop capacitance when we have more than 1 turn:
                     multiloop_capacitance = multiloopCapacitance();
                 }
+                */
                 const capacitance = 1e12 * ((1.0 / (2.0 * Math.PI * frequency * reactance)) - multiloop_capacitance);
                 return capacitance; // in picofarads
             }
@@ -314,11 +412,15 @@
                 const n_turns = loop_turns_slider.value;
                 const loop_spacing_ratio = loop_spacing_slider.value;
                 const mu0 = 4.0 * Math.PI * 1e-7;
+                
+                // How much longer is the perimeter compared to the circumference if it were circular:
+                const shape_factor = perimeter / (Math.PI * loop_diameter_slider.value);
+                
                 const k = (n_turns * a_coil_radius / b_conductor_radius);
                 const Rp = getProximityResFromSpacing(loop_spacing_ratio);
                 const Rs = Math.sqrt(Math.PI * frequency * mu0 / conductivity);
                 //const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
-                const R_ohmic = k * Rs * (Rp + 1.0);
+                const R_ohmic = shape_factor * k * Rs * (Rp + 1.0);
                 //const R_ohmic = k * Rs * (Rp / R0 + 1.0);
                 return R_ohmic;
             }
@@ -414,6 +516,7 @@
             metric_radio.oninput = function() {
                 units = metric_radio.value;
                 //console.log(units);
+                setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
             }
@@ -427,6 +530,7 @@
 
             copper_radio.oninput = function() {
                 conductivity = 58e6;
+                setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
                 updateFrequencies();
@@ -444,6 +548,79 @@
 
             aluminium_radio.oninput = function() {
                 conductivity = 35e6;
+                setGlobals();
+                drawFrontDesign();
+                drawSideDesign();
+                updateFrequencies();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
+            circle_radio.oninput = function() {
+                shape = "circle";
+                setGlobals();
+                drawFrontDesign();
+                drawSideDesign();
+                updateFrequencies();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
+            oct_radio.oninput = function() {
+                shape = "octagon";
+                setGlobals();
+                drawFrontDesign();
+                drawSideDesign();
+                updateFrequencies();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
+            hex_radio.oninput = function() {
+                shape = "hexagon";
+                setGlobals();
+                drawFrontDesign();
+                drawSideDesign();
+                updateFrequencies();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
+            square_radio.oninput = function() {
+                shape = "square";
+                setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
                 updateFrequencies();
@@ -490,6 +667,7 @@
                     }, emphasis_delay);
                 }
                 
+                setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
                 updateFrequencies();
@@ -528,6 +706,7 @@
                     }, emphasis_delay);
                 }
                 
+                setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
                 myChart.data.datasets[0].data = calculateTuningCapacitor();
@@ -562,6 +741,7 @@
                     }, emphasis_delay);
                 }
                 
+                setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
                 updateFrequencies();
@@ -597,6 +777,7 @@
                     }, emphasis_delay);
                 }
                 
+                setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
                 if(loop_turns_slider.value > 1) {
@@ -634,6 +815,7 @@
                     }, emphasis_delay);
                 }
                 
+                setGlobals();
                 drawFrontDesign();
                 myChart.data.datasets[1].data = calculateCapacitorVoltage();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
@@ -668,8 +850,6 @@
             function drawFrontDesign() {
                 const win_width  = document.getElementById("antenna-front-container").offsetWidth; 
                 const win_height = document.getElementById("antenna-front-container").offsetHeight; 
-                //const win_width  = afront_canvas.getBoundingClientRect().width; 
-                //const win_height = afront_canvas.getBoundingClientRect().height; 
                 afront_canvas.width = win_width-2; 
                 afront_canvas.height = win_height-2; 
 
@@ -678,28 +858,306 @@
                 const cond_radius = conductor_diameter_slider.value / 6;
                 const loopx = win_width/2; 
                 const loopy = win_height/2;
+                
+                if(shape == "circle") {
+                    // Draw loop:
+                    fctx.beginPath();
+                    fctx.arc(loopx, loopy, loop_radius + cond_radius, -0.5 * Math.PI + 0.025, -0.5 * Math.PI - 0.025, false);
+                    fctx.arc(loopx, loopy, loop_radius - cond_radius, -0.5 * Math.PI - 0.025, -0.5 * Math.PI + 0.025, true);
+                    fctx.closePath();
+                    fctx.fill();
+                    
+                    // Draw variable capacitor:
+                    fctx.lineWidth = 3;
+                    fctx.beginPath();
+                    fctx.moveTo(loopx - 3, loopy - loop_radius - 3*cond_radius);
+                    fctx.lineTo(loopx - 3, loopy - loop_radius + 3*cond_radius);
+                    fctx.moveTo(loopx + 3, loopy - loop_radius - 3*cond_radius);
+                    fctx.lineTo(loopx + 3, loopy - loop_radius + 3*cond_radius);
+                    fctx.moveTo(loopx - 12, loopy - loop_radius + 3*cond_radius);
+                    fctx.lineTo(loopx + 12, loopy - loop_radius - 3*cond_radius);
+                    /*
+                    fctx.moveTo(loopx + 8, loopy - loop_radius - 3*cond_radius);
+                    fctx.lineTo(loopx + 14, loopy - loop_radius - 3*cond_radius);
+                    fctx.lineTo(loopx + 14, loopy - loop_radius - 3*cond_radius + 6);
+                    */
+                    fctx.stroke();
+                
+                    // Draw coupling loop:
+                    fctx.lineWidth = 2;
+                    fctx.beginPath();
+                    fctx.arc(loopx, loopy + (loop_radius - loop_radius/5) - cond_radius , loop_radius/5, 0, 2*Math.PI, true);
+                    fctx.stroke();
+                    
+                    // Draw conductor diameter arrow:
+                    fctx.lineWidth = cond_dia_thickness;
+                    fctx.beginPath();
+                    var p1x = loopx + 0.45 * (loop_radius - cond_radius);
+                    var p1y = loopy + 0.45 * (loop_radius - cond_radius);
+                    var p2x = loopx + 0.707 * (loop_radius - cond_radius);
+                    var p2y = loopy + 0.707 * (loop_radius - cond_radius);
+                    var p3x = loopx + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
+                    var p3y = loopy + 0.707 * (loop_radius - cond_radius);
+                    var p4x = loopx + 0.707 * (loop_radius - cond_radius);
+                    var p4y = loopy + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
+                    fctx.moveTo(win_width-p1x, p1y);
+                    fctx.lineTo(p1x, p1y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.lineTo(p3x, p3y);
+                    fctx.lineTo(p4x, p4y);
+                    fctx.lineTo(p2x, p2y);
 
-                // Draw loop:
-                fctx.beginPath();
-                fctx.arc(loopx, loopy, loop_radius + cond_radius, -0.5 * Math.PI + 0.025, -0.5 * Math.PI - 0.025, false);
-                fctx.arc(loopx, loopy, loop_radius - cond_radius, -0.5 * Math.PI - 0.025, -0.5 * Math.PI + 0.025, true);
-                fctx.closePath();
-                fctx.fill();
-                
-                // Draw cap:
-                fctx.lineWidth = 3;
-                fctx.beginPath();
-                fctx.moveTo(loopx - 3, loopy - loop_radius - 3*cond_radius);
-                fctx.lineTo(loopx - 3, loopy - loop_radius + 3*cond_radius);
-                fctx.moveTo(loopx + 3, loopy - loop_radius - 3*cond_radius);
-                fctx.lineTo(loopx + 3, loopy - loop_radius + 3*cond_radius);
-                fctx.stroke();
-                fctx.lineWidth = 1;
-                
-                // Draw coupling loop:
-                fctx.beginPath();
-                fctx.arc(loopx, loopy + (loop_radius - loop_radius/5) - cond_radius , loop_radius/5, 0, 2*Math.PI, true);
-                fctx.stroke();
+                    p1x = loopx + 1.0 * (loop_radius + cond_radius);
+                    p1y = loopy + 1.0 * (loop_radius + cond_radius);
+                    p2x = loopx + 0.707 * (loop_radius + cond_radius);
+                    p2y = loopy + 0.707 * (loop_radius + cond_radius);
+                    p3x = loopx + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+                    p3y = loopy + 0.707 * (loop_radius + cond_radius);
+                    p4x = loopx + 0.707 * (loop_radius + cond_radius);
+                    p4y = loopy + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+                    fctx.moveTo(p1x, p1y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.lineTo(p3x, p3y);
+                    fctx.lineTo(p4x, p4y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.stroke();
+                    fctx.lineWidth = normal_width;
+                } else 
+                if(shape == "octagon") {
+                    // Draw octagon:
+                    //const width = loop_diameter_slider.value;
+                    const a = 0.4142135 * loop_radius * 2.0;
+                    const circumradius = 1.30656296 * a;
+                    fctx.lineWidth = 2 * cond_radius;
+                    fctx.beginPath();
+                    fctx.moveTo(loopx - 3, loopy - loop_radius);
+                    for(var i=0; i<8; i++) {
+                        fctx.lineTo(loopx - circumradius * Math.sin(Math.PI * (i/4.0 + 1.0/8)), loopy - circumradius * Math.cos(Math.PI * (i/4.0 + 1.0/8)));
+                    }
+                    fctx.lineTo(loopx + 3, loopy - loop_radius);
+                    fctx.stroke();
+                    
+                    // Draw variable capacitor:
+                    fctx.lineWidth = 3;
+                    fctx.beginPath();
+                    fctx.moveTo(loopx - 3, loopy - loop_radius - 3*cond_radius);
+                    fctx.lineTo(loopx - 3, loopy - loop_radius + 3*cond_radius);
+                    fctx.moveTo(loopx + 3, loopy - loop_radius - 3*cond_radius);
+                    fctx.lineTo(loopx + 3, loopy - loop_radius + 3*cond_radius);
+                    fctx.moveTo(loopx - 12, loopy - loop_radius + 3*cond_radius);
+                    fctx.lineTo(loopx + 12, loopy - loop_radius - 3*cond_radius);
+                    fctx.stroke();
+                    
+                    // Draw coupling loop:
+                    fctx.lineWidth = 2;
+                    fctx.beginPath();
+                    fctx.arc(loopx, loopy + (loop_radius - loop_radius/5) - cond_radius , loop_radius/5, 0, 2*Math.PI, true);
+                    fctx.stroke();
+                    
+                    fctx.font = normal_font;
+                    fctx.save();
+                    fctx.translate(loopx - loop_radius - cond_radius - 8, loopy);
+                    fctx.rotate(-Math.PI * 0.5);
+                    fctx.textAlign = "center";
+                    const s = (100.0 * loop_diameter_slider.value) * 0.414213; // side length in cm
+                    if(units == "metric") {
+                        fctx.fillText(s.toPrecision(3).toString() + " cm", 0, 0);
+                    } else {
+                        fctx.fillText((s*0.03281).toPrecision(3).toString() + "\'", 0, 0);
+                    }
+                    fctx.restore();
+                    
+                    // Draw conductor diameter arrow:
+                    fctx.lineWidth = cond_dia_thickness;
+                    fctx.beginPath();
+                    var p1x = loopx + 0.45 * (loop_radius - cond_radius);
+                    var p1y = loopy + 0.45 * (loop_radius - cond_radius);
+                    var p2x = loopx + 0.707 * (loop_radius - cond_radius);
+                    var p2y = loopy + 0.707 * (loop_radius - cond_radius);
+                    var p3x = loopx + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
+                    var p3y = loopy + 0.707 * (loop_radius - cond_radius);
+                    var p4x = loopx + 0.707 * (loop_radius - cond_radius);
+                    var p4y = loopy + 0.707 * (loop_radius - cond_radius) - 3*cond_radius;
+                    fctx.moveTo(win_width-p1x, p1y);
+                    fctx.lineTo(p1x, p1y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.lineTo(p3x, p3y);
+                    fctx.lineTo(p4x, p4y);
+                    fctx.lineTo(p2x, p2y);
+
+                    p1x = loopx + 1.0 * (loop_radius + cond_radius);
+                    p1y = loopy + 1.0 * (loop_radius + cond_radius);
+                    p2x = loopx + 0.707 * (loop_radius + cond_radius);
+                    p2y = loopy + 0.707 * (loop_radius + cond_radius);
+                    p3x = loopx + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+                    p3y = loopy + 0.707 * (loop_radius + cond_radius);
+                    p4x = loopx + 0.707 * (loop_radius + cond_radius);
+                    p4y = loopy + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+                    fctx.moveTo(p1x, p1y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.lineTo(p3x, p3y);
+                    fctx.lineTo(p4x, p4y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.stroke();
+                    fctx.lineWidth = normal_width;
+                } else 
+                if(shape == "hexagon") {
+                    // Draw hexagon:
+                    const radius = 2.0 * loop_radius * 0.57735;
+                    fctx.lineWidth = 2 * cond_radius;
+                    fctx.beginPath();
+                    fctx.moveTo(loopx - 3, loopy - radius);
+                    for(var i=1; i<6; i++) {
+                        fctx.lineTo(loopx - radius * Math.sin(Math.PI * (i/3.0)), loopy - radius * Math.cos(Math.PI * (i/3.0)));
+                    }
+                    fctx.lineTo(loopx + 3, loopy - radius);
+                    fctx.stroke();
+                    
+                    // Draw variable capacitor:
+                    fctx.lineWidth = 3;
+                    fctx.beginPath();
+                    fctx.moveTo(loopx - 3, loopy - radius - 3*cond_radius);
+                    fctx.lineTo(loopx - 3, loopy - radius + 3*cond_radius);
+                    fctx.moveTo(loopx + 3, loopy - radius - 3*cond_radius);
+                    fctx.lineTo(loopx + 3, loopy - radius + 3*cond_radius);
+                    fctx.moveTo(loopx - 12, loopy - radius + 3*cond_radius);
+                    fctx.lineTo(loopx + 12, loopy - radius - 3*cond_radius);
+                    fctx.stroke();
+                    
+                    // Draw coupling loop:
+                    fctx.lineWidth = 2;
+                    fctx.beginPath();
+                    fctx.arc(loopx, loopy + (radius - radius/4) - cond_radius , radius/5, 0, 2*Math.PI, true);
+                    fctx.stroke();
+                    
+                    fctx.font = normal_font;
+                    fctx.save();
+                    fctx.translate(loopx - loop_radius - cond_radius - 8, loopy);
+                    fctx.rotate(-Math.PI * 0.5);
+                    fctx.textAlign = "center";
+                    const s = (100.0 * loop_diameter_slider.value) * 0.57735; // side length in cm
+                    if(units == "metric") {
+                        fctx.fillText(s.toPrecision(3).toString() + " cm", 0, 0);
+                    } else {
+                        fctx.fillText((s*0.03281).toPrecision(3).toString() + "\'", 0, 0);
+                    }
+                    fctx.restore();
+                    
+                    // Draw conductor diameter arrow:
+                    fctx.lineWidth = cond_dia_thickness;
+                    fctx.beginPath();
+                    var p0x = loopx + 0.45 * loop_radius;
+                    var p0y = loopy + 0.45 * loop_radius;
+                    var p1x = loopx + loop_radius - cond_radius - 4*cond_radius;
+                    var p1y = loopy + 0.45 * loop_radius;
+                    var p2x = loopx + loop_radius - cond_radius;
+                    var p2y = loopy + 0.45 * loop_radius;
+                    var p3x = loopx + loop_radius - cond_radius - 2*cond_radius;
+                    var p3y = loopy + 0.45 * loop_radius - 2*cond_radius;
+                    var p4x = loopx + loop_radius - cond_radius - 2*cond_radius;
+                    var p4y = loopy + 0.45 * loop_radius + 2*cond_radius;
+                    fctx.moveTo(win_width-p0x, p0y);
+                    fctx.lineTo(p0x, p0y);
+                    //fctx.lineTo(p1x, p1y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.lineTo(p3x, p3y);
+                    fctx.lineTo(p4x, p4y);
+                    fctx.lineTo(p2x, p2y);
+
+                    p1x = loopx + loop_radius + cond_radius + 4*cond_radius;
+                    //p1y = loopy + 1.0 * (loop_radius + cond_radius);
+                    p2x = loopx + loop_radius + cond_radius;
+                    //p2y = loopy + 0.707 * (loop_radius + cond_radius);
+                    p3x = loopx + loop_radius + cond_radius + 2*cond_radius;
+                    //p3y = loopy + 0.707 * (loop_radius + cond_radius);
+                    p4x = loopx + loop_radius + cond_radius + 2*cond_radius;
+                    //p4y = loopy + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+                    fctx.moveTo(p1x, p1y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.lineTo(p3x, p3y);
+                    fctx.lineTo(p4x, p4y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.stroke();
+                    fctx.lineWidth = normal_width;
+                } else {
+                    // Draw square:
+                    const radius = 1.414 * loop_radius;
+                    fctx.lineWidth = 2 * cond_radius;
+                    fctx.beginPath();
+                    fctx.moveTo(loopx - 3, loopy - loop_radius);
+                    for(var i=0; i<4; i++) {
+                        fctx.lineTo(loopx - radius * Math.sin(Math.PI * (i/2.0 + 0.25)), loopy - radius * Math.cos(Math.PI * (i/2.0 + 0.25)));
+                    }
+                    fctx.lineTo(loopx + 3, loopy - loop_radius);
+                    fctx.stroke();
+                    
+                    // Draw variable capacitor:
+                    fctx.lineWidth = 3;
+                    fctx.beginPath();
+                    fctx.moveTo(loopx - 3, loopy - loop_radius - 3*cond_radius);
+                    fctx.lineTo(loopx - 3, loopy - loop_radius + 3*cond_radius);
+                    fctx.moveTo(loopx + 3, loopy - loop_radius - 3*cond_radius);
+                    fctx.lineTo(loopx + 3, loopy - loop_radius + 3*cond_radius);
+                    fctx.moveTo(loopx - 12, loopy - loop_radius + 3*cond_radius);
+                    fctx.lineTo(loopx + 12, loopy - loop_radius - 3*cond_radius);
+                    fctx.stroke();
+                    
+                    // Draw coupling loop:
+                    fctx.lineWidth = 2;
+                    fctx.beginPath();
+                    fctx.arc(loopx, loopy + (loop_radius - loop_radius/5) - cond_radius , loop_radius/5, 0, 2*Math.PI, true);
+                    fctx.stroke();
+                    
+                    fctx.font = normal_font;
+                    fctx.save();
+                    fctx.translate(loopx - loop_radius - cond_radius - 8, loopy);
+                    fctx.rotate(-Math.PI * 0.5);
+                    fctx.textAlign = "center";
+                    const s = (100.0 * loop_diameter_slider.value); // side length in cm
+                    if(units == "metric") {
+                        fctx.fillText(s.toPrecision(3).toString() + " cm", 0, 0);
+                    } else {
+                        fctx.fillText((s*0.03281).toPrecision(3).toString() + "\'", 0, 0);
+                    }
+                    fctx.restore();
+                    
+                    // Draw conductor diameter arrow:
+                    fctx.lineWidth = cond_dia_thickness;
+                    fctx.beginPath();
+                    var p0x = loopx + 0.45 * (loop_radius - cond_radius);
+                    var p0y = loopy + 0.45 * (loop_radius - cond_radius);
+                    var p1x = loopx + loop_radius - cond_radius - 4*cond_radius;
+                    var p1y = loopy + 0.7 * loop_radius;
+                    var p2x = loopx + loop_radius - cond_radius;
+                    var p2y = loopy + 0.7 * loop_radius;
+                    var p3x = loopx + loop_radius - cond_radius - 2*cond_radius;
+                    var p3y = loopy + 0.7 * loop_radius - 2*cond_radius;
+                    var p4x = loopx + loop_radius - cond_radius - 2*cond_radius;
+                    var p4y = loopy + 0.7 * loop_radius + 2*cond_radius;
+                    fctx.moveTo(win_width-p0x, p0y);
+                    fctx.lineTo(p0x, p0y);
+                    fctx.lineTo(p1x, p1y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.lineTo(p3x, p3y);
+                    fctx.lineTo(p4x, p4y);
+                    fctx.lineTo(p2x, p2y);
+
+                    p1x = loopx + loop_radius + cond_radius + 4*cond_radius;
+                    //p1y = loopy + 1.0 * (loop_radius + cond_radius);
+                    p2x = loopx + loop_radius + cond_radius;
+                    //p2y = loopy + 0.707 * (loop_radius + cond_radius);
+                    p3x = loopx + loop_radius + cond_radius + 2*cond_radius;
+                    //p3y = loopy + 0.707 * (loop_radius + cond_radius);
+                    p4x = loopx + loop_radius + cond_radius + 2*cond_radius;
+                    //p4y = loopy + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
+                    fctx.moveTo(p1x, p1y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.lineTo(p3x, p3y);
+                    fctx.lineTo(p4x, p4y);
+                    fctx.lineTo(p2x, p2y);
+                    fctx.stroke();
+                    fctx.lineWidth = normal_width;
+                }
 
                 // Draw loop diameter arrow:
                 fctx.lineWidth = loop_dia_thickness;
@@ -717,7 +1175,8 @@
                 
                 // Write loop inductance:
                 fctx.font = normal_font;
-                const L = getInductance() * 1.0e+6;
+                const L = inductance * 1.0e+6;
+                //const L = getInductance() * 1.0e+6;
                 fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
 
                 // Write Tx power text:
@@ -737,6 +1196,7 @@
                 fctx.font = normal_font;
 
                 // Draw conductor diameter arrow:
+                /*
                 fctx.lineWidth = cond_dia_thickness;
                 fctx.beginPath();
                 var p1x = loopx + 0.4 * (loop_radius - cond_radius);
@@ -769,9 +1229,9 @@
                 fctx.lineTo(p2x, p2y);
                 fctx.stroke();
                 fctx.lineWidth = normal_width;
-                
-                p1x = loopx + 0.4 * (loop_radius - cond_radius);
-                p1y = loopy + 0.4 * (loop_radius - cond_radius) - 5;
+                */
+                p1x = loopx + 0.45 * (loop_radius - cond_radius);
+                p1y = loopy + 0.45 * (loop_radius - cond_radius) - 5;
                 //fctx.textAlign = "right";
                 const cond_dia = 1.0 * conductor_diameter_slider.value;
                 fctx.textAlign = "center";
@@ -781,20 +1241,20 @@
                     fctx.font = normal_font;
                     // Write loop area:
                     fctx.textAlign = "right";
-                    fctx.fillText("A = " + (Math.PI * (0.5*dia)**2).toPrecision(3).toString() + " m\u00B2", win_width-8, 18);
+                    fctx.fillText("A = " + area.toPrecision(3).toString() + " m\u00B2", win_width-8, 18);
                 
                     // Write Tx power text:
-                    fctx.fillText("circ = " + (Math.PI * dia).toPrecision(3).toString() + " m", win_width-8, win_height * 0.8 + 20);
+                    fctx.fillText("peri = " + perimeter.toPrecision(3).toString() + " m", win_width-8, win_height * 0.8 + 20);
                 } else {
                     fctx.font = cond_dia_font;
                     fctx.fillText("\u2300a = " + (cond_dia/25.4).toPrecision(3).toString() + "\"", loopx, p1y+1);
                     fctx.font = normal_font;
                     // Write loop area:
                     fctx.textAlign = "right";
-                    fctx.fillText("A = " + (Math.PI * (0.5*dia*3.28084)**2).toPrecision(3).toString() + " ft\u00B2", win_width-8, 18);
+                    fctx.fillText("A = " + (area * 10.76391).toPrecision(3).toString() + " ft\u00B2", win_width-8, 18);
                 
                     // Write Tx power text:
-                    fctx.fillText("circ = " + (Math.PI * dia*3.28084).toPrecision(3).toString() + " ft", win_width-8, win_height * 0.8 + 20);
+                    fctx.fillText("peri = " + (perimeter*3.28084).toPrecision(3).toString() + " ft", win_width-8, win_height * 0.8 + 20);
                 }
 
             }
@@ -805,16 +1265,9 @@
             function drawSideDesign() {
                 const win_width  = document.getElementById("antenna-side-container").offsetWidth; 
                 const win_height = document.getElementById("antenna-side-container").offsetHeight; 
-                //const win_width  = aside_canvas.getBoundingClientRect().width; 
-                //const win_height = aside_canvas.getBoundingClientRect().height; 
-                //console.log(win_width, win_height);
                 aside_canvas.width = win_width-2; 
                 aside_canvas.height = win_height-2; 
-                //const win_width  = aside_canvas.width; 
-                //const win_height = aside_canvas.height; 
                 sctx.clearRect(0, 0, win_width, win_height);
-
-                //const loop_radius = win_width < win_height ? 0.40 * win_width : 0.40 * win_height; 
 
                 const cond_radius = conductor_diameter_slider.value / 6;
                 const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
@@ -877,11 +1330,11 @@
                 
                 sctx.textAlign = "right";
                 sctx.fillText("cond = " , win_width-8, dim_y + 08);
-                const cond_length = ((((Math.PI * loop_diameter_slider.value * loop_turns_slider.value) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns_slider.value) ** 2.0)) ** 0.5);
+                // const cond_length = ((((Math.PI * loop_diameter_slider.value * loop_turns_slider.value) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns_slider.value) ** 2.0)) ** 0.5);
                 if(units == "metric") {
-                    sctx.fillText(cond_length.toPrecision(4).toString() + " m", win_width-8, dim_y + 20);
+                    sctx.fillText(conductor_length.toPrecision(4).toString() + " m", win_width-8, dim_y + 20);
                 } else {
-                    sctx.fillText((cond_length * 3.28084).toPrecision(4).toString() + " ft", win_width-8, dim_y + 20);
+                    sctx.fillText((conductor_length * 3.28084).toPrecision(4).toString() + " ft", win_width-8, dim_y + 20);
                 }
                     
                 // Draw spacing text:
@@ -893,6 +1346,11 @@
                     sctx.fillText("c = " + (spc/25.4).toPrecision(3).toString() + " in", start_x + cond_spacing, dim_y + 20);
                 }
             }
+            
+            // Update the frequencies, now that we have the sliders available:
+            updateFrequencies();
+            setGlobals();
+            
             drawFrontDesign();
             drawSideDesign();
 
