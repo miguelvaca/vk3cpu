@@ -17,7 +17,7 @@
             <div class="slider_container">
                 <div class="sliders">
                     <label for="conductor_diameter_slider">&#8960a:</label>
-                    <input type="range" id="conductor_diameter_slider" min="5" max="40" value="19" step="0.2">
+                    <input type="range" id="conductor_diameter_slider" min="5" max="80" value="19" step="0.2">
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960b:</label>
@@ -860,7 +860,7 @@
 
                 fctx.clearRect(0, 0, win_width, win_height);
                 const loop_radius = win_width < win_height ? 0.32 * win_width : 0.32 * win_height; 
-                const cond_radius = conductor_diameter_slider.value / 6;
+                const cond_radius = conductor_diameter_slider.value / 12;
                 const loopx = win_width/2; 
                 const loopy = win_height/2;
                 
@@ -1239,7 +1239,7 @@
                 aside_canvas.height = win_height-2; 
                 sctx.clearRect(0, 0, win_width, win_height);
 
-                const cond_radius = conductor_diameter_slider.value / 6;
+                const cond_radius = conductor_diameter_slider.value / 12;
                 const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
                 const start_x = win_width/2 - loop_turns_slider.value * cond_spacing * 0.5;
                 const top_y = win_height * 0.2;
