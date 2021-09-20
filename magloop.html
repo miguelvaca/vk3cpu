@@ -92,7 +92,7 @@
             <ul>
                 <li>L : Inductance in microhenries.</li>
                 <li>A : Loop area in square meters or square feet.</li>
-                <li>C : Effective capacitance for multi-turn loops in picofarads.</li>
+                <li>C : Effective capacitance of the loop in picofarads.</li>
                 <li>peri : Perimeter of the main loop in meters or feet.</li>
                 <li>c : Distance between windings, measured from the conductor centers in mm or inches.</li>
                 <li>cond : Total required conductor length in meters or feet.</li>
@@ -108,6 +108,8 @@
             </ul>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[21-Sep-21]</b> <br>
+            * Added distributed capacitance calculation and display for the single turn loop.<br>
             <b>[19-Sep-21]</b> <br>
             * Increased supported conductor diameter to 80 mm. (3.15 inches)<br>
             <b>[18-Sep-21]</b> <br>
@@ -157,7 +159,8 @@
             var inductance = 0.0;
             var area = 0.0;                     // Loop area in square meters. 
             var perimeter = 0.0;                // Perimeter of a single turn of the main loop
-            var multiloop_capacitance = 0.0;    // Effective capacitance of a multi-turn loop
+            var loop_capacitance = 0.0;         // Effective capacitance of a single or multi-turn loop
+            var srf = 0.0;                      // Self-resonant frequency SRF
             var conductor_length = 0.0;         // Total conductor length
 
             var frequencies = [];
@@ -167,13 +170,11 @@
                     0.1365, 0.475, 1.8, 3.5, 5.0, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0, 54.0
                 ];
                 
-                // Max frequency is for multi-turn loops:
-                var max_freq = calculateSRF();
                 frequencies = [];
                 hamFrequencies.forEach(freq => {
                     const wavelength = 3e8 / (freq * 1e6);
                     const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-                    if ((l <= 0.30) && ((freq * 1e6) < max_freq)) {
+                    if ((l <= 0.30) && ((freq * 1e6) < srf)) {
                         frequencies.push(freq);
                     }
                 });
@@ -183,7 +184,8 @@
                 inductance = getInductance();
                 area = getArea();
                 perimeter = getPerimeter();
-                multiloop_capacitance = (loop_turns_slider.value > 1) ? multiloopCapacitance() : 0.0;
+                loop_capacitance = (loop_turns_slider.value > 1) ? multiloopCapacitance() : (2.69e-12 * perimeter);
+                srf = calculateSRF();
                 conductor_length = ((((perimeter* loop_turns_slider.value) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns_slider.value) ** 2.0)) ** 0.5);
             }
             
@@ -358,18 +360,17 @@
                 var l_multiloop_capacitance = 1e-12 * shape_factor * (ctdw(ff, ei, ex) / Math.sqrt(1 - h**2 / loop_diameter_slider.value**2) + ciae(ff, ei, ex)) * loop_diameter_slider.value;
                 return l_multiloop_capacitance; // in Farads
             }
-
+            /*
+            function singleloopCapacitance() {
+                var retval = 2.69 * perimeter; 
+                return (retval*1e-12); // in Farads
+            }
+            */
+            
             function tuningCapacitance(frequency) {
                 // frequency is in Hertz
                 const reactance = inductiveReactance(frequency);
-                /*
-                var multiloop_capacitance = 0.0;
-                if(loop_turns_slider.value > 1) {
-                    // Only compensate for multiloop capacitance when we have more than 1 turn:
-                    multiloop_capacitance = multiloopCapacitance();
-                }
-                */
-                const capacitance = 1e12 * ((1.0 / (2.0 * Math.PI * frequency * reactance)) - multiloop_capacitance);
+                const capacitance = 1e12 * ((1.0 / (2.0 * Math.PI * frequency * reactance)) - loop_capacitance);
                 return capacitance; // in picofarads
             }
 
@@ -514,10 +515,9 @@
             }
             
             function calculateSRF() {
-                const capacitance = (loop_turns_slider.value > 1) ? multiloopCapacitance() : 1e-12;  // Assume 1 pF for a single loop. Yes it is wrong, but we just don't want a divide-by-zero error below.
                 // According to Knight (2016), SRF for a single coil is equivalent to the circumference being equivalent to a half-wave dipole.
                 const inductance = getInductance();
-                return (1.0 / (2.0 * Math.PI * ((inductance * capacitance) ** 0.5)));
+                return (1.0 / (2.0 * Math.PI * ((inductance * loop_capacitance) ** 0.5)));
             }
 
             metric_radio.oninput = function() {
@@ -1291,14 +1291,11 @@
                 sctx.font = normal_font; 
                 
                 // Multi-turn loop, so calculate C and SRF:
-                if(loop_turns_slider.value > 1) {
-                    const L = multiloopCapacitance() * 1e+12;
-                    const srf = calculateSRF();
-                    sctx.textAlign = "right";
-                    sctx.fillText("C = " + L.toFixed(0).toString() + " pF", win_width-8, 18);
-                    sctx.fillText("SRF = ", win_width-8, win_height * 0.1 + 18);
-                    sctx.fillText((srf*1e-6).toPrecision(3).toString() + " MHz", win_width-8, win_height * 0.1 + 33);
-                }
+                const L = loop_capacitance * 1e+12;
+                sctx.textAlign = "right";
+                sctx.fillText("C = " + L.toFixed(0).toString() + " pF", win_width-8, 18);
+                sctx.fillText("SRF = ", win_width-8, win_height * 0.1 + 18);
+                sctx.fillText((srf*1e-6).toPrecision(3).toString() + " MHz", win_width-8, win_height * 0.1 + 33);
                 
                 sctx.textAlign = "right";
                 sctx.fillText("cond = " , win_width-8, dim_y + 08);
@@ -1318,9 +1315,10 @@
                 }
             }
             
+            // Set the global variables, which are all determined by physical dimensions, and are thus frequency-independent:
+            setGlobals();
             // Update the frequencies, now that we have the sliders available:
             updateFrequencies();
-            setGlobals();
             
             drawFrontDesign();
             drawSideDesign();
