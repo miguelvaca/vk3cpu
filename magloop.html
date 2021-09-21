@@ -514,6 +514,16 @@
                 return retval;
             }
             
+            function calculateAntennaSize() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const lambda = 3e8 / (freq*1e6);
+                    const size = conductor_length / lambda;
+                    retval.push({x:freq, y:size});
+                });
+                return retval;
+            }
+            
             function calculateSRF() {
                 // According to Knight (2016), SRF for a single coil is equivalent to the circumference being equivalent to a half-wave dipole.
                 const inductance = getInductance();
@@ -550,6 +560,7 @@
                 myChart.data.datasets[6].data = calculateInductiveReactance();
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.update();
             }
 
@@ -568,6 +579,7 @@
                 myChart.data.datasets[6].data = calculateInductiveReactance();
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.update();
             }
 
@@ -586,6 +598,7 @@
                 myChart.data.datasets[6].data = calculateInductiveReactance();
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.update();
             }
 
@@ -604,6 +617,7 @@
                 myChart.data.datasets[6].data = calculateInductiveReactance();
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.update();
             }
 
@@ -622,6 +636,7 @@
                 myChart.data.datasets[6].data = calculateInductiveReactance();
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.update();
             }
 
@@ -640,6 +655,7 @@
                 myChart.data.datasets[6].data = calculateInductiveReactance();
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.update();
             }
 
@@ -687,6 +703,7 @@
                 myChart.data.datasets[6].data = calculateInductiveReactance();
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.update();
             }
 
@@ -725,6 +742,7 @@
                 myChart.data.datasets[6].data = calculateInductiveReactance();
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.update();
             }
 
@@ -761,6 +779,7 @@
                 myChart.data.datasets[6].data = calculateInductiveReactance();
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.update();
             }
 
@@ -799,6 +818,7 @@
                 myChart.data.datasets[6].data = calculateInductiveReactance();
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.update();
             }
 
@@ -1410,6 +1430,15 @@
                         data: calculateCirculatingCurrent(),
                         borderWidth: 1,
                         yAxisID: 'ccID'
+                    },
+                    {
+                        label: 'Size (\u03BB)',
+                        fill: false,
+                        borderColor: 'rgb(20,20,20)',
+                        backgroundColor: 'rgb(100,100,100)',
+                        data: calculateAntennaSize(),
+                        borderWidth: 1,
+                        yAxisID: 'sizeID'
                     }]
                 },
                 options: {
@@ -1540,6 +1569,22 @@
                             min: 0.0,
                             position: 'right',
                             id: 'ccID'
+                        },{
+                            type: 'linear',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: '\u03BB',
+                                fontColor: 'rgb(40,40,40)',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                max: 0.3,
+                            },
+                            min: 0.0,
+                            position: 'right',
+                            id: 'sizeID'
                         }]
                     },
                     showLines: true,
