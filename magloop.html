@@ -109,7 +109,7 @@
                 <li>BW (kHz): The predicted 3dB bandwidth of the magloop antenna. </li>
                 <li>Efficiency (%): The percentage of input energy that is actually radiated and not lost as heat.</li>
                 <li>R-radiation (&#937): The calculated radiation resistance of the loop in ohms.</li>
-                <li>R-loss (&#937): The calculated loss resistance of the loop in ohms, due to the combination of material conductance, conductor length, skin-effect and proximity effects.</li>
+                <li>R-loop (&#937): The calculated resistance of the loop in ohms, due to the combination of material conductance, conductor length, skin-effect and proximity effects.</li>
                 <li>Reactance (j&#937): The inductive reactance of the loop in ohms.</li>
                 <li>Q : The antenna Q (quality) factor.</li>
                 <li>Ia (A): The RMS loop current in amps.</li>
@@ -123,7 +123,8 @@
             <b><u>Change history:</u></b><br>
             <b>[23-Sep-21]</b> <br>
             * Changed Q equation back to the original Xl/Rtot.<br>
-            * Introduced a new slider to inject external losses to account for the combined losses due to capacitor contact resistance and ground losses.<br>
+            * Introduced a new slider "Re" to inject external losses to account for the combined losses due to capacitor contact resistance and ground losses.<br>
+            * Renamed R-loss to R-loop to avoid confusion, as loop resistance is no longer the only resistance that contributes to losses. The other being Re.<br>
             <b>[22-Sep-21]</b> <br>
             * Added antenna perimeter size in wavelength to the chart display as a new item.<br>
             * Changed maximum spacing ratio c/a from 4.0 to 10.0. Values higher than 4 have no further effect on proximity resistance, but does reduce coil inductance which drives up the SRF.<br>
@@ -1453,7 +1454,7 @@
                         yAxisID: 'mohmsID'
                     },
                     {
-                        label: 'R-loss (\u03A9)',
+                        label: 'R-loop (\u03A9)',
                         fill: false,
                         borderColor: 'orange',
                         backgroundColor: 'orange',
