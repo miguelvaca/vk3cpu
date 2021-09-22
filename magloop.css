@@ -98,7 +98,7 @@ section div.antennaSide-container {
     section.gridLayoutClass {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(3, 1fr) 150px 135px 300px;
+        grid-template-rows: repeat(3, 1fr) 150px 150px 300px;
         justify-items: stretch;
     }
 

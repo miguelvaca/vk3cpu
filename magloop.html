@@ -35,6 +35,10 @@
                     <label for="transmit_power_slider">Tx:</label>
                     <input type="range" id="transmit_power_slider" min="5" max="1500" value="100" step="5">
                 </div>
+                <div class="sliders">
+                    <label for="external_losses_slider">Re:</label>
+                    <input type="range" id="external_losses_slider" min="0" max="1000" value="0" step="1">
+                </div>
                 <div class="radios">
                     <label>Met</label>
                     <input type="radio" name="unit_radio" id="metric_radio" value="metric" checked/>
@@ -84,6 +88,10 @@
                 <li>c/a : is the spacing ratio; based on 'c' being the inter-winding spacing for multi-turn loops measured between conductor centers, and 'a' is the conductor diameter. (Must be >= 1.1) 
                     A low-value will increase the resistance due to the proximity effect. (Ignore for single-turn loops.)</li>
                 <li>Tx : The transmit power in Watts. This affects the predicted voltage across the capacitor (Vcap), and the RMS loop current (Ia).</li>
+                <li>Re : Additional resistance due to external losses, due mainly from capacitor contact resistance and proximity-to-ground effects. Use Re=0.0 to assume the loop is in free-space.
+                Adding Re will reduce antenna efficiency, Q, Vcap and Ia, while increasing BW.
+                In a study [1], a 1 m diameter loop of 22 mm copper tubing at a height of 1.5 m above the ground at 7 MHz had a calculated capacitor contact resistance of ~190m&#937; 
+                and an additional ground proximity loss resistance of ~30m&#937;. Note that ground effects are height-above-ground and frequency-dependent.</li>
                 <li>Metric or Imperial : selects the measuring system.</li>
                 <li>Cu or Al : selects the type of metal conductor (annealed copper or aluminum).</li>
                 <li>Circ, Oct, Hex or Sqr : selects the shape of the magloop.</li>
@@ -108,7 +116,13 @@
                 <li>Perimeter (&#955): Antenna perimeter size relative to the wavelength.</li>
             </ul>
             <br>
+            <b><u>References:</u></b><br>
+            [1]: A. Boswell, A. J. Tyler and A. White, <b>"Performance of a Small Loop Antenna in the 3 - 10 MHz Band"</b> <i>, IEEE Antennas and Propagation Magazine, 47, 2, April 2005, pp. 5 1 -56.</i> <br>
+            <br>
             <b><u>Change history:</u></b><br>
+            <b>[23-Sep-21]</b> <br>
+            * Changed Q equation back to the original Xl/Rtot.<br>
+            * Introduced a new slider to inject external losses to account for the combined losses due to capacitor contact resistance and ground losses.<br>
             <b>[22-Sep-21]</b> <br>
             * Added antenna perimeter size in wavelength to the chart display as a new item.<br>
             * Changed maximum spacing ratio c/a from 4.0 to 10.0. Values higher than 4 have no further effect on proximity resistance, but does reduce coil inductance which drives up the SRF.<br>
@@ -119,7 +133,7 @@
             <b>[18-Sep-21]</b> <br>
             * Updated to V5; Added support for octagon, hexagon and square shaped loops. Moved and hyperlinked equations-used to a separate page for clarity.<br>
             <b>[16-Sep-21]</b> <br>
-            * Updated to V4; Updated equation used for Q to match the one use in the ARRL Antenna Book. This will affect predictions for V_cap, I_loop and BW. (Based on confirmation of correct Q equation used in
+            * Updated to V4; Updated equation used for Q to match the one use in the ARRL Antenna Book. This will affect predictions for V_cap, I_loop and BW. (Based on Q equation D.1 used in
             <i>"Impedance, Bandwidth, and Q of Antennas"</i> by A D Yaghjian, IEEE Transactions on Antennas and Propagation, April 2005.)<br>
             * Added equation graphics for V_cap, I_loop and BW formulas.<br>
             * Flipped the main-loop graphic to have the capacitor above the coupling loop.<br>
@@ -154,6 +168,7 @@
             var metric_radio = document.getElementById("metric_radio");
             var imperial_radio = document.getElementById("imperial_radio");
             var shape_radio = document.getElementById("shape_radio");
+            var external_losses_slider = document.getElementById("external_losses_slider");
             
             // Global variables:
             var units = "metric";
@@ -166,6 +181,7 @@
             var loop_capacitance = 0.0;         // Effective capacitance of a single or multi-turn loop
             var srf = 0.0;                      // Self-resonant frequency SRF
             var conductor_length = 0.0;         // Total conductor length
+            var R_ext = 0.0;                    // External losses due to capacitor resistance and ground effects, in ohms
 
             var frequencies = [];
 
@@ -191,6 +207,7 @@
                 loop_capacitance = (loop_turns_slider.value > 1) ? multiloopCapacitance() : (2.69e-12 * perimeter);
                 srf = calculateSRF();
                 conductor_length = ((((perimeter* loop_turns_slider.value) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns_slider.value) ** 2.0)) ** 0.5);
+                R_ext = external_losses_slider.value * 0.001;
             }
             
             // Returns the loop area in square meters:
@@ -451,7 +468,8 @@
                 frequencies.forEach(freq => {
                     const R_ohmic = lossResistance(freq * 1e6);
                     const R_rad = radiationResistance(freq * 1e6);
-                    const efficiency = 100.0 / (1.0 + (R_ohmic / R_rad));
+                    const efficiency = 100.0 * R_rad / (R_rad + R_ohmic + R_ext);
+                    //const efficiency = 100.0 / (1.0 + (R_ohmic / R_rad));
                     //const efficiency = 10.0 * Math.log10(1.0 / (1.0 + (R_ohmic / R_rad))); // for Efficiency in dB
                     retval.push({x:freq, y:efficiency});
                 });
@@ -462,7 +480,7 @@
                 const Xl = inductiveReactance(frequency);
                 const Rl = lossResistance(frequency);
                 const Rr = radiationResistance(frequency);
-                const Q = Xl / (2.0 * (Rl + Rr));
+                const Q = Xl / (Rl + Rr + R_ext);
                 return Q;
             }
 
@@ -854,6 +872,36 @@
                 myChart.update();
             }
 
+            var external_losses_handler = 0;
+            var external_losses_font = normal_font;
+            
+            external_losses_slider.oninput = function() {
+                if(external_losses_handler == 0) {
+                    external_losses_font = emphasis_font;
+                    external_losses_handler = setTimeout(function(){
+                        external_losses_font = normal_font;
+                        drawFrontDesign();
+                        external_losses_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(external_losses_handler);
+                    external_losses_handler = setTimeout(function(){
+                        external_losses_font = normal_font;
+                        drawFrontDesign();
+                        external_losses_handler = 0;
+                    }, emphasis_delay);
+                }
+                
+                setGlobals();
+                drawFrontDesign();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.update();
+            }
+
             window.onresize = function() {
                 myChart.resize();
                 //myChart.update();
@@ -1213,7 +1261,10 @@
 
                 // Write Tx power text:
                 fctx.font = tx_font;
-                fctx.fillText("Tx = " + transmit_power_slider.value + " W", 8, win_height * 0.8 + 20);
+                fctx.fillText("Tx = " + transmit_power_slider.value + " W", 8, win_height * 0.8 + 10);
+                
+                fctx.font = external_losses_font;
+                fctx.fillText("Re = " + R_ext.toFixed(3).toString() + " \u03A9", 8, win_height * 0.8 + 24);
 
                 // Write loop diameter symbol:
                 fctx.font = normal_font;
@@ -1241,7 +1292,7 @@
                     fctx.fillText("A = " + area.toPrecision(3).toString() + " m\u00B2", win_width-8, 18);
                 
                     // Write Tx power text:
-                    fctx.fillText("peri = " + perimeter.toPrecision(3).toString() + " m", win_width-8, win_height * 0.8 + 20);
+                    fctx.fillText("peri = " + perimeter.toPrecision(3).toString() + " m", win_width-8, win_height * 0.8 + 24);
                 } else {
                     fctx.font = cond_dia_font;
                     fctx.fillText("\u2300a = " + (cond_dia/25.4).toPrecision(3).toString() + "\"", loopx, p1y+1);
@@ -1251,7 +1302,7 @@
                     fctx.fillText("A = " + (area * 10.76391).toPrecision(3).toString() + " ft\u00B2", win_width-8, 18);
                 
                     // Write Tx power text:
-                    fctx.fillText("peri = " + (perimeter*3.28084).toPrecision(3).toString() + " ft", win_width-8, win_height * 0.8 + 20);
+                    fctx.fillText("peri = " + (perimeter*3.28084).toPrecision(3).toString() + " ft", win_width-8, win_height * 0.8 + 24);
                 }
 
             }
@@ -1323,11 +1374,11 @@
                 sctx.fillText((srf*1e-6).toPrecision(3).toString() + " MHz", win_width-8, win_height * 0.1 + 33);
                 
                 sctx.textAlign = "right";
-                sctx.fillText("cond = " , win_width-8, dim_y + 08);
+                sctx.fillText("cond = " , win_width-8, dim_y + 10);
                 if(units == "metric") {
-                    sctx.fillText(conductor_length.toPrecision(4).toString() + " m", win_width-8, dim_y + 20);
+                    sctx.fillText(conductor_length.toPrecision(4).toString() + " m", win_width-8, dim_y + 24);
                 } else {
-                    sctx.fillText((conductor_length * 3.28084).toPrecision(4).toString() + " ft", win_width-8, dim_y + 20);
+                    sctx.fillText((conductor_length * 3.28084).toPrecision(4).toString() + " ft", win_width-8, dim_y + 24);
                 }
                     
                 // Draw spacing text:
