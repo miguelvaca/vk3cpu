@@ -122,7 +122,7 @@
             <br>
             <b><u>Change history:</u></b><br>
             <b>[23-Sep-21]</b> <br>
-            * Changed Q equation back to the original Xl/Rtot.<br>
+            * Changed Q equation back to the original Xl/Rtot. Changed max Q to 3000.<br>
             * Introduced a new slider "Re" to inject external losses to account for the combined losses due to capacitor contact resistance and ground losses.<br>
             * Renamed R-loss to R-loop to avoid confusion, as loop resistance is no longer the only resistance that contributes to losses. The other being Re.<br>
             * Changed to V6 to capture the significant changes.
@@ -1608,7 +1608,7 @@
                             },
                             ticks: {
                                 beginAtZero: true,
-                                max: 1800.0,
+                                max: 3000.0,
                             },
                             position: 'right',
                             id: 'qID'
