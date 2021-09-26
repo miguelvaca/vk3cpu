@@ -1599,7 +1599,7 @@
                                 fontStyle: 'bold'
                             },
                             ticks: {
-                                max: 2000.0,
+                                max: 1000.0,
                             },
                             position: 'left',
                             id: 'pfID'
@@ -1682,7 +1682,12 @@
                                 if (label) {
                                     label += ': ';
                                 }
-                                label += Math.round(tooltipItem.yLabel * 1000) / 1000;
+                                if(data.datasets[tooltipItem.datasetIndex].label == "Tuning Cap (pF)" || data.datasets[tooltipItem.datasetIndex].label == "Q") {
+                                    label += Math.round(tooltipItem.yLabel);
+                                } else {
+                                    label += tooltipItem.yLabel.toFixed(3).toString();
+                                    //label += Math.round(tooltipItem.yLabel * 1000) / 1000;
+                                }
                                 return label;
                             }
                         }
