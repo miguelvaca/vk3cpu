@@ -186,6 +186,7 @@
             var srf = 0.0;                      // Self-resonant frequency SRF
             var conductor_length = 0.0;         // Total conductor length
             var R_ext = 0.0;                    // External losses due to capacitor resistance and ground effects, in ohms
+            var metal = "Cu";                   // Default metal is copper
 
             var frequencies = [];
 
@@ -574,6 +575,7 @@
 
             copper_radio.oninput = function() {
                 conductivity = 58e6;
+                metal = "Cu";
                 setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
@@ -593,6 +595,7 @@
 
             aluminium_radio.oninput = function() {
                 conductivity = 35e6;
+                metal = "Al";
                 setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
@@ -991,8 +994,8 @@
                     fctx.lineTo(p4x, p4y);
                     fctx.lineTo(p2x, p2y);
 
-                    p1x = loopx + 1.0 * (loop_radius + cond_radius);
-                    p1y = loopy + 1.0 * (loop_radius + cond_radius);
+                    p1x = loopx + 0.9 * (loop_radius + cond_radius);
+                    p1y = loopy + 0.9 * (loop_radius + cond_radius);
                     p2x = loopx + 0.707 * (loop_radius + cond_radius);
                     p2y = loopy + 0.707 * (loop_radius + cond_radius);
                     p3x = loopx + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
@@ -1006,6 +1009,10 @@
                     fctx.lineTo(p2x, p2y);
                     fctx.stroke();
                     fctx.lineWidth = normal_width;
+                    
+                    fctx.font = normal_font;
+                    fctx.textAlign = "left";
+                    fctx.fillText(metal, loopx + 0.9 * (loop_radius + cond_radius) + 3, loopy + 0.9 * (loop_radius + cond_radius));
                 } else 
                 if(shape == "octagon") {
                     // Draw octagon:
@@ -1069,8 +1076,8 @@
                     fctx.lineTo(p4x, p4y);
                     fctx.lineTo(p2x, p2y);
 
-                    p1x = loopx + 1.0 * (loop_radius + cond_radius);
-                    p1y = loopy + 1.0 * (loop_radius + cond_radius);
+                    p1x = loopx + 0.9 * (loop_radius + cond_radius);
+                    p1y = loopy + 0.9 * (loop_radius + cond_radius);
                     p2x = loopx + 0.707 * (loop_radius + cond_radius);
                     p2y = loopy + 0.707 * (loop_radius + cond_radius);
                     p3x = loopx + 0.707 * (loop_radius + cond_radius) + 3*cond_radius;
@@ -1084,6 +1091,10 @@
                     fctx.lineTo(p2x, p2y);
                     fctx.stroke();
                     fctx.lineWidth = normal_width;
+                    
+                    fctx.font = normal_font;
+                    fctx.textAlign = "left";
+                    fctx.fillText(metal, p1x + 3, p1y);
                 } else 
                 if(shape == "hexagon") {
                     // Draw hexagon:
@@ -1163,6 +1174,10 @@
                     fctx.lineTo(p2x, p2y);
                     fctx.stroke();
                     fctx.lineWidth = normal_width;
+                    
+                    fctx.font = normal_font;
+                    fctx.textAlign = "left";
+                    fctx.fillText(metal, p1x + 3, p1y);
                 } else {
                     // Draw square:
                     const radius = 1.414 * loop_radius;
@@ -1241,6 +1256,10 @@
                     fctx.lineTo(p2x, p2y);
                     fctx.stroke();
                     fctx.lineWidth = normal_width;
+                    
+                    fctx.font = normal_font;
+                    fctx.textAlign = "left";
+                    fctx.fillText(metal, p1x + 3, p1y);
                 }
 
                 // Draw loop diameter arrow:
@@ -1667,11 +1686,11 @@
                                 return label;
                             }
                         }
-                    },
+                    } ,
                     plugins: {
                         crosshair: {
                             line: {
-                                color: 'red',   // crosshair line color
+                                color: 'grey',   // crosshair line color
                                 width: 1,       // crosshair line width
                                 dashPattern: [100, 100]
                             },
