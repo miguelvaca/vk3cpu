@@ -446,7 +446,7 @@
                 const L = inductor.L * 1.0e+6;
                 fctx.fillText("L = " + L.toPrecision(3).toString() + " \u03bcH", 8, 18);
                 fctx.fillText("C = " + (inductor.C * 1e12).toFixed(1) + " pF", 8, 32);
-                fctx.fillText("Rdc = " + inductor.Rdc.toFixed(2) + " \u03A9", 8, 46);
+                fctx.fillText("Rdc = " + inductor.Rdc.toFixed(3) + " \u03A9", 8, 46);
                 fctx.fillText("SRF = " + (inductor.SRF * 1e-6).toFixed(1) + " MHz", 8, 60);
                 const wire_length_m = Math.sqrt((inductor.loop_turns * inductor.spacing_ratio * inductor.cond_diameter_meters)**2 + (Math.PI * inductor.loop_diameter_meters * inductor.loop_turns)**2);
                 fctx.fillText("wire = " + (wire_length_m*3.2808).toFixed(2) + "\' (" + wire_length_m.toFixed(2) + "m)", 8, 74);
