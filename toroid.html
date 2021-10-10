@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>VK3CPU RF Toroid Calculator</title>
+        <link rel="stylesheet" href="toroid.css">
+    </head>
+    <body>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator<br></header>
+        <section class="gridLayoutClass">
+            <div id="inductor-container" class="inductor-container" style="position: relative;">
+                <canvas id="inductor2D" class="inductorClass" width="350" height="350">
+                </canvas>
+            </div>
+            <div class="slider_container">
+                <label for="function-select">Function:</label>
+                <select name="functions" id="function-select">
+                    <option value="Inductor">Inductor</option>
+                    <option value="CommonModeChoke">Common-mode choke</option>
+                    <option value="Transformer">Transformer</option>
+                    <option value="FT82">BALUN</option>
+                </select>
+                <label for="toroid-select">Toroid:</label>
+                <select name="toroids" id="toroid-select" onchange="setToroid()">
+                    <option value="FT240">FT240</option>
+                    <option value="FT140">FT140</option>
+                    <option value="FT114">FT114</option>
+                    <option value="FT82">FT82</option>
+                    <option value="FT50">FT50</option>
+                    <option value="FT37">FT37</option>
+                </select>
+                <select name="materials" id="material-select" onchange="setMaterial()">
+                    <option value="31">31</option>
+                    <option value="43" selected='true'>43</option>
+                    <option value="52">52</option>
+                    <option value="75">75</option>
+                </select>
+                <div class="sliders">
+                    <label for="conductor_diameter_slider">&#8960a:</label>
+                    <input type="range" id="conductor_diameter_slider" min="0" max="40" value="20" step="1">
+                </div>
+                <!--div class="sliders">
+                    <label for="loop_diameter_slider">&#8960b:</label>
+                    <input type="range" id="loop_diameter_slider" min="0.25" max="2.0" value="1.00" step="0.01">
+                </div>
+                <div class="sliders">
+                    <label for="loop_spacing_slider">c/a:</label>
+                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.01">
+                </div-->
+                <div class="sliders">
+                    <label for="loop_turns_slider">N:</label>
+                    <input type="range" id="loop_turns_slider" min="1" max="100" value="50.0" step="0.1">
+                </div>
+                <div class="sliders">
+                    <label for="frequency_slider">f:</label>
+                    <input type="range" id="frequency_slider" min="1.0" max="30.0" value="7.0" step="0.1">
+                </div>
+                <div class="sliders">
+                    <label for="voltage_slider">Vrms:</label>
+                    <input type="range" id="voltage_slider" min="1.0" max="100.0" value="10.0" step="0.1">
+                </div>
+            </div>
+            <div id="notes" class="notes">
+            <br>
+            <b><u>Notes:</u></b><br>
+            RF Toroid Calculator was developed to help users predict the RF characteristics of a toroid-wound inductor. <br><br>
+            <u>Inputs via the slider widgets:</u>
+            <ul> 
+                <li>&#8960;a : Conductor diameter slider changes AWG from 0-40.</li>
+                <li>N : Number of turns or windings.</li>
+                <li>f : The frequency of interest (MHz) for some of the calculations.</li>
+                <li>Vrms : The RMS voltage applied to the inductor (Volts).</li>
+            </ul>
+            <p>Characteristics on the left are independent of frequency, while the characteristics on the right are dependent on the selected frequency. <br><br>
+            Each of the graphic representations attempt to keep the relative geometry correct, without exceeding the drawing boundary. The coil diameter
+            relative to the conductor diameter are representative. </p>
+            <u>Calculated dimensions:</u>
+            <ul>
+                <li>&#8960;o : Outer loop diameter (inches) </li>
+                <li>&#8960;i : Inner loop diameter (inches) - corresponds to the diameter of the winding former.</li>
+                <li>c : Distance between windings, measured from the conductor centers (inches).</li>
+                <li>&#8467; : Length of the coil (inches). Equal to c x N.</li>
+            </ul>
+            <u>Calculated parameters:</u>
+            <ul>
+                <li>L : Inductance is calculated using Nagaoka's equation incorporating his coefficient.</li>
+                <li>C : Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
+                <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
+                <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. Currently using a lumped reactances model. (Looking into modifying the model to 
+                    use the conductor length and velocity factor as described by Knight (2016).</li>
+                <li>X&#8343; : Inductive reactance at the given frequency. (&#937;)</li>
+                <li>|Z| : Impedance at the given frequency. (&#937;)</li>
+                <li>&#948; : Skin depth due to skin effect (&#956;m)</li>
+                <li>Rac : AC resistance is calculated using the skin effect and proximity resistance from empirical data collected by Medhurst using the spacing ratio, and length-to-diameter ratio.</li>
+                <li>Q : Quality factor of device, based on reactance (X) &#247 resistance (Rac) at the given frequency.</li>
+            </ul>
+            </div>
+        </section>
+        <!--script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script-->
+        <script src="math.js"></script>
+        <script src="inductor.js"></script>
+        <script>
+            function awgToMm(awg) {
+                //
+                switch (awg) {
+                    case 40: return 0.0799;
+                    case 39: return 0.0897;
+                    case 38: return 0.101;
+                    case 37: return 0.113;
+                    case 36: return 0.127;
+                    case 35: return 0.143;
+                    case 34: return 0.160;
+                    case 33: return 0.180;
+                    case 32: return 0.202;
+                    case 31: return 0.227;
+                    case 30: return 0.255;
+                    case 29: return 0.286;
+                    case 28: return 0.321;
+                    case 27: return 0.361;
+                    case 26: return 0.405;
+                    case 25: return 0.455;
+                    case 24: return 0.511;
+                    case 23: return 0.573;
+                    case 22: return 0.644;
+                    case 21: return 0.723;
+                    case 20: return 0.812;
+                    case 19: return 0.912;
+                    case 18: return 1.024;
+                    case 17: return 1.150;
+                    case 16: return 1.291;
+                    case 15: return 1.450;
+                    case 14: return 1.628;
+                    case 13: return 1.828;
+                    case 12: return 2.053;
+                    case 11: return 2.305;
+                    case 10: return 2.588;
+                    case  9: return 2.906;
+                    case  8: return 3.264;
+                    case  7: return 3.665;
+                    case  6: return 4.115;
+                    case  5: return 4.621;
+                    case  4: return 5.189;
+                    case  3: return 5.827;
+                    case  2: return 6.544;
+                    case  1: return 7.348; 
+                    case  0: return 8.251; 
+                    default: return 0.0;
+                }
+            }
+            
+            function setToroid() {
+                console.log("setToroid()")
+                var toroids = document.getElementsByName("toroids");
+                t_size = toroids[0].value;
+                recalculate()
+            }
+
+            function setMaterial() {
+                console.log("setMaterial()")
+                var materials = document.getElementsByName("materials");
+                material = materials[0].value;
+                recalculate()
+            }
+
+            const cores = {
+                '75' : {
+                    'FT240' : { PN:'5975003801', A:61.0,  B:35.35, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8,  Al:6850.0 },
+                    'FT140' : { PN:'5975002701', A:35.55, B:23.00, C:12.7, W:33.00,  CC:11.20, le:8.90, Ae:0.79, Ve:7.00, Al:5500.0 },
+                    'FT50'  : { PN:'5975000301', A:12.70, B:7.15,   C:4.90, W:2.00,   CC:22.90, le:2.95, Ae:0.129, Ve:0.38, Al:2725.0 }, 
+                    'FT37'  : { PN:'5975000201', A:9.50,  B:4.75,  C:3.30, W:0.83,   CC:28.60, le:2.06, Ae:0.072, Ve:0.15, Al:2200.0 }, 
+                    mu_i    : 5000,
+                    B       : 4800,
+                    H       : 5,
+                    Br      : 1000,
+                    Hc      : 0.11,
+                    Tc      : 140,
+                    R       : 300
+                },
+                '52' : {
+                    'FT240' : { PN:'5952003801', A:60.0,  B:35.35, C:12.7, W:133.44, CC:9.14,  le:14.5, Ae:1.58,  Ve:22.8,  Al:325.0 },
+                    'FT140' : { PN:'5952020801', A:35.25, B:22.60, C:12.7, W:38.26,  CC:11.10, le:8.79, Ae:0.792, Ve:6.959, Al:283.0 },
+                    'FT114' : { PN:'5952020701', A:28.8,  B:18.70, C:7.50, W:14.81,  CC:19.34, le:7.23, Ae:0.374, Ve:2.702, Al:162.0 },
+                    'FT82'  : { PN:'5952020601', A:21.70, B:13.50, C:6.35, W:7.54,   CC:20.80, le:5.33, Ae:0.256, Ve:1.368, Al:151.0 }, 
+                    'FT50'  : { PN:'5952020501', A:12.45, B:7.8,   C:6.35, W:2.46,   CC:21.24, le:3.06, Ae:0.144, Ve:0.442, Al:148.0 }, 
+                    'FT37'  : { PN:'5952020301', A:9.42,  B:4.72,  C:3.30, W:0.87,   CC:28.66, le:2.06, Ae:0.072, Ve:0.147, Al:110.0 }, 
+                    mu_i    : 250,
+                    B       : 4200,
+                    H       : 10,
+                    Br      : 2900,
+                    Hc      : 0.60,
+                    Tc      : 250,
+                    R       : 1.0e9
+                },
+                '43' : {
+                    'FT240' : { PN:'5943003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8, Al:1075.0 },
+                    'FT140' : { PN:'5943002701', A:35.55, B:23.00, C:12.7, W:33.0,  CC:11.20, le:8.90, Ae:0.79,  Ve:7.00, Al:885.0 },
+                    'FT114' : { PN:'5943001001', A:29.00, B:19.00, C:7.50, W:13.0,  CC:19.80, le:7.30, Ae:0.37,  Ve:2.70, Al:510.0 },
+                    'FT82'  : { PN:'5943000601', A:21.00, B:13.20, C:6.35, W:6.40,  CC:21.30, le:5.20, Ae:0.243, Ve:1.26, Al:470.0 }, 
+                    'FT50'  : { PN:'5943000301', A:12.70, B:7.15,  C:4.90, W:2.00,  CC:22.90, le:2.95, Ae:0.129, Ve:0.38, Al:440.0 }, 
+                    'FT37'  : { PN:'5943000201', A:9.50,  B:4.75,  C:3.30, W:0.83,  CC:28.60, le:2.07, Ae:0.072, Ve:0.15, Al:350.0 }, 
+                    mu_i    : 800,
+                    B       : 3500,
+                    H       : 10,
+                    Br      : 2200,
+                    Hc      : 0.36,
+                    Tc      : 130,
+                    R       : 1.0e5
+                },
+                '31' : {
+                    'FT240' : { PN:'2631803802', A:61.0,  B:35.55, C:12.7, W:118.0, H:0.09,  R : {1:12, 5:28,  10:40,  25:63,  100:119, 250:215} },
+                    'FT200' : { PN:'2631626202', A:50.80, B:25.40, C:38.1, W:278.0, H:0.11,  R : {1:40, 5:103, 10:140, 25:215, 100:365, 250:290} },
+                    'FT114' : { PN:'2631801202', A:29.00, B:19.00, C:13.85, W:25.0,  H:0.17, R : {1:10, 5:24, 10:31, 25:49, 100:88, 250:130} },
+                    mu_i    : 1500,
+                    B       : 3600,
+                    H       : 5,
+                    Br      : 2600,
+                    Hc      : 0.34,
+                    Tc      : 130,
+                    R       : 3.0e3
+                }
+            };
+            
+            //const mu0 = Math.PI * 4e-7;
+            //const cu_sigma = 58e6;      // Copper conductance value
+            
+            // Define global storage for calculated values, so we don't recalculate the same things multiple times:
+            var usage = 'Inductor';
+            var t_size = 'FT240';
+            var material = '43';
+            
+            var toroid = {
+                core : cores[material][t_size], 
+                cond_diameter_meters : 0.0,
+                N_max : 0,
+                N : 0,
+                frequency_hz : 0.0,
+                Vrms : 0.0, 
+
+                L : 0.0,
+                B_peak : 0.0,
+                H_peak : 0.0, 
+                cond_length_meters : 0.0,
+                Rdc : 0.0,
+                SRF : 0.0,
+
+                Xl : 0.0,
+                Z : 0.0,
+                skin_depth : 0.0,
+                Rac : 0.0,
+                Q : 0.0
+            };
+
+            // Solve all the parameters, and re-draw the canvas:
+            function recalculate() {
+                // Input variables:
+                toroid.core = cores[material][t_size];
+                toroid.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
+                toroid.frequency_hz = 1e6 * frequency_slider.value;
+                toroid.Vrms = 1.0 * voltage_slider.value;
+
+                // Frequency independent characteristics:
+                toroid.N_max = Math.PI / (Math.atan2(0.5e3 * toroid.cond_diameter_meters, (0.5 * toroid.core.B - 0.5e3 * toroid.cond_diameter_meters)));
+                toroid.N = 1 + Math.floor(loop_turns_slider.value * toroid.N_max / 100);
+                toroid.L = (toroid.N**2) * toroid.core.Al * 1.0e-9;      // In Henries
+                toroid.B_peak = (toroid.Vrms * 1e8) / (4.44 * toroid.frequency_hz * toroid.N); // 
+                toroid.cond_length_meters = toroid.N * (2*toroid.core.C + toroid.core.A - toroid.core.B) * 1e-3;
+                toroid.Rdc = 1.68e-8 * toroid.cond_length_meters / (Math.PI * ((toroid.cond_diameter_meters*0.5)**2.0));
+                
+                // Frequency dependent characteristics:
+                toroid.Xl = 6.2832 * toroid.frequency_hz * toroid.L;
+                toroid.skin_depth = Math.sqrt(1.0 / (Math.PI * toroid.frequency_hz * mu0 * cu_sigma));
+                toroid.Rac = dc2acFactor(toroid.cond_diameter_meters, toroid.skin_depth) * toroid.Rdc;
+                toroid.Q = qualityFactor(toroid.Xl, toroid.Rac);
+                
+                // Calculate impedance:
+                toroid.Z = math.complex(toroid.Rac, toroid.Xl).toPolar();
+                toroid.I = 1.414 * toroid.Vrms / toroid.Z.r;
+                toroid.H_peak = (0.4 * Math.PI * toroid.N * toroid.I) / toroid.core.le;
+                
+                drawDesign();
+            }
+/*
+            loop_diameter_slider.oninput = function() {
+                recalculate();
+            }
+*/
+            conductor_diameter_slider.oninput = function() {
+                recalculate();
+            }
+
+            loop_turns_slider.oninput = function() {
+                recalculate();
+            }
+/*
+            loop_spacing_slider.oninput = function() {
+                recalculate();
+            }
+*/
+            frequency_slider.oninput = function() {
+                recalculate();
+            }
+
+            voltage_slider.oninput = function() {
+                recalculate();
+            }
+
+            window.onresize = function() {
+                recalculate();
+            }
+
+            window.onorientationchange = function() {
+                recalculate();
+            }
+
+            window.onbeforeprint = function() {
+                console.log("onbeforeprint");
+                drawDesign();
+            }
+
+            const afront_canvas = document.getElementById("inductor2D");
+            const fctx = afront_canvas.getContext('2d');
+
+            function drawInductor(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
+                let theta = Math.PI/8.0;
+
+                // Draw entry and exit wires:
+                var x1 = originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI + 0.5 * theta);
+                var y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI + 0.5 * theta);
+                //var x2 = originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI + 0.5 * theta);
+                //var y2 = originY + (innerRadius - wireRadius) * Math.sin(0.5 * Math.PI + 0.5 * theta);
+                var x2 = originX + (outerRadius - wireRadius) * Math.cos(0.5 * Math.PI + 0.5 * theta);
+                var y2 = originY + (outerRadius - wireRadius) * Math.sin(0.5 * Math.PI + 0.5 * theta);
+                var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                fctx.beginPath();
+                fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                fctx.fillStyle = "black";
+                fctx.fill();
+                
+                // Draw toroid former:
+                fctx.lineWidth = outerRadius - innerRadius;
+                //fctx.fillStyle = "#1F0000";
+                fctx.strokeStyle = "#7F7F7F"; // rgb(100, 100, 100);
+                fctx.beginPath();
+                //fctx.lineWidth = wireRadius * 2.0;
+                fctx.arc(originX, originY, 0.5 * (outerRadius + innerRadius), 0.0, 2.0 * Math.PI, false);
+                fctx.stroke();
+                fctx.lineWidth = 1.0;
+
+                /*
+                fctx.beginPath();
+                //fctx.lineWidth = wireRadius * 2.0;
+                fctx.arc(originX, originY, outerRadius, 0.0, 2.0 * Math.PI, false);
+                fctx.stroke();
+                fctx.beginPath();
+                fctx.arc(originX, originY, innerRadius, 0.0, 2.0 * Math.PI, false);
+                fctx.stroke();
+                */
+
+                x1 = originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI - 0.5 * theta);
+                y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI - 0.5 * theta);
+                x2 = originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI - 0.5 * theta);
+                y2 = originY + (innerRadius - wireRadius) * Math.sin(0.5 * Math.PI - 0.5 * theta);
+                angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                fctx.beginPath();
+                fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                fctx.fillStyle = "black";
+                fctx.fill();
+                
+                // Now draw the rest of the wires:
+                fctx.beginPath();
+                for(let i = 0; i < (turns-1); i++) {
+                    /*
+                    x1 = originX + (outerRadius + wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    y1 = originY + (outerRadius + wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    x2 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    y2 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    */
+                    x1 = originX + (outerRadius + wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
+                    y1 = originY + (outerRadius + wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
+                    x2 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    y2 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+
+                    fctx.beginPath();
+                    fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                    fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                    fctx.fillStyle = "black";
+                    fctx.fill();
+                }
+                
+                // Draw the Dimensions:
+                fctx.beginPath();
+                fctx.moveTo(originX + innerRadius, originY - outerRadius);
+                fctx.lineTo(originX + outerRadius + 20, originY - outerRadius);
+                fctx.moveTo(originX + innerRadius, originY + outerRadius);
+                fctx.lineTo(originX + outerRadius + 20, originY + outerRadius);
+                fctx.lineTo(originX + outerRadius + 20, originY - outerRadius);
+                
+                
+                fctx.stroke();
+
+            }
+
+            function drawTransformer(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
+                // Draw toroid former:
+                fctx.beginPath();
+                fctx.arc(originX, originY, outerRadius, 0.0, 2.0 * Math.PI, false);
+                fctx.stroke();
+                fctx.beginPath();
+                fctx.arc(originX, originY, innerRadius, 0.0, 2.0 * Math.PI, false);
+                fctx.stroke();
+                fctx.lineWidth = 1.0;
+
+                // Draw left-hand entry wire:
+                var x1 = originX - innerRadius + wireRadius;
+                var y1 = originY;
+                var x2 = originX - outerRadius - 100;
+                var y2 = originY;
+                var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                fctx.beginPath();
+                fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                fctx.fillStyle = "black";
+                fctx.fill();
+
+                // Right-hand exit wire:
+                x1 = originX + outerRadius + wireRadius;
+                y1 = originY;
+                x2 = originX + outerRadius + 100;
+                y2 = originY;
+                angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                fctx.beginPath();
+                fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                fctx.fillStyle = "black";
+                fctx.fill();
+
+                // Draw cross-over wire:
+                let theta = Math.PI/8.0;
+                x1 = originX + (innerRadius - wireRadius) * Math.cos(Math.PI - theta);
+                y1 = originY + (innerRadius - wireRadius) * Math.sin(Math.PI - theta);
+                x2 = originX + (outerRadius + wireRadius) * Math.cos(- theta);
+                y2 = originY + (outerRadius + wireRadius) * Math.sin(- theta);
+                angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                fctx.beginPath();
+                fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                fctx.fillStyle = "black";
+                fctx.fill();
+
+                for(let i = 0; i < (turns-1); i++) {
+                    x1 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1.5)) * (Math.PI - theta));
+                    y1 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1.5)) * (Math.PI - theta));
+                    x2 = originX + (outerRadius + wireRadius) * Math.cos(((i+0.5)/(turns-1.5)) * (Math.PI - theta));
+                    y2 = originY + (outerRadius + wireRadius) * Math.sin(((i+0.5)/(turns-1.5)) * (Math.PI - theta));
+                    angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+
+                    fctx.beginPath();
+                    fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                    fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                    fctx.fillStyle = "black";
+                    fctx.fill();
+                }
+                
+                for(let i = 0; i < (turns-2); i++) {
+                    x1 = originX + (innerRadius - wireRadius) * Math.cos(((i+1.0)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
+                    y1 = originY + (innerRadius - wireRadius) * Math.sin(((i+1.0)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
+                    x2 = originX + (outerRadius + wireRadius) * Math.cos(((i+0.5)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
+                    y2 = originY + (outerRadius + wireRadius) * Math.sin(((i+0.5)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
+                    angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+
+                    fctx.beginPath();
+                    fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                    fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                    fctx.fillStyle = "black";
+                    fctx.fill();
+                }
+            }
+
+            function drawBalun(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
+                // 
+            }
+            
+            function drawDesign() {
+                const win_width  = document.getElementById("inductor-container").clientWidth; 
+                const win_height = document.getElementById("inductor-container").clientHeight; 
+                afront_canvas.width = win_width-12; 
+                afront_canvas.height = win_height-12; 
+
+                fctx.clearRect(0, 0, win_width, win_height);
+                const loop_radius = 0.15 * win_height; 
+                var cond_radius = loop_radius * toroid.cond_diameter_meters * 1e3 / toroid.core.A;
+                const loopx = win_width/2; 
+                const loopy = win_height/2;
+
+                const loop_diameter_mm = toroid.core.A;
+                const cond_diameter_mm = toroid.cond_diameter_meters * 1000.0;
+                const loop_diameter_inches = loop_diameter_mm / 25.4;
+                const cond_diameter_inches = cond_diameter_mm / 25.4;
+
+                fctx.font = "bold 14px arial";
+                fctx.textAlign = "center";
+                fctx.fillText("Wire - AWG", win_width*0.5, 18);
+                
+                let inner_radius = loop_radius * toroid.core.B / toroid.core.A;
+                drawInductor(fctx, loopx, loopy, loop_radius, inner_radius, cond_radius, toroid.N);
+                //drawTransformer(fctx, loopx, loopy, loop_radius, inner_radius, cond_radius, toroid.N);
+
+                const y_offset = loopy + loop_radius + 20;
+                var arrow_size = 10.0;
+
+                // Draw inner-diameter arrows: (for using a winding former)
+                const inner_dia_y = loopy + loop_radius + 40;
+
+                // Draw outer-diameter arrows: (for using a winding former)
+                const outer_dia_y = loopy + loop_radius + 0;
+
+                // Write loop inductance:
+                fctx.font = "12px arial";
+                fctx.textAlign = "left";
+                const L = toroid.L * 1.0e+6;
+                fctx.fillText("L = " + L.toFixed(0).toString() + " \u03bcH", 8, 18);
+                var freq = 1e-6 * toroid.frequency_hz;
+                fctx.fillText("f = " + freq.toFixed(1) + " MHz", 8, 32);
+                fctx.fillText("Vrms = " + toroid.Vrms.toFixed(1) + " V", 8, 46);
+                fctx.fillText("Rdc = " + toroid.Rdc.toFixed(2) + " \u03A9", 8, 60);
+                fctx.fillText("H = " + (toroid.H_peak*1.0e3).toFixed(1) + " mOe", 8, 74);
+                fctx.fillText("B = " + (toroid.B_peak).toFixed(1) + " G", 8, 88);
+                fctx.fillText("\u03bc = " + (toroid.B_peak / toroid.H_peak).toFixed(1), 8, 102);
+                fctx.fillText("wire = " + (toroid.cond_length_meters*100.0).toFixed(1)+ " cm", 8, 116);
+                
+                fctx.textAlign = "center";
+                fctx.font = "16px courier";
+                fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, loopy - loop_radius - 44);
+                fctx.fillText("N = " + toroid.N.toString(), loopx, loopy - loop_radius - 26);
+                fctx.font = "12px arial";
+/*
+                var cond_spacing = 2.0 * cond_radius * toroid.spacing_ratio;
+                if((cond_spacing * toroid.loop_turns) > (0.8 * win_width)) {
+                    cond_radius = ((0.8 * win_width) / (toroid.loop_turns * 2.0*toroid.spacing_ratio));
+                    cond_spacing = 2.0 * cond_radius * toroid.spacing_ratio;
+                } 
+                var start_x = win_width/2.0 - toroid.loop_turns * cond_spacing * 0.5;
+                var top_y = win_height * 0.56;
+                var bot_y = top_y + 2.0 * cond_radius * (toroid.loop_diameter_meters / toroid.cond_diameter_meters);
+                var angle = math.atan2((cond_spacing * 0.5), (bot_y - top_y));
+                
+                for (let i = 0; i < toroid.loop_turns; i++) {
+                    fctx.beginPath();
+                    fctx.arc(start_x + (i+0.5) * cond_spacing, top_y, cond_radius, Math.PI-angle, -angle, false);
+                    fctx.arc(start_x + (i+1) * cond_spacing, bot_y, cond_radius, -angle, Math.PI-angle, false);
+                    fctx.fillStyle = "grey";
+                    fctx.fill();
+
+                    fctx.beginPath();
+                    fctx.arc(start_x + (i * cond_spacing), bot_y, cond_radius, angle, Math.PI+angle);
+                    fctx.arc(start_x + (cond_spacing * 0.5) + i * cond_spacing, top_y, cond_radius, Math.PI+angle, angle);
+                    fctx.fillStyle = "black";
+                    fctx.fill();
+                }
+
+                // Draw the wire ends:
+                fctx.fillRect(start_x - cond_radius, bot_y, 2.0 * cond_radius, 20);
+                fctx.fillStyle = "grey";
+                fctx.fillRect(start_x + toroid.loop_turns * cond_spacing  - cond_radius, bot_y, 2.0 * cond_radius, 20);
+                fctx.fillStyle = "black";
+
+                // Draw left spacing arrow:
+                const dim_y = win_height * 0.88;
+                fctx.beginPath();
+                fctx.moveTo(start_x - 20, dim_y);
+                fctx.lineTo(start_x, dim_y);
+                fctx.lineTo(start_x - 7, dim_y + 7)
+                fctx.lineTo(start_x - 7, dim_y - 7)
+                fctx.lineTo(start_x, dim_y);
+                fctx.moveTo(start_x, dim_y - 7);
+                fctx.lineTo(start_x, dim_y + 7);
+                fctx.stroke();
+
+                // Draw right spacing arrow:
+                fctx.beginPath();
+                fctx.moveTo(start_x + cond_spacing + 20, dim_y);
+                fctx.lineTo(start_x + cond_spacing, dim_y);
+                fctx.lineTo(start_x + cond_spacing + 7, dim_y + 7)
+                fctx.lineTo(start_x + cond_spacing + 7, dim_y - 7)
+                fctx.lineTo(start_x + cond_spacing, dim_y);
+                fctx.moveTo(start_x + cond_spacing, dim_y - 7);
+                fctx.lineTo(start_x + cond_spacing, dim_y + 7);
+                fctx.stroke();
+
+                // Draw right length arrow:
+                fctx.beginPath();
+                fctx.moveTo(start_x + toroid.loop_turns * cond_spacing + 20, dim_y);
+                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing, dim_y);
+                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing + 7, dim_y + 7)
+                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing + 7, dim_y - 7)
+                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing, dim_y);
+                fctx.moveTo(start_x + toroid.loop_turns * cond_spacing, dim_y - 7);
+                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing, dim_y + 7);
+                fctx.stroke();
+
+                // Extended lines:
+                fctx.strokeStyle = "grey";
+                fctx.beginPath();
+                fctx.moveTo(start_x, bot_y + 25);
+                fctx.lineTo(start_x, dim_y - 12);
+                fctx.moveTo(start_x + cond_spacing, bot_y + 10);
+                fctx.lineTo(start_x + cond_spacing, dim_y - 12);
+                fctx.moveTo(start_x + toroid.loop_turns * cond_spacing, bot_y + 25);
+                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing, dim_y - 12);
+                fctx.stroke();
+                fctx.strokeStyle = "black";
+*/
+                fctx.font = "12px arial";
+                fctx.textAlign = "right";
+                var freq = 1e-6 * toroid.frequency_hz;
+                fctx.fillText("Irms = " + (1.0e3 * toroid.I).toFixed(1) + " mA", win_width-18, 18);
+                fctx.fillText("X\u2097 = " + toroid.Xl.toFixed(1) + " \u03A9", win_width-18, 32);
+                fctx.fillText("|Z| = " + toroid.Z.r.toFixed(1) + " \u03A9", win_width-18, 46);
+                fctx.fillText("\u03B4 = " + (toroid.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 60);
+                fctx.fillText("Rac = " + toroid.Rac.toFixed(2) + " \u03A9", win_width-18, 74);
+                fctx.fillText("Q = " + toroid.Q.toFixed(1), win_width-18, 88);
+
+                // Bottom left text:
+                fctx.textAlign = "left";
+                fctx.fillText("\u03bci  = " + cores[material].mu_i, 8, win_height - 102);
+                fctx.fillText("B  = " + cores[material].B + " G", 8, win_height - 88);
+                fctx.fillText("H  = " + cores[material].H + " Oe", 8, win_height - 74);
+                fctx.fillText("Br = " + cores[material].Br + " G", 8, win_height - 60);
+                fctx.fillText("Hc = " + cores[material].Hc + " Oe", 8, win_height - 46);
+                fctx.fillText("Tc = " + cores[material].Tc + " C", 8, win_height - 32);
+                fctx.fillText("\u03C1 = " + cores[material].R + " \u03A9", 8, win_height - 18);
+
+                /*
+                // Draw spacing text: (gap is to avoid collision of spacing and length texts)
+                fctx.textAlign = "right";
+                var gap = ((toroid.loop_turns * cond_spacing - cond_spacing) < 60) ? (60 - (toroid.loop_turns * cond_spacing - cond_spacing)) : 0;
+                const spc = toroid.spacing_ratio * cond_diameter_inches;
+                fctx.fillText("c = " + spc.toFixed(3).toString() + "\"", start_x + cond_spacing + 20 - gap, dim_y + 20);
+                fctx.fillText("(" + (spc*25.4).toFixed(3).toString() + "mm)", start_x + cond_spacing + 20 - gap, dim_y + 34);
+
+                // Draw length text:
+                const sol_len = toroid.loop_turns * spc;
+                fctx.fillText("\u2113 = " + sol_len.toFixed(3).toString() + "\"", start_x + toroid.loop_turns * cond_spacing + 20, dim_y + 20);
+                fctx.fillText("(" + (sol_len*25.4).toFixed(1).toString() + "mm)", start_x + toroid.loop_turns * cond_spacing + 20, dim_y + 34);
+                */
+            }
+            recalculate();
+        </script>
+    </body>
+</html>
