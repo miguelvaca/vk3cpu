@@ -19,7 +19,6 @@
                     <option value="Inductor">Inductor</option>
                     <option value="CommonModeChoke">Common-mode choke</option>
                     <option value="Transformer">Transformer</option>
-                    <option value="FT82">BALUN</option>
                 </select>
                 <label for="toroid-select">Toroid:</label>
                 <select name="toroids" id="toroid-select" onchange="setToroid()">
@@ -40,14 +39,6 @@
                     <label for="conductor_diameter_slider">&#8960a:</label>
                     <input type="range" id="conductor_diameter_slider" min="0" max="40" value="20" step="1">
                 </div>
-                <!--div class="sliders">
-                    <label for="loop_diameter_slider">&#8960b:</label>
-                    <input type="range" id="loop_diameter_slider" min="0.25" max="2.0" value="1.00" step="0.01">
-                </div>
-                <div class="sliders">
-                    <label for="loop_spacing_slider">c/a:</label>
-                    <input type="range" id="loop_spacing_slider" min="1.1" max="4.0" value="2.0" step="0.01">
-                </div-->
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
                     <input type="range" id="loop_turns_slider" min="1" max="100" value="50.0" step="0.1">
@@ -58,7 +49,7 @@
                 </div>
                 <div class="sliders">
                     <label for="voltage_slider">Vrms:</label>
-                    <input type="range" id="voltage_slider" min="1.0" max="100.0" value="10.0" step="0.1">
+                    <input type="range" id="voltage_slider" min="1.0" max="200.0" value="10.0" step="0.2">
                 </div>
             </div>
             <div id="notes" class="notes">
@@ -537,91 +528,15 @@
                 fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, loopy - loop_radius - 44);
                 fctx.fillText("N = " + toroid.N.toString(), loopx, loopy - loop_radius - 26);
                 fctx.font = "12px arial";
-/*
-                var cond_spacing = 2.0 * cond_radius * toroid.spacing_ratio;
-                if((cond_spacing * toroid.loop_turns) > (0.8 * win_width)) {
-                    cond_radius = ((0.8 * win_width) / (toroid.loop_turns * 2.0*toroid.spacing_ratio));
-                    cond_spacing = 2.0 * cond_radius * toroid.spacing_ratio;
-                } 
-                var start_x = win_width/2.0 - toroid.loop_turns * cond_spacing * 0.5;
-                var top_y = win_height * 0.56;
-                var bot_y = top_y + 2.0 * cond_radius * (toroid.loop_diameter_meters / toroid.cond_diameter_meters);
-                var angle = math.atan2((cond_spacing * 0.5), (bot_y - top_y));
                 
-                for (let i = 0; i < toroid.loop_turns; i++) {
-                    fctx.beginPath();
-                    fctx.arc(start_x + (i+0.5) * cond_spacing, top_y, cond_radius, Math.PI-angle, -angle, false);
-                    fctx.arc(start_x + (i+1) * cond_spacing, bot_y, cond_radius, -angle, Math.PI-angle, false);
-                    fctx.fillStyle = "grey";
-                    fctx.fill();
-
-                    fctx.beginPath();
-                    fctx.arc(start_x + (i * cond_spacing), bot_y, cond_radius, angle, Math.PI+angle);
-                    fctx.arc(start_x + (cond_spacing * 0.5) + i * cond_spacing, top_y, cond_radius, Math.PI+angle, angle);
-                    fctx.fillStyle = "black";
-                    fctx.fill();
-                }
-
-                // Draw the wire ends:
-                fctx.fillRect(start_x - cond_radius, bot_y, 2.0 * cond_radius, 20);
-                fctx.fillStyle = "grey";
-                fctx.fillRect(start_x + toroid.loop_turns * cond_spacing  - cond_radius, bot_y, 2.0 * cond_radius, 20);
-                fctx.fillStyle = "black";
-
-                // Draw left spacing arrow:
-                const dim_y = win_height * 0.88;
-                fctx.beginPath();
-                fctx.moveTo(start_x - 20, dim_y);
-                fctx.lineTo(start_x, dim_y);
-                fctx.lineTo(start_x - 7, dim_y + 7)
-                fctx.lineTo(start_x - 7, dim_y - 7)
-                fctx.lineTo(start_x, dim_y);
-                fctx.moveTo(start_x, dim_y - 7);
-                fctx.lineTo(start_x, dim_y + 7);
-                fctx.stroke();
-
-                // Draw right spacing arrow:
-                fctx.beginPath();
-                fctx.moveTo(start_x + cond_spacing + 20, dim_y);
-                fctx.lineTo(start_x + cond_spacing, dim_y);
-                fctx.lineTo(start_x + cond_spacing + 7, dim_y + 7)
-                fctx.lineTo(start_x + cond_spacing + 7, dim_y - 7)
-                fctx.lineTo(start_x + cond_spacing, dim_y);
-                fctx.moveTo(start_x + cond_spacing, dim_y - 7);
-                fctx.lineTo(start_x + cond_spacing, dim_y + 7);
-                fctx.stroke();
-
-                // Draw right length arrow:
-                fctx.beginPath();
-                fctx.moveTo(start_x + toroid.loop_turns * cond_spacing + 20, dim_y);
-                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing, dim_y);
-                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing + 7, dim_y + 7)
-                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing + 7, dim_y - 7)
-                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing, dim_y);
-                fctx.moveTo(start_x + toroid.loop_turns * cond_spacing, dim_y - 7);
-                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing, dim_y + 7);
-                fctx.stroke();
-
-                // Extended lines:
-                fctx.strokeStyle = "grey";
-                fctx.beginPath();
-                fctx.moveTo(start_x, bot_y + 25);
-                fctx.lineTo(start_x, dim_y - 12);
-                fctx.moveTo(start_x + cond_spacing, bot_y + 10);
-                fctx.lineTo(start_x + cond_spacing, dim_y - 12);
-                fctx.moveTo(start_x + toroid.loop_turns * cond_spacing, bot_y + 25);
-                fctx.lineTo(start_x + toroid.loop_turns * cond_spacing, dim_y - 12);
-                fctx.stroke();
-                fctx.strokeStyle = "black";
-*/
-                fctx.font = "12px arial";
+                // Top-right:
                 fctx.textAlign = "right";
-                var freq = 1e-6 * toroid.frequency_hz;
-                fctx.fillText("Irms = " + (1.0e3 * toroid.I).toFixed(1) + " mA", win_width-18, 18);
+                fctx.fillText("Rac = " + toroid.Rac.toFixed(2) + " \u03A9", win_width-18, 18);
                 fctx.fillText("X\u2097 = " + toroid.Xl.toFixed(1) + " \u03A9", win_width-18, 32);
-                fctx.fillText("|Z| = " + toroid.Z.r.toFixed(1) + " \u03A9", win_width-18, 46);
-                fctx.fillText("\u03B4 = " + (toroid.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 60);
-                fctx.fillText("Rac = " + toroid.Rac.toFixed(2) + " \u03A9", win_width-18, 74);
+                fctx.fillText("Z = " + + toroid.Rac.toFixed(2) + " + j" + toroid.Xl.toFixed(1) + " \u03A9", win_width-18, 46);
+                fctx.fillText("|Z| = " + toroid.Z.r.toFixed(1) + " \u03A9", win_width-18, 60);
+                fctx.fillText("Irms = " + (1.0e3 * toroid.I).toFixed(1) + " mA", win_width-18, 74);
+                //fctx.fillText("\u03B4 = " + (toroid.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 88);
                 fctx.fillText("Q = " + toroid.Q.toFixed(1), win_width-18, 88);
 
                 // Bottom left text:
