@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>VK3CPU RF Toroid Calculator</title>
+        <link rel="stylesheet" href="toroid2.css">
+    </head>
+    <body>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.2<br></header>
+        <section class="gridLayoutClass">
+            <div id="smith-chart-container" class="smith-chart-container" style="position: relative;">
+                <canvas id="chartCanvas" class="chartCanvasClass">
+                    2D Chart Canvas
+                </canvas>
+            </div>
+            <div id="inductor-container" class="inductor-container" style="position: relative;">
+                <canvas id="inductor2D" class="inductorClass" width="350" height="350">
+                </canvas>
+            </div>
+            <div class="slider_container">
+                <div>
+                    <select name="functions" id="function-select">
+                        <option value="Inductor">Inductor</option>
+                        <option value="CommonModeChoke">Common-mode choke</option>
+                        <option value="Transformer">Transformer</option>
+                    </select>
+                    <select name="toroids" id="toroid-select" onchange="setToroid()">
+                        <option value="FT240">FT240</option>
+                        <option value="FT140">FT140</option>
+                        <option value="FT114">FT114</option>
+                        <option value="FT82">FT82</option>
+                        <option value="FT50">FT50</option>
+                        <option value="FT37">FT37</option>
+                    </select>
+                    <select name="materials" id="material-select" onchange="setMaterial()">
+                        <option value="31">31</option>
+                        <option value="43" selected='true'>43</option>
+                        <option value="52">52</option>
+                        <option value="75">75</option>
+                    </select>
+                </div>
+                <div class="sliders">
+                    <label for="conductor_diameter_slider">AWG:</label>
+                    <input type="range" id="conductor_diameter_slider" min="0" max="40" value="20" step="1">
+                </div>
+                <div class="sliders">
+                    <label for="loop_turns_slider">N:</label>
+                    <input type="range" id="loop_turns_slider" min="1" max="100" value="50.0" step="0.1">
+                </div>
+                <div class="sliders">
+                    <label for="frequency_slider">f:</label>
+                    <input type="range" id="frequency_slider" min="4.0" max="8.0" value="1.0" step="0.01">
+                </div>
+                <div class="sliders">
+                    <label for="voltage_slider">Vrms:</label>
+                    <input type="range" id="voltage_slider" min="1.0" max="200.0" value="10.0" step="0.2">
+                </div>
+            </div>
+            <div id="notes" class="notes">
+            <br>
+            <b><u>Notes:</u></b><br>
+            RF Toroid Calculator was developed to help users predict the RF characteristics of a toroid-wound inductor. <br><br>
+            <u>Inputs via the slider widgets:</u>
+            <ul> 
+                <li>&#8960;a : Conductor diameter slider changes AWG from 0-40.</li>
+                <li>N : Number of turns or windings.</li>
+                <li>f : The frequency of interest (MHz) for some of the calculations.</li>
+                <li>Vrms : The RMS voltage applied to the inductor (Volts).</li>
+            </ul>
+            <p>Characteristics on the left are independent of frequency, while the characteristics on the right are dependent on the selected frequency. <br><br>
+            Each of the graphic representations attempt to keep the relative geometry correct, without exceeding the drawing boundary. The coil diameter
+            relative to the conductor diameter are representative. </p>
+            <u>Calculated dimensions:</u>
+            <ul>
+                <li>&#8960;o : Outer loop diameter (inches) </li>
+                <li>&#8960;i : Inner loop diameter (inches) - corresponds to the diameter of the winding former.</li>
+                <li>c : Distance between windings, measured from the conductor centers (inches).</li>
+                <li>&#8467; : Length of the coil (inches). Equal to c x N.</li>
+            </ul>
+            <u>Calculated parameters:</u>
+            <ul>
+                <li>L : Inductance is calculated using Nagaoka's equation incorporating his coefficient.</li>
+                <li>C : Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
+                <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
+                <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. Currently using a lumped reactances model. (Looking into modifying the model to 
+                    use the conductor length and velocity factor as described by Knight (2016).</li>
+                <li>X&#8343; : Inductive reactance at the given frequency. (&#937;)</li>
+                <li>|Z| : Impedance at the given frequency. (&#937;)</li>
+                <li>&#948; : Skin depth due to skin effect (&#956;m)</li>
+                <li>Rac : AC resistance is calculated using the skin effect and proximity resistance from empirical data collected by Medhurst using the spacing ratio, and length-to-diameter ratio.</li>
+                <li>Q : Quality factor of device, based on reactance (X) &#247 resistance (Rac) at the given frequency.</li>
+            </ul>
+            </div>
+        </section>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+        <script src="chartjs-chart-smith.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
+        <!--script src="math.js"></script-->
+        <script src="inductor.js"></script>
+        <script>
+            function awgToMm(awg) {
+                //
+                switch (awg) {
+                    case 40: return 0.0799;
+                    case 39: return 0.0897;
+                    case 38: return 0.101;
+                    case 37: return 0.113;
+                    case 36: return 0.127;
+                    case 35: return 0.143;
+                    case 34: return 0.160;
+                    case 33: return 0.180;
+                    case 32: return 0.202;
+                    case 31: return 0.227;
+                    case 30: return 0.255;
+                    case 29: return 0.286;
+                    case 28: return 0.321;
+                    case 27: return 0.361;
+                    case 26: return 0.405;
+                    case 25: return 0.455;
+                    case 24: return 0.511;
+                    case 23: return 0.573;
+                    case 22: return 0.644;
+                    case 21: return 0.723;
+                    case 20: return 0.812;
+                    case 19: return 0.912;
+                    case 18: return 1.024;
+                    case 17: return 1.150;
+                    case 16: return 1.291;
+                    case 15: return 1.450;
+                    case 14: return 1.628;
+                    case 13: return 1.828;
+                    case 12: return 2.053;
+                    case 11: return 2.305;
+                    case 10: return 2.588;
+                    case  9: return 2.906;
+                    case  8: return 3.264;
+                    case  7: return 3.665;
+                    case  6: return 4.115;
+                    case  5: return 4.621;
+                    case  4: return 5.189;
+                    case  3: return 5.827;
+                    case  2: return 6.544;
+                    case  1: return 7.348; 
+                    case  0: return 8.251; 
+                    default: return 0.0;
+                }
+            }
+            
+            function setToroid() {
+                console.log("setToroid()")
+                var toroids = document.getElementsByName("toroids");
+                t_size = toroids[0].value;
+                recalculate()
+            }
+
+            function setMaterial() {
+                console.log("setMaterial()")
+                var materials = document.getElementsByName("materials");
+                material = materials[0].value;
+                recalculate()
+            }
+
+            // TODO - add 77 material in FT240, FT140, FT50A, FT50 and FT23
+            const cores = {
+                '75' : {
+                    'FT240' : { PN:'5975003801', A:61.0,  B:35.35, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8,  Al:6850.0 },
+                    'FT140' : { PN:'5975002701', A:35.55, B:23.00, C:12.7, W:33.00,  CC:11.20, le:8.90, Ae:0.79, Ve:7.00, Al:5500.0 },
+                    'FT50'  : { PN:'5975000301', A:12.70, B:7.15,   C:4.90, W:2.00,   CC:22.90, le:2.95, Ae:0.129, Ve:0.38, Al:2725.0 }, 
+                    'FT37'  : { PN:'5975000201', A:9.50,  B:4.75,  C:3.30, W:0.83,   CC:28.60, le:2.06, Ae:0.072, Ve:0.15, Al:2200.0 }, 
+                    mat     : "MnZn",
+                    mu_i    : 5000,
+                    B       : 4800,
+                    H       : 5,
+                    Br      : 1000,
+                    Hc      : 0.11,
+                    Tc      : 140,
+                    R       : 300,
+                    complex_mu : {
+                        freq: [10000.0, 30000.0, 50000.0, 100000.0, 300000.0, 500000.0, 667000.0, 800000.0, 1000000.0, 1070000.0, 1150000.0, 1230000.0, 1320000.0, 1420000.0, 1520000.0, 1630000.0, 1750000.0, 1870000.0, 2010000.0, 2150000.0, 2310000.0, 2480000.0, 2660000.0, 2850000.0, 3050000.0, 3270000.0, 3510000.0, 3760000.0, 4040000.0, 4330000.0, 4640000.0, 4980000.0, 5340000.0, 5720000.0, 6140000.0, 6580000.0, 7050000.0, 7560000.0, 8110000.0, 8700000.0, 9330000.0, 10000000.0, 10700000.0, 11500000.0, 12300000.0, 13200000.0, 14200000.0, 15200000.0, 16300000.0, 17500000.0, 18700000.0, 20100000.0, 21500000.0, 23100000.0, 24800000.0, 26600000.0, 28500000.0, 30500000.0, 32700000.0, 35100000.0, 37600000.0, 40400000.0, 43300000.0, 46400000.0, 49800000.0, 53400000.0, 57200000.0, 61400000.0, 65800000.0, 70500000.0, 75600000.0, 81100000.0, 87000000.0, 93300000.0, 100000000.0, 107000000.0, 115000000.0, 123000000.0, 132000000.0, 142000000.0, 152000000.0, 163000000.0, 175000000.0, 187000000.0, 201000000.0, 215000000.0, 231000000.0, 248000000.0, 266000000.0, 285000000.0, 305000000.0, 327000000.0, 351000000.0, 376000000.0, 404000000.0, 433000000.0, 464000000.0, 498000000.0, 534000000.0, 572000000.0, 614000000.0, 658000000.0, 705000000.0, 756000000.0, 811000000.0, 870000000.0, 933000000.0, 1000000000.0],
+                        mu_1: [4957.4, 4960.8, 4964.3, 5024.6, 5352.6, 5276.2, 4805.8, 4304.1, 3520.6, 3279.0, 3038.6, 2799.4, 2564.8, 2329.6, 2088.9, 1845.8, 1604.1, 1354.9, 1108.0, 864.5, 633.2, 420.2, 233.0, 77.9, -45.5, -135.8, -196.8, -234.1, -254.8, -262.2, -259.7, -253.8, -244.4, -232.8, -221.2, -209.1, -197.4, -185.8, -174.2, -163.5, -152.8, -142.6, -132.7, -123.3, -114.2, -105.6, -97.5, -89.9, -82.7, -76.0, -69.7, -63.9, -58.5, -53.4, -48.8, -44.5, -40.5, -36.9, -33.6, -30.5, -27.7, -25.1, -22.8, -20.6, -18.7, -16.9, -15.2, -13.7, -12.4, -11.1, -10.0, -9.0, -8.1, -7.3, -6.5, -5.8, -5.2, -4.7, -4.2, -3.7, -3.4, -3.0, -2.7, -2.4, -2.2, -1.9, -1.7, -1.6, -1.4, -1.3, -1.2, -1.0, -1.0, -0.9, -0.8, -0.7, -0.7, -0.6, -0.6, -0.6, -0.6, -0.5, -0.5, -0.5, -0.5, -0.5, -0.6, -0.6],
+                        mu_2: [23.3, 29.0, 37.5, 77.6, 739.8, 1695.5, 2424.0, 2820.0, 3087.4, 3137.4, 3170.0, 3191.1, 3201.6, 3204.9, 3192.9, 3165.4, 3133.1, 3074.0, 2996.8, 2894.4, 2766.3, 2614.6, 2440.2, 2252.9, 2060.9, 1868.9, 1687.2, 1518.0, 1365.0, 1227.4, 1106.0, 999.0, 903.2, 819.2, 743.3, 675.8, 614.4, 559.3, 509.1, 463.5, 421.8, 383.9, 349.6, 318.3, 289.9, 264.2, 240.6, 219.2, 199.8, 182.2, 166.2, 151.6, 138.3, 126.2, 115.3, 105.3, 96.2, 88.0, 80.4, 73.6, 67.4, 61.6, 56.5, 51.7, 47.4, 43.5, 39.9, 36.6, 33.6, 30.9, 28.4, 26.1, 24.1, 22.2, 20.4, 18.8, 17.4, 16.0, 14.8, 13.7, 12.7, 11.7, 10.9, 10.1, 9.3, 8.7, 8.1, 7.5, 7.0, 6.5, 6.0, 5.6, 5.2, 4.9, 4.6, 4.3, 4.0, 3.7, 3.5, 3.3, 3.1, 2.9, 2.8, 2.6, 2.5, 2.4, 2.3, 2.2],
+                    }
+                },
+                '52' : {
+                    'FT240' : { PN:'5952003801', A:60.0,  B:35.35, C:12.7, W:133.44, CC:9.14,  le:14.5, Ae:1.58,  Ve:22.8,  Al:325.0 },
+                    'FT140' : { PN:'5952020801', A:35.25, B:22.60, C:12.7, W:38.26,  CC:11.10, le:8.79, Ae:0.792, Ve:6.959, Al:283.0 },
+                    'FT114' : { PN:'5952020701', A:28.8,  B:18.70, C:7.50, W:14.81,  CC:19.34, le:7.23, Ae:0.374, Ve:2.702, Al:162.0 },
+                    'FT82'  : { PN:'5952020601', A:21.70, B:13.50, C:6.35, W:7.54,   CC:20.80, le:5.33, Ae:0.256, Ve:1.368, Al:151.0 }, 
+                    'FT50'  : { PN:'5952020501', A:12.45, B:7.8,   C:6.35, W:2.46,   CC:21.24, le:3.06, Ae:0.144, Ve:0.442, Al:148.0 }, 
+                    'FT37'  : { PN:'5952020301', A:9.42,  B:4.72,  C:3.30, W:0.87,   CC:28.66, le:2.06, Ae:0.072, Ve:0.147, Al:110.0 }, 
+                    mat     : "NiZn",
+                    mu_i    : 250,
+                    B       : 4200,
+                    H       : 10,
+                    Br      : 2900,
+                    Hc      : 0.60,
+                    Tc      : 250,
+                    R       : 1.0e9,
+                    complex_mu : {
+                        freq: [10000.0, 75000.0, 100000.0, 300000.0, 500000.0, 666000.0, 800000.0, 960000.0, 3000000.0, 5000000.0, 5290000.0, 5740000.0, 6190000.0, 6640000.0, 7160000.0, 7770000.0, 8380000.0, 8990000.0, 9690000.0, 10500000.0, 11300000.0, 12200000.0, 13200000.0, 14200000.0, 15300000.0, 16500000.0, 17900000.0, 19300000.0, 20700000.0, 22300000.0, 24100000.0, 25900000.0, 28000000.0, 30400000.0, 32700000.0, 35100000.0, 37900000.0, 41100000.0, 44300000.0, 47500000.0, 51300000.0, 55500000.0, 59600000.0, 64300000.0, 69800000.0, 75300000.0, 80700000.0, 87100000.0, 94500000.0, 102000000.0, 109000000.0, 118000000.0, 128000000.0, 137000000.0, 148000000.0, 161000000.0, 173000000.0, 186000000.0, 200000000.0, 217000000.0, 234000000.0, 251000000.0, 271000000.0, 293000000.0, 315000000.0, 340000000.0, 369000000.0, 398000000.0, 427000000.0, 461000000.0, 500000000.0, 539000000.0, 578000000.0, 624000000.0, 675000000.0, 726000000.0, 783000000.0, 849000000.0, 916000000.0, 982000000.0, 1060000000.0, 1150000000.0, 1240000000.0, 1330000000.0, 1430000000.0, 1560000000.0, 1680000000.0],
+                        mu_1: [272.64, 267.78, 268.08, 266.51, 265.73, 265.54, 265.36, 265.25, 268.44, 293.51, 290.76, 295.23, 298.26, 299.66, 298.92, 295.43, 288.51, 278.83, 265.16, 249.12, 233.44, 217.14, 200.97, 186.96, 174.9, 162.89, 151.28, 141.63, 133.64, 126.05, 119.14, 113.54, 108.44, 103.41, 99.3, 95.63, 91.73, 87.85, 84.32, 81.03, 77.51, 73.9, 70.58, 67.17, 63.53, 60.2, 57.14, 53.85, 50.29, 47.02, 43.88, 40.44, 36.9, 33.72, 30.57, 27.43, 24.65, 22.18, 19.62, 16.99, 14.69, 12.6, 10.48, 8.42, 6.63, 4.9, 3.27, 1.87, 0.81, -0.15, -0.94, -1.5, -1.92, -2.25, -2.58, -2.88, -3.17, -3.55, -3.87, -4.2, -4.61, -5.12, -5.69, -6.37, -7.18, -8.22, -9.41],
+                        mu_2: [1.43, 3.32, 3.14, 2.74, 2.74, 2.83, 2.87, 3.01, 5.62, 18.88, 24.42, 33.27, 43.8, 55.65, 70.27, 87.04, 103.16, 117.07, 129.99, 139.81, 145.57, 148.73, 149.32, 148.17, 145.94, 142.49, 137.95, 133.21, 128.53, 123.35, 118.07, 113.46, 108.87, 104.39, 100.66, 97.55, 94.55, 91.53, 89.01, 86.86, 84.65, 82.51, 80.63, 78.73, 76.75, 75.03, 73.49, 71.85, 70.17, 68.63, 67.13, 65.52, 63.64, 61.79, 59.64, 57.43, 55.34, 53.41, 51.33, 49.1, 47.04, 45.07, 42.97, 40.71, 38.63, 36.47, 34.07, 31.87, 29.84, 27.75, 25.57, 23.73, 22.14, 20.61, 19.22, 18.03, 16.99, 15.96, 15.08, 14.37, 13.67, 13.02, 12.44, 11.94, 11.39, 10.86, 10.41],
+                    }
+                },
+                '43' : {
+                    'FT240' : { PN:'5943003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8, Al:1075.0 },
+                    'FT140' : { PN:'5943002701', A:35.55, B:23.00, C:12.7, W:33.0,  CC:11.20, le:8.90, Ae:0.79,  Ve:7.00, Al:885.0 },
+                    'FT114' : { PN:'5943001001', A:29.00, B:19.00, C:7.50, W:13.0,  CC:19.80, le:7.30, Ae:0.37,  Ve:2.70, Al:510.0 },
+                    'FT82'  : { PN:'5943000601', A:21.00, B:13.20, C:6.35, W:6.40,  CC:21.30, le:5.20, Ae:0.243, Ve:1.26, Al:470.0 }, 
+                    'FT50'  : { PN:'5943000301', A:12.70, B:7.15,  C:4.90, W:2.00,  CC:22.90, le:2.95, Ae:0.129, Ve:0.38, Al:440.0 }, 
+                    'FT37'  : { PN:'5943000201', A:9.50,  B:4.75,  C:3.30, W:0.83,  CC:28.60, le:2.07, Ae:0.072, Ve:0.15, Al:350.0 }, 
+                    mat     : "NiZn",
+                    mu_i    : 800,
+                    B       : 3500,
+                    H       : 10,
+                    Br      : 2200,
+                    Hc      : 0.36,
+                    Tc      : 130,
+                    R       : 1.0e5,
+                    complex_mu : {
+                        freq: [10000.0, 100000.0, 300000.0, 500000.0, 700000.0, 900000.0, 1000000.0, 1040843.912, 1083356.049, 1127604.548, 1173660.329, 
+                                1221597.208, 1271492.016, 1323424.724, 1377478.567, 1433740.18, 1492299.738, 1553251.097, 1616691.948, 1682723.971, 1751453.001, 
+                                1822989.193, 1897447.203, 1974946.369, 2055610.905, 2139570.096, 2226958.508, 2317916.205, 2412588.97, 2511128.542, 2613692.855, 
+                                2720446.295, 2831559.964, 2947211.95, 3067587.615, 3192879.893, 3323289.598, 3459025.746, 3600305.888, 3747356.465, 3900413.162, 
+                                4059721.294, 4225536.192, 4398123.62, 4577760.194, 4764733.828, 4959344.196, 5161903.214, 5372735.534, 5592179.071, 5820585.54, 
+                                6058321.023, 6305766.553, 6563318.726, 6831390.338, 7110411.043, 7400828.045, 7703106.813, 8017731.829, 8345207.362, 8686058.276, 
+                                9040830.875, 9410093.774, 9794438.815, 10194482.01, 10610864.54, 11044253.75, 11495344.28, 11964859.11, 12453550.76, 12962202.49, 
+                                13491629.55, 14042680.47, 14616238.48, 15213222.83, 15834590.37, 16481336.98, 17154499.26, 17855156.11, 18584430.54, 19343491.38, 
+                                20133555.24, 20955888.39, 21811808.85, 22702688.45, 23629955.06, 24595094.86, 25599654.75, 26645244.79, 27733540.82, 28866287.12, 
+                                30045299.2, 31272466.76, 32549756.63, 33879216.03, 35262975.74, 36703253.61, 38202358.07, 39762691.82, 41386755.7, 43077152.7, 
+                                44836592.13, 46667893.95, 48573993.3, 50557945.2, 52622929.46, 54772255.75, 57009368.94, 59337854.58, 61761444.68, 64284023.69, 
+                                66909634.69, 69642485.91, 72486957.47, 75447608.37, 78529183.84, 81736622.91, 85075066.33, 88549864.84, 92166587.72, 95931031.71, 
+                                99849230.31, 103927463.5, 108172267.6, 112590446.2, 117189080.5, 121975540.9, 126957499.2, 132142940.1, 137540174.7, 143157853.5, 
+                                149004980.2, 155090926.5, 161425446.7, 168018693.4, 174881234.1, 182024067.8, 189458642.8, 197196874.9, 205251166.7, 213634427.2, 
+                                222360093.0, 231442149.0, 240895151.7, 250734252.1, 260975219.8, 271634468.7, 282729083.0, 294276844.7, 306296262.3, 318806599.8, 
+                                331827908.5, 345381058.3, 359487771.8, 374170658.7, 389453252.1, 405360046.4, 421916536.5, 439149258.3, 457085831.9, 475755005.4, 
+                                495186700.9, 515412062.8, 536463507.7, 558374776.0, 581180986.1, 604918691.1, 629625936.8, 655342323.1, 682109067.2, 709969069.8, 
+                                738966984.0, 769149286.3, 800564352.0, 833262531.9, 867296233.3, 902720004.2, 939590620.5, 977967177.1, 1017911182.0, 1059486657.0, 
+                                1102760237.0, 1147801278.0, 1194681973.0, 1243477458.0, 1294265942.0, 1347128826.0, 1402150837.0, 1459420162.0, 1519028591.0, 
+                                1581071660.0, 1645648812.0, 1712863547.0, 1782823595.0, 1855641085.0, 1931432726.0, 2010319994.0, 2092429326.0, 2177892326.0, 
+                                2266845968.0, 2359432825.0, 2455801291.0, 2556105823.0, 2660507184.0, 2769172705.0, 2882276551.0, 3000000000.0],
+                        mu_1: [816.0434106, 809.4449846, 808.5477831, 812.4832301, 830.0, 840.0, 851.3550816, 855.3857072, 859.4280167, 863.329692, 868.8362314, 873.4029217, 878.6444097, 884.0783849, 889.0529029, 895.3839031, 899.4493574, 904.0126394, 907.5266357, 910.0203411, 910.9492314, 911.4432599, 910.0241714, 906.443633, 901.7612532, 894.7454962, 886.5318274, 876.4861149, 864.8268961, 851.8814883, 836.9656884, 820.9649591, 803.9201657, 786.4046357, 767.5437693, 748.078803, 728.1939222, 708.024764, 687.5199527, 667.2839247, 647.2975609, 627.2853647, 607.7149357, 588.2959163, 569.4661363, 551.1033373, 533.2520488, 515.834048, 498.6328191, 482.1858831, 466.3487294, 450.8418277, 435.856601, 421.3303978, 407.5182508, 393.9971741, 380.9413358, 368.4577648, 356.3852298, 344.7942781, 333.5853593, 322.7425848, 312.35968, 302.2204109, 292.5988049, 283.2869199, 274.2216373, 265.6180661, 257.2803026, 249.160291, 241.2841181, 233.775772, 226.2806641, 219.2852607, 212.3792322, 205.65458, 199.1326295, 192.8574158, 186.7017878, 180.6860621, 174.8067106, 169.0641159, 163.4172714, 157.8108122, 152.496357, 147.1781132, 141.9045894, 136.7576294, 131.6965718, 126.6982028, 121.9103193, 117.1243187, 112.4318844, 107.9118477, 103.3905232, 99.04778341, 94.80141586, 90.66367569, 86.61887717, 82.7360264, 78.92937687, 75.24423862, 71.61557489, 68.11114917, 64.70845403, 61.35970005, 58.16417106, 54.99950081, 51.98086999, 49.04606958, 46.21742756, 43.48953175, 40.86438026, 38.32897415, 35.9111902, 33.60366679, 31.36620548, 29.25810043, 27.26016277, 25.33436861, 23.52832203, 21.83230634, 20.20725259, 18.68336788, 17.24877159, 15.89862405, 14.65712437, 13.47214896, 12.35542792, 11.33991416, 10.36420209, 9.440788341, 8.612194737, 7.826606509, 7.078008771, 6.387697882, 5.752794218, 5.162377181, 4.592156449, 4.076342228, 3.586660745, 3.120234351, 2.695352478, 2.302422231, 1.929560777, 1.587058651, 1.261615037, 0.961547574, 0.671581848, 0.415344641, 0.167703835, -0.055788884, -0.266081108, -0.460160219, -0.6384921, -0.803665771, -0.95280532, -1.089612412, -1.218894539, -1.330816403, -1.433134834, -1.521798239, -1.61281749, -1.685171164, -1.748774697, -1.824947393, -1.869291211, -1.919426596, -1.962779073, -2.010004471, -2.056958278, -2.106915463, -2.137781096, -2.169012949, -2.208400104, -2.246651436, -2.271554896, -2.300684784, -2.321922889, -2.341299582, -2.367853582, -2.382587788, -2.397842195, -2.40574571, -2.41658175, -2.428523833, -2.429057786, -2.437691491, -2.447634592, -2.456583053, -2.466197302, -2.480427891, -2.503263931, -2.534327999, -2.56735631, -2.623242801, -2.697527559, -2.799488116, -2.941510933, -3.136445289, -3.407015884, -3.773734912, -4.274679156, -4.957240854, -5.84054521, -6.95245912, -8.229961109],
+                        mu_2: [10.11279513, 7.770352725, 13.12514619, 18.86346319, 26.0, 39.7584741, 48.0, 52.24323758, 56.08474704, 60.66052028, 63.77378899, 68.79225981, 74.55092495, 82.10240562, 89.91580362, 99.86344223, 109.8854973, 122.0905173, 134.9205245, 150.1954341, 165.5561763, 182.6703335, 199.6600693, 217.9770489, 236.2656043, 254.5206731, 272.9632256, 290.6334221, 308.0098765, 324.8292976, 340.8766836, 355.442382, 368.9213716, 381.3955747, 392.885811, 402.6777229, 410.5907043, 417.6843355, 423.3470394, 427.9791561, 431.5502447, 433.8375244, 434.8004796, 435.3066996, 434.9828234, 433.4925342, 431.9292566, 429.3102906, 426.2907469, 423.1008996, 419.1481421, 414.7761543, 409.9786354, 405.0314957, 399.7558796, 394.3670598, 388.5238795, 382.7374037, 376.7736165, 370.7288147, 364.5412953, 358.5572719, 352.293695, 346.1714307, 340.0336128, 333.7435023, 327.7813875, 321.7860835, 315.8033369, 309.8798359, 304.1390618, 298.321386, 292.6251645, 287.063184, 281.6429841, 276.3156579, 271.0000261, 265.8900686, 260.7994498, 255.8300132, 250.9296943, 246.2315314, 241.5308595, 236.9549992, 232.489607, 228.0226635, 223.6806842, 219.3635523, 215.0323858, 210.832678, 206.6547215, 202.4945207, 198.3025938, 194.1682534, 190.0809625, 186.059191, 181.9879784, 178.0347824, 174.0459223, 170.1143112, 166.2235604, 162.4113316, 158.6054727, 154.8116149, 151.0441475, 147.3701595, 143.6761117, 140.0112141, 136.406703, 132.8270467, 129.2737356, 125.7777699, 122.3131771, 118.8394449, 115.4182493, 112.0540883, 108.7120941, 105.4466725, 102.2010201, 98.99834385, 95.86141645, 92.81023381, 89.77140325, 86.83106141, 83.92687516, 81.10449855, 78.33059554, 75.64825806, 73.04742107, 70.47486799, 68.01979237, 65.61151219, 63.29295152, 61.03288382, 58.84546545, 56.73133403, 54.67562862, 52.70152094, 50.78913283, 48.93524506, 47.14199955, 45.42751077, 43.74810579, 42.14543587, 40.58795409, 39.09008945, 37.64841345, 36.24304964, 34.90317234, 33.59938343, 32.34859618, 31.14511465, 29.97529319, 28.85230646, 27.7720412, 26.72586867, 25.72936557, 24.75833806, 23.83742534, 22.95090576, 22.09307736, 21.27675587, 20.49158785, 19.74229606, 19.02552627, 18.34444448, 17.68643739, 17.06591121, 16.46785679, 15.89743828, 15.35949916, 14.85061966, 14.35392972, 13.8833472, 13.44260977, 13.0110046, 12.60952872, 12.22325904, 11.85805387, 11.51208879, 11.18573273, 10.87660458, 10.59413026, 10.32674988, 10.0842746, 9.857029553, 9.658149541, 9.476343336, 9.322814549, 9.185113931, 9.07482699, 8.993569752, 8.940985197, 8.916090809, 8.922877831, 8.964492093, 9.045510866, 9.171683804, 9.343332921, 9.562863338, 9.833703433, 10.14060623, 10.47906645, 10.80237748, 11.05249316, 11.13324746, 10.91140156],
+                    }
+                },
+                '31' : {
+                    'FT240' : { PN:'2631803802', A:61.0,  B:35.55, C:12.7, W:118.0, H:0.09,  R : {1:12, 5:28,  10:40,  25:63,  100:119, 250:215} },
+                    'FT200' : { PN:'2631626202', A:50.80, B:25.40, C:38.1, W:278.0, H:0.11,  R : {1:40, 5:103, 10:140, 25:215, 100:365, 250:290} },
+                    'FT114' : { PN:'2631801202', A:29.00, B:19.00, C:13.85, W:25.0,  H:0.17, R : {1:10, 5:24, 10:31, 25:49, 100:88, 250:130} },
+                    mat     : "MnZn",
+                    mu_i    : 1500,
+                    B       : 3600,
+                    H       : 5,
+                    Br      : 2600,
+                    Hc      : 0.34,
+                    Tc      : 130,
+                    R       : 3.0e3,
+                    complex_mu : {
+                        freq: [10000.0, 50000.0, 100000.0, 150000.0, 200000.0, 250000.0, 300000.0, 333000.0, 400000.0, 480000.0, 500000.0, 600000.0, 640000.0, 667000.0, 800000.0, 960000.0, 1000000.0, 2000000.0, 2330000.0, 2680000.0, 3090000.0, 3560000.0, 4090000.0, 4710000.0, 5430000.0, 6250000.0, 7200000.0, 8290000.0, 9540000.0, 11000000.0, 12600000.0, 14600000.0, 16800000.0, 19300000.0, 22200000.0, 25600000.0, 29500000.0, 33900000.0, 39100000.0, 45000000.0, 51800000.0, 59600000.0, 68700000.0, 75600000.0, 124000000.0, 216000000.0, 353000000.0, 617000000.0, 1000000000.0],
+                        mu_1: [1423.52, 1406.98, 1401.93, 1379.45, 1386.57, 1385.58, 1387.5, 1388.08, 1388.37, 1391.6, 1390.55, 1396.46, 1392.65, 1390.14, 1463.65, 1409.68, 1400.65, 980.76, 854.67, 757.67, 668.67, 590.0, 520.67, 460.33, 409.0, 365.67, 329.0, 299.0, 272.0, 248.0, 227.0, 206.0, 187.0, 168.0, 149.6666667, 132.3333333, 115.6666667, 100.7, 86.2, 73.33333333, 61.8, 51.26666667, 43.0, 39.06, 14.7, 1.61, 0.0, 0.0, 0.0],
+                        mu_2: [10.45, 27.02, 41.61, 57.82, 72.67, 89.6, 106.76, 119.0, 141.03, 173.33, 183.07, 228.68, 248.07, 260.16, 345.99, 444.47, 463.22, 734.77, 752.33, 728.33, 696.33, 657.67, 616.0, 571.33, 527.0, 484.33, 444.33, 408.33, 375.33, 346.67, 321.67, 299.0, 278.67, 260.0, 242.3333333, 226.3333333, 210.3333333, 195.0, 180.0, 165.3333333, 151.6666667, 138.6666667, 130.0, 125.0, 86.5, 52.1, 32.1, 18.7, 12.5],
+                    }
+                }
+            };
+            
+            //const mu0 = Math.PI * 4e-7;
+            //const cu_sigma = 58e6;      // Copper conductance value
+            
+            // Define global storage for calculated values, so we don't recalculate the same things multiple times:
+            var usage = 'Inductor';
+            var t_size = 'FT240';
+            var material = '43';
+            
+            var toroid = {
+                core : cores[material][t_size], 
+                cond_diameter_meters : 0.0,
+                N_max : 0,
+                N : 0,
+                frequency_hz : 0.0,
+                Vrms : 0.0, 
+
+                L : 0.0,
+                B_peak : 0.0,
+                H_peak : 0.0, 
+                cond_length_meters : 0.0,
+                Rdc : 0.0,
+                SRF : 0.0,
+
+                Xl : 0.0,
+                Z : 0.0,
+                skin_depth : 0.0,
+                Rac : 0.0,
+                Q : 0.0
+            };
+            
+            function getComplexPermeability(frequency) {
+                // Use the proximityResistance look-up table and interpolate values depending on the spacing ratio and the number of turns.
+                var mu_1 = 0.0;
+                var mu_2 = 0.0;
+                var i = 0;
+                for (i = 0; i < (cores[material].complex_mu.freq.length-1); i++) {
+                    if(frequency <= cores[material].complex_mu.freq[i+1]) {
+                        // Linear interpolation between empirical proximity resistance values:
+                        mu_1 = (((frequency - cores[material].complex_mu.freq[i]) / (cores[material].complex_mu.freq[i+1] - cores[material].complex_mu.freq[i]) 
+                            * (cores[material].complex_mu.mu_1[i+1] - cores[material].complex_mu.mu_1[i])) + cores[material].complex_mu.mu_1[i]);
+                        mu_2 = (((frequency - cores[material].complex_mu.freq[i]) / (cores[material].complex_mu.freq[i+1] - cores[material].complex_mu.freq[i]) 
+                            * (cores[material].complex_mu.mu_2[i+1] - cores[material].complex_mu.mu_2[i])) + cores[material].complex_mu.mu_2[i]);
+                        break;
+                    }
+                }
+                return [mu_1, mu_2];
+            }
+
+            function getNormalisedPermeability(frequency) {
+                const mu = getComplexPermeability(frequency);
+                //console.log(mu);
+                const Lo = 4.0 * Math.PI * toroid.N**2 * 1e-9 / toroid.core.CC;
+                const Rs = 2.0 * Math.PI * toroid.frequency_hz * Lo * mu[1];
+                const wLs = 2.0 * Math.PI * toroid.frequency_hz * Lo * mu[0];
+                return { real:(Rs/Rs) , imag:(wLs/Rs) };
+            }
+
+            // Solve all the parameters, and re-draw the canvas:
+            function recalculate() {
+                // Input variables:
+                toroid.core = cores[material][t_size];
+                toroid.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
+                toroid.frequency_hz = 10.0**frequency_slider.value;
+                toroid.Vrms = 1.0 * voltage_slider.value;
+
+                // Frequency independent characteristics:
+                toroid.N_max = Math.PI / (Math.atan2(0.5e3 * toroid.cond_diameter_meters, (0.5 * toroid.core.B - 0.5e3 * toroid.cond_diameter_meters)));
+                toroid.N = 1 + Math.floor(loop_turns_slider.value * toroid.N_max / 100);
+                toroid.L = (toroid.N**2) * toroid.core.Al * 1.0e-9;      // In Henries
+                toroid.B_peak = (toroid.Vrms * 1e8) / (4.44 * toroid.frequency_hz * toroid.N); // 
+                toroid.cond_length_meters = toroid.N * (2*toroid.core.C + toroid.core.A - toroid.core.B) * 1e-3;
+                toroid.Rdc = 1.68e-8 * toroid.cond_length_meters / (Math.PI * ((toroid.cond_diameter_meters*0.5)**2.0));
+                
+                // Frequency dependent characteristics:
+                toroid.Xl = 6.2832 * toroid.frequency_hz * toroid.L;
+                toroid.skin_depth = Math.sqrt(1.0 / (Math.PI * toroid.frequency_hz * mu0 * cu_sigma));
+                toroid.Rac = dc2acFactor(toroid.cond_diameter_meters, toroid.skin_depth) * toroid.Rdc;
+                toroid.Q = qualityFactor(toroid.Xl, toroid.Rac);
+                
+                // Calculate impedance:
+                toroid.Z = math.complex(toroid.Rac, toroid.Xl).toPolar();
+                toroid.I = 1.414 * toroid.Vrms / toroid.Z.r;
+                toroid.H_peak = (0.4 * Math.PI * toroid.N * toroid.I) / toroid.core.le;
+                
+                drawDesign();
+            }
+/*
+            loop_diameter_slider.oninput = function() {
+                recalculate();
+            }
+*/
+            conductor_diameter_slider.oninput = function() {
+                recalculate();
+            }
+
+            loop_turns_slider.oninput = function() {
+                recalculate();
+            }
+/*
+            loop_spacing_slider.oninput = function() {
+                recalculate();
+            }
+*/
+            frequency_slider.oninput = function() {
+                recalculate();
+                mySmithChart.data.datasets[0].data = [getNormalisedPermeability(toroid.frequency_hz)];
+                mySmithChart.update();
+            }
+
+            voltage_slider.oninput = function() {
+                recalculate();
+            }
+
+            window.onresize = function() {
+                recalculate();
+            }
+
+            window.onorientationchange = function() {
+                recalculate();
+            }
+
+            window.onbeforeprint = function() {
+                console.log("onbeforeprint");
+                drawDesign();
+            }
+
+            const afront_canvas = document.getElementById("inductor2D");
+            const fctx = afront_canvas.getContext('2d');
+
+            function drawInductor(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
+                let theta = Math.PI/8.0;
+
+                // Draw entry and exit wires:
+                var x1 = originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI + 0.5 * theta);
+                var y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI + 0.5 * theta);
+                //var x2 = originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI + 0.5 * theta);
+                //var y2 = originY + (innerRadius - wireRadius) * Math.sin(0.5 * Math.PI + 0.5 * theta);
+                var x2 = originX + (outerRadius - wireRadius) * Math.cos(0.5 * Math.PI + 0.5 * theta);
+                var y2 = originY + (outerRadius - wireRadius) * Math.sin(0.5 * Math.PI + 0.5 * theta);
+                var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                fctx.beginPath();
+                fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                fctx.fillStyle = "black";
+                fctx.fill();
+                
+                // Draw toroid former:
+                fctx.lineWidth = outerRadius - innerRadius;
+                //fctx.fillStyle = "#1F0000";
+                fctx.strokeStyle = "#7F7F7F"; // rgb(100, 100, 100);
+                fctx.beginPath();
+                //fctx.lineWidth = wireRadius * 2.0;
+                fctx.arc(originX, originY, 0.5 * (outerRadius + innerRadius), 0.0, 2.0 * Math.PI, false);
+                fctx.stroke();
+                fctx.lineWidth = 1.0;
+
+                /*
+                // 
+                fctx.beginPath();
+                //fctx.lineWidth = wireRadius * 2.0;
+                fctx.arc(originX, originY, outerRadius, 0.0, 2.0 * Math.PI, false);
+                fctx.stroke();
+                fctx.beginPath();
+                fctx.arc(originX, originY, innerRadius, 0.0, 2.0 * Math.PI, false);
+                fctx.stroke();
+                */
+
+                x1 = originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI - 0.5 * theta);
+                y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI - 0.5 * theta);
+                x2 = originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI - 0.5 * theta);
+                y2 = originY + (innerRadius - wireRadius) * Math.sin(0.5 * Math.PI - 0.5 * theta);
+                angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                fctx.beginPath();
+                fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                fctx.fillStyle = "black";
+                fctx.fill();
+                
+                // Now draw the rest of the wires:
+                fctx.beginPath();
+                for(let i = 0; i < (turns-1); i++) {
+                    /*
+                    x1 = originX + (outerRadius + wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    y1 = originY + (outerRadius + wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    x2 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    y2 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    */
+                    x1 = originX + (outerRadius + wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
+                    y1 = originY + (outerRadius + wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
+                    x2 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    y2 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+
+                    fctx.beginPath();
+                    fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                    fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                    fctx.fillStyle = "black";
+                    fctx.fill();
+                }
+                
+                // Draw the side view:
+                
+                
+                // Draw the Dimensions:
+                fctx.beginPath();
+                fctx.moveTo(originX - innerRadius, originY - outerRadius);
+                fctx.lineTo(originX - outerRadius - 20, originY - outerRadius);
+                fctx.moveTo(originX - innerRadius, originY + outerRadius);
+                fctx.lineTo(originX - outerRadius - 20, originY + outerRadius);
+                fctx.lineTo(originX - outerRadius - 20, originY - outerRadius);
+                fctx.stroke();
+                
+                fctx.font = "12px arial";
+                fctx.textAlign = "right";
+                fctx.fillText((toroid.core.A).toFixed(1) + " mm", originX - outerRadius - 24, originY - 6);
+                fctx.fillText((toroid.core.A*0.03937).toFixed(1) + "\"", originX - outerRadius - 24, originY + 6);
+            }
+
+            function drawTransformer(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
+                // Draw toroid former:
+                fctx.beginPath();
+                fctx.arc(originX, originY, outerRadius, 0.0, 2.0 * Math.PI, false);
+                fctx.stroke();
+                fctx.beginPath();
+                fctx.arc(originX, originY, innerRadius, 0.0, 2.0 * Math.PI, false);
+                fctx.stroke();
+                fctx.lineWidth = 1.0;
+
+                // Draw left-hand entry wire:
+                var x1 = originX - innerRadius + wireRadius;
+                var y1 = originY;
+                var x2 = originX - outerRadius - 100;
+                var y2 = originY;
+                var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                fctx.beginPath();
+                fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                fctx.fillStyle = "black";
+                fctx.fill();
+
+                // Right-hand exit wire:
+                x1 = originX + outerRadius + wireRadius;
+                y1 = originY;
+                x2 = originX + outerRadius + 100;
+                y2 = originY;
+                angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                fctx.beginPath();
+                fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                fctx.fillStyle = "black";
+                fctx.fill();
+
+                // Draw cross-over wire:
+                let theta = Math.PI/8.0;
+                x1 = originX + (innerRadius - wireRadius) * Math.cos(Math.PI - theta);
+                y1 = originY + (innerRadius - wireRadius) * Math.sin(Math.PI - theta);
+                x2 = originX + (outerRadius + wireRadius) * Math.cos(- theta);
+                y2 = originY + (outerRadius + wireRadius) * Math.sin(- theta);
+                angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                fctx.beginPath();
+                fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                fctx.fillStyle = "black";
+                fctx.fill();
+
+                for(let i = 0; i < (turns-1); i++) {
+                    x1 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1.5)) * (Math.PI - theta));
+                    y1 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1.5)) * (Math.PI - theta));
+                    x2 = originX + (outerRadius + wireRadius) * Math.cos(((i+0.5)/(turns-1.5)) * (Math.PI - theta));
+                    y2 = originY + (outerRadius + wireRadius) * Math.sin(((i+0.5)/(turns-1.5)) * (Math.PI - theta));
+                    angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+
+                    fctx.beginPath();
+                    fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                    fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                    fctx.fillStyle = "black";
+                    fctx.fill();
+                }
+                
+                for(let i = 0; i < (turns-2); i++) {
+                    x1 = originX + (innerRadius - wireRadius) * Math.cos(((i+1.0)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
+                    y1 = originY + (innerRadius - wireRadius) * Math.sin(((i+1.0)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
+                    x2 = originX + (outerRadius + wireRadius) * Math.cos(((i+0.5)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
+                    y2 = originY + (outerRadius + wireRadius) * Math.sin(((i+0.5)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
+                    angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+
+                    fctx.beginPath();
+                    fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                    fctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                    fctx.fillStyle = "black";
+                    fctx.fill();
+                }
+            }
+
+            function drawBalun(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
+                // 
+            }
+            
+            function drawDesign() {
+                const win_width  = document.getElementById("inductor-container").clientWidth; 
+                const win_height = document.getElementById("inductor-container").clientHeight; 
+                afront_canvas.width = win_width-12; 
+                afront_canvas.height = win_height-12; 
+
+                fctx.clearRect(0, 0, win_width, win_height);
+                const loop_radius = 0.15 * win_height; 
+                var cond_radius = loop_radius * toroid.cond_diameter_meters * 1e3 / toroid.core.A;
+                const loopx = win_width/2; 
+                const loopy = win_height/2;
+
+                const loop_diameter_mm = toroid.core.A;
+                const cond_diameter_mm = toroid.cond_diameter_meters * 1000.0;
+                const loop_diameter_inches = loop_diameter_mm / 25.4;
+                const cond_diameter_inches = cond_diameter_mm / 25.4;
+
+                fctx.font = "bold 14px arial";
+                fctx.textAlign = "center";
+                fctx.fillText("Wire - AWG", win_width*0.5, 18);
+                
+                let inner_radius = loop_radius * toroid.core.B / toroid.core.A;
+                drawInductor(fctx, loopx, loopy, loop_radius, inner_radius, cond_radius, toroid.N);
+                //drawTransformer(fctx, loopx, loopy, loop_radius, inner_radius, cond_radius, toroid.N);
+
+                const y_offset = loopy + loop_radius + 20;
+                var arrow_size = 10.0;
+
+                // Draw inner-diameter arrows: (for using a winding former)
+                const inner_dia_y = loopy + loop_radius + 40;
+
+                // Draw outer-diameter arrows: (for using a winding former)
+                const outer_dia_y = loopy + loop_radius + 0;
+
+                // Write loop inductance:
+                fctx.font = "12px arial";
+                fctx.textAlign = "left";
+                const L = toroid.L * 1.0e+6;
+                fctx.fillText("L = " + L.toFixed(0).toString() + " \u03bcH", 8, 18);
+                if(toroid.frequency_hz >= 1.0e6) {
+                    var freq = 1e-6 * toroid.frequency_hz;
+                    fctx.fillText("f = " + freq.toFixed(1) + " MHz", 8, 32);
+                } else {
+                    var freq = 1e-3 * toroid.frequency_hz;
+                    fctx.fillText("f = " + freq.toFixed(1) + " kHz", 8, 32);
+                }
+                fctx.fillText("Vrms = " + toroid.Vrms.toFixed(1) + " V", 8, 46);
+                fctx.fillText("Rdc = " + toroid.Rdc.toFixed(3) + " \u03A9", 8, 60);
+                fctx.fillText("H = " + (toroid.H_peak*1.0e3).toFixed(1) + " mOe", 8, 74);
+                fctx.fillText("B = " + (toroid.B_peak).toFixed(1) + " G", 8, 88);
+                fctx.fillText("\u03bc = " + (toroid.B_peak / toroid.H_peak).toFixed(1), 8, 102);
+                fctx.fillText("wire = " + (toroid.cond_length_meters*100.0).toFixed(1)+ " cm", 8, 116);
+                
+                fctx.textAlign = "center";
+                fctx.font = "16px courier";
+                fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, loopy - loop_radius - 44);
+                fctx.fillText("N = " + toroid.N.toString(), loopx, loopy - loop_radius - 26);
+                fctx.font = "12px arial";
+                
+                // Top-right:
+                fctx.textAlign = "right";
+                fctx.fillText("Rac = " + toroid.Rac.toFixed(2) + " \u03A9", win_width-18, 18);
+                fctx.fillText("X\u2097 = " + toroid.Xl.toFixed(1) + " \u03A9", win_width-18, 32);
+                //fctx.fillText("Z = " + + toroid.Rac.toFixed(2) + " + j" + toroid.Xl.toFixed(1) + " \u03A9", win_width-18, 46);
+                //fctx.fillText("|Z| = " + toroid.Z.r.toFixed(1) + " \u03A9", win_width-18, 60);
+                
+                
+                const mu = getComplexPermeability(toroid.frequency_hz);
+                //console.log(mu);
+                const Lo = 4.0 * Math.PI * toroid.N**2 * 1e-9 / toroid.core.CC;
+                const Rs = 2.0 * Math.PI * toroid.frequency_hz * Lo * mu[1];
+                const wLs = 2.0 * Math.PI * toroid.frequency_hz * Lo * mu[0];
+                fctx.fillText("Z = " + Rs.toFixed(1) + "+ j" + wLs.toFixed(1) + " \u03A9", win_width-18, 60);
+                
+                const loss_factor = Math.atan2(mu[1],mu[0]) * 180.0 / Math.PI;
+                fctx.fillText("\u03B4-loss = " + loss_factor.toFixed(2) , win_width-18, 46);
+                
+                fctx.fillText("Zn = " + (Rs/Rs).toFixed(1) + "+ j" + (wLs/Rs).toFixed(1) + " \u03A9", win_width-18, 74);
+                
+                
+                //fctx.fillText("Irms = " + (1.0e3 * toroid.I).toFixed(1) + " mA", win_width-18, 74);
+                //fctx.fillText("\u03B4 = " + (toroid.skin_depth * 1e6).toFixed(1) + " \u03BCm", win_width-18, 88);
+                fctx.fillText("Q = " + toroid.Q.toFixed(1), win_width-18, 88);
+
+                // Bottom left text:
+                fctx.textAlign = "left";
+                fctx.fillText("Material  = " + cores[material].mat, 8, win_height - 116);
+                fctx.fillText("\u03bci  = " + cores[material].mu_i, 8, win_height - 102);
+                fctx.fillText("B  = " + cores[material].B + " G", 8, win_height - 88);
+                fctx.fillText("H  = " + cores[material].H + " Oe", 8, win_height - 74);
+                fctx.fillText("Br = " + cores[material].Br + " G", 8, win_height - 60);
+                fctx.fillText("Hc = " + cores[material].Hc + " Oe", 8, win_height - 46);
+                fctx.fillText("Tc = " + cores[material].Tc + " C", 8, win_height - 32);
+                fctx.fillText("\u03C1 = " + cores[material].R + " \u03A9", 8, win_height - 18);
+
+                /*
+                // Draw spacing text: (gap is to avoid collision of spacing and length texts)
+                fctx.textAlign = "right";
+                var gap = ((toroid.loop_turns * cond_spacing - cond_spacing) < 60) ? (60 - (toroid.loop_turns * cond_spacing - cond_spacing)) : 0;
+                const spc = toroid.spacing_ratio * cond_diameter_inches;
+                fctx.fillText("c = " + spc.toFixed(3).toString() + "\"", start_x + cond_spacing + 20 - gap, dim_y + 20);
+                fctx.fillText("(" + (spc*25.4).toFixed(3).toString() + "mm)", start_x + cond_spacing + 20 - gap, dim_y + 34);
+
+                // Draw length text:
+                const sol_len = toroid.loop_turns * spc;
+                fctx.fillText("\u2113 = " + sol_len.toFixed(3).toString() + "\"", start_x + toroid.loop_turns * cond_spacing + 20, dim_y + 20);
+                fctx.fillText("(" + (sol_len*25.4).toFixed(1).toString() + "mm)", start_x + toroid.loop_turns * cond_spacing + 20, dim_y + 34);
+                */
+            }
+            
+            const chartCanvas = document.getElementById("chartCanvas");
+            const chartCanvasContext = chartCanvas.getContext('2d');
+            
+            //const ctx = document.getElementById('smith-chart-container').getContext('2d');
+            
+            var mySmithChart = new Chart(chartCanvasContext, {
+                  type: 'smith',
+                  options: {
+                    aspectRatio: 1,
+                    elements: {
+                      point: {
+                        pointStyle: 'cross',
+                        radius: 10,
+                        hoverRadius: 10,
+                        borderColor: 'black'
+                      }
+                    }
+                  },
+                  data: {
+                    datasets: [{
+                      label: 'Impedance',
+                      data: [getNormalisedPermeability(toroid.frequency_hz)],
+                    }]
+                  }
+                });
+                
+            recalculate();
+        </script>
+    </body>
+</html>
