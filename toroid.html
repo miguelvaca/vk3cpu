@@ -14,27 +14,29 @@
                 </canvas>
             </div>
             <div class="slider_container">
-                <label for="function-select">Function:</label>
-                <select name="functions" id="function-select">
-                    <option value="Inductor">Inductor</option>
-                    <option value="CommonModeChoke">Common-mode choke</option>
-                    <option value="Transformer">Transformer</option>
-                </select>
-                <label for="toroid-select">Toroid:</label>
-                <select name="toroids" id="toroid-select" onchange="setToroid()">
-                    <option value="FT240">FT240</option>
-                    <option value="FT140">FT140</option>
-                    <option value="FT114">FT114</option>
-                    <option value="FT82">FT82</option>
-                    <option value="FT50">FT50</option>
-                    <option value="FT37">FT37</option>
-                </select>
-                <select name="materials" id="material-select" onchange="setMaterial()">
-                    <option value="31">31</option>
-                    <option value="43" selected='true'>43</option>
-                    <option value="52">52</option>
-                    <option value="75">75</option>
-                </select>
+                <div>
+                    <label for="function-select">Function:</label>
+                    <select name="functions" id="function-select">
+                        <option value="Inductor">Inductor</option>
+                        <option value="CommonModeChoke">Common-mode choke</option>
+                        <option value="Transformer">Transformer</option>
+                    </select>
+                    <label for="toroid-select">Toroid:</label>
+                    <select name="toroids" id="toroid-select" onchange="setToroid()">
+                        <option value="FT240">FT240</option>
+                        <option value="FT140">FT140</option>
+                        <option value="FT114">FT114</option>
+                        <option value="FT82">FT82</option>
+                        <option value="FT50">FT50</option>
+                        <option value="FT37">FT37</option>
+                    </select>
+                    <select name="materials" id="material-select" onchange="setMaterial()">
+                        <option value="31">31</option>
+                        <option value="43" selected='true'>43</option>
+                        <option value="52">52</option>
+                        <option value="75">75</option>
+                    </select>
+                </div>
                 <div class="sliders">
                     <label for="conductor_diameter_slider">AWG:</label>
                     <input type="range" id="conductor_diameter_slider" min="0" max="40" value="20" step="1">
