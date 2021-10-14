@@ -848,9 +848,11 @@
                 const loop_diameter_inches = loop_diameter_mm / 25.4;
                 const cond_diameter_inches = cond_diameter_mm / 25.4;
 
+                /*
                 fctx.font = "bold 14px arial";
                 fctx.textAlign = "center";
-                fctx.fillText("Wire - AWG", win_width*0.5, 18);
+                fctx.fillText("Wire - AWG", win_width*0.5, 14);
+                */
                 
                 let inner_radius = outer_radius * toroid.core.B / toroid.core.A;
                 let thickness = 2.0 * outer_radius * toroid.core.C / toroid.core.A;
@@ -885,8 +887,8 @@
                 fctx.fillText("\u03bc = " + (toroid.B_peak / toroid.H_peak).toFixed(1), 8, 102);
                 
                 fctx.textAlign = "center";
-                fctx.font = "16px courier";
-                fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, loopy - outer_radius - 44);
+                fctx.font = "bold 16px courier";
+                fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, loopy - outer_radius - 50);
                 fctx.fillText("N = " + toroid.N.toString(), loopx, loopy + outer_radius + 36);
                 fctx.font = "12px arial";
                 fctx.fillText("wire = " + (toroid.cond_length_meters*100.0).toFixed(1)+ " cm", loopx, loopy + outer_radius + 50);
