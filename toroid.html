@@ -47,28 +47,29 @@
                     <input type="range" id="conductor_diameter_slider" min="0" max="40" value="20" step="1">
                 </div>
                 <div class="sliders">
-                    <label for="loop_turns_slider">N:</label>
+                    <label for="loop_turns_slider">N%:</label>
                     <input type="range" id="loop_turns_slider" min="1" max="100" value="20.0" step="0.1">
-                </div>
-                <div class="sliders">
-                    <label for="frequency_slider">f:</label>
-                    <input type="range" id="frequency_slider" min="0.0" max="4.0" value="2.0" step="0.02">
                 </div>
                 <div class="sliders">
                     <label for="voltage_slider">Vrms:</label>
                     <input type="range" id="voltage_slider" min="1.0" max="200.0" value="10.0" step="0.2">
                 </div>
+                <div class="sliders">
+                    <label for="frequency_slider">f:</label>
+                    <input type="range" id="frequency_slider" min="0.0" max="4.0" value="2.0" step="0.02">
+                </div>
             </div>
             <div id="notes" class="notes">
             <br>
             <b><u>Notes:</u></b><br>
-            RF Toroid Calculator was developed to help users predict the RF characteristics of a toroid-wound inductor. <br><br>
+            RF Toroid Calculator was developed to help users predict the RF characteristics of a ferrite toroid wound as an inductor. 
+            Uses the manufacturer's (Fair-Rite) published data.<br><br>
             <u>Inputs via the slider widgets:</u>
             <ul> 
-                <li>&#8960;a : Conductor diameter slider changes AWG from 0-40.</li>
-                <li>N : Number of turns or windings.</li>
-                <li>f : The frequency of interest (MHz) for some of the calculations.</li>
-                <li>Vrms : The RMS voltage applied to the inductor (Volts).</li>
+                <li>AWG : Select the wire gauge. Slider L-R changes AWG from 40-0.</li>
+                <li>N% : Selects the number of turns or windings. Maximum (100%) is reached when the wires are adjacent at the toroid's inner radius.</li>
+                <li>Vrms : The RMS voltage applied to the inductor (Volts). Determines the flux-density (B) and field-intensity (H) within the ferrite toroid.</li>
+                <li>f : Shifts the frequency of interest left-to-right. Left towards kHz, right towards GHz. </li>
             </ul>
             <p>Characteristics on the left are independent of frequency, while the characteristics on the right are dependent on the selected frequency. <br><br>
             Each of the graphic representations attempt to keep the relative geometry correct, without exceeding the drawing boundary. The coil diameter
@@ -348,6 +349,7 @@
                 X_vs_f : [],
                 Q_vs_f : [],
                 i_vs_f : [],
+                P_vs_f : [],
                 mu1_vs_f: [],
                 mu2_vs_f: [],
                 
@@ -386,26 +388,6 @@
                 return [mu_1, mu_2];
             }
             
-            /*
-            function getComplexPermeability(frequency) {
-                // Use the proximityResistance look-up table and interpolate values depending on the spacing ratio and the number of turns.
-                var mu_1 = 0.0;
-                var mu_2 = 0.0;
-                var i = 0;
-                for (i = 0; i < (cores[material].complex_mu.freq.length-1); i++) {
-                    if(frequency <= cores[material].complex_mu.freq[i+1]) {
-                        // Linear interpolation between empirical proximity resistance values:
-                        mu_1 = (((frequency - cores[material].complex_mu.freq[i]) / (cores[material].complex_mu.freq[i+1] - cores[material].complex_mu.freq[i]) 
-                            * (cores[material].complex_mu.mu_1[i+1] - cores[material].complex_mu.mu_1[i])) + cores[material].complex_mu.mu_1[i]);
-                        mu_2 = (((frequency - cores[material].complex_mu.freq[i]) / (cores[material].complex_mu.freq[i+1] - cores[material].complex_mu.freq[i]) 
-                            * (cores[material].complex_mu.mu_2[i+1] - cores[material].complex_mu.mu_2[i])) + cores[material].complex_mu.mu_2[i]);
-                        break;
-                    }
-                }
-                return [mu_1, mu_2];
-            }
-            */
-
             function getImpedance(frequency) {
                 const mu = getComplexPermeability(frequency);
                 //console.log(mu);
@@ -459,6 +441,10 @@
                 return toroid.i_vs_f;
             }
             
+            function calculatePowerLoss() {
+                return toroid.P_vs_f;
+            }
+            
             function calculateH() {
                 return toroid.H_vs_f;
             }
@@ -493,15 +479,17 @@
                 toroid.Q = qualityFactor(toroid.Xl, toroid.Rac);
                 
                 // Calculate impedance:
+                /*
                 toroid.Z = math.complex(toroid.Rac, toroid.Xl).toPolar();
                 toroid.I = 1.414 * toroid.Vrms / toroid.Z.r;
                 toroid.H_peak = (0.4 * Math.PI * toroid.N * toroid.I) / toroid.core.le;
-                
+                */
                 toroid.Z_vs_f = [];
                 toroid.R_vs_f = [];
                 toroid.X_vs_f = [];
                 toroid.Q_vs_f = [];
                 toroid.i_vs_f = [];
+                toroid.P_vs_f = [];
                 toroid.mu1_vs_f = [];
                 toroid.mu2_vs_f = [];
                 toroid.H_vs_f = [];
@@ -524,7 +512,7 @@
                     const II = math.divide(toroid.Vrms, ZZ).toPolar();
                     
                     toroid.i_vs_f.push({x:freq, y:(II.r*1e3)});
-                    
+                    toroid.P_vs_f.push({x:freq, y:(Z.real * II.r**2)});
                     toroid.Z_vs_f.push({x:freq, y:(ZZ.toPolar().r)});
                     
                     const H = ((0.4 * Math.PI * toroid.N * 1.414 * II.r) / toroid.core.le);
@@ -550,6 +538,7 @@
                 myChart.data.datasets[6].data = calculatePermeability2();
                 myChart.data.datasets[7].data = calculateH();
                 myChart.data.datasets[8].data = calculateB();
+                myChart.data.datasets[9].data = calculatePowerLoss();
                 myChart.update();
             }
 
@@ -567,6 +556,7 @@
                 myChart.data.datasets[6].data = calculatePermeability2();
                 myChart.data.datasets[7].data = calculateH();
                 myChart.data.datasets[8].data = calculateB();
+                myChart.data.datasets[9].data = calculatePowerLoss();
                 myChart.update();
             }
 
@@ -579,6 +569,7 @@
                 myChart.data.datasets[4].data = calculateCurrent();
                // myChart.data.datasets[5].data = calculatePermeability1();
                // myChart.data.datasets[6].data = calculatePermeability2();
+                myChart.data.datasets[9].data = calculatePowerLoss();
                 myChart.update();
             }
 
@@ -593,6 +584,7 @@
                 // myChart.data.datasets[6].data = calculatePermeability2();
                 myChart.data.datasets[7].data = calculateH();
                 myChart.data.datasets[8].data = calculateB();
+                myChart.data.datasets[9].data = calculatePowerLoss();
                 myChart.update();
             }
 
@@ -608,6 +600,7 @@
                 myChart.data.datasets[6].data = calculatePermeability2();
                 myChart.data.datasets[7].data = calculateH();
                 myChart.data.datasets[8].data = calculateB();
+                myChart.data.datasets[9].data = calculatePowerLoss();
                 myChart.update();
             }
 
@@ -622,6 +615,7 @@
                 myChart.data.datasets[6].data = calculatePermeability2();
                 myChart.data.datasets[7].data = calculateH();
                 myChart.data.datasets[8].data = calculateB();
+                myChart.data.datasets[9].data = calculatePowerLoss();
                 myChart.update();
             }
 
@@ -903,6 +897,7 @@
                 fctx.textAlign = "left";
                 const L = toroid.L * 1.0e+6;
                 fctx.fillText("L = " + L.toFixed(0).toString() + " \u03bcH", 8, 18);
+                /*
                 if(toroid.frequency_hz >= 1.0e6) {
                     var freq = 1e-6 * toroid.frequency_hz;
                     fctx.fillText("f = " + freq.toFixed(1) + " MHz", 8, 32);
@@ -910,10 +905,11 @@
                     var freq = 1e-3 * toroid.frequency_hz;
                     fctx.fillText("f = " + freq.toFixed(1) + " kHz", 8, 32);
                 }
-                fctx.fillText("Vrms = " + toroid.Vrms.toFixed(1) + " V", 8, 46);
-                fctx.fillText("Rdc = " + toroid.Rdc.toFixed(3) + " \u03A9", 8, 60);
-                fctx.fillText("C = " + (toroid.C*1e12).toFixed(1) + " pF", 8, 74);
-                fctx.fillText("SRF = " + (toroid.SRF*1e-6).toFixed(2) + " MHz", 8, 88);
+                */
+                fctx.fillText("Vrms = " + toroid.Vrms.toFixed(1) + " V", 8, 32);
+                fctx.fillText("Rdc = " + toroid.Rdc.toFixed(3) + " \u03A9", 8, 46);
+                fctx.fillText("Ceff = " + (toroid.C*1e12).toFixed(1) + " pF", 8, win_height - 28);
+                fctx.fillText("SRF = " + (toroid.SRF*1e-6).toFixed(2) + " MHz", 8, win_height - 14);
                 
                 fctx.textAlign = "center";
                 fctx.font = "bold 16px courier";
@@ -949,15 +945,15 @@
                 
                 // Top right text:
                 fctx.textAlign = "right";
-                fctx.fillText("Material  = " + cores[material].mat, win_width-18, 18);
+                fctx.fillText(material + " Material", win_width-18, 18);
                 fctx.fillText("\u03bci  = " + cores[material].mu_i, win_width-18, 32);
                 fctx.fillText("B  = " + cores[material].B + " G",   win_width-18, 46);
                 fctx.fillText("H  = " + cores[material].H + " Oe",  win_width-18, 60);
                 fctx.fillText("Br = " + cores[material].Br + " G",  win_width-18, 74);
                 fctx.fillText("Hc = " + cores[material].Hc + " Oe", win_width-18, 88);
                 fctx.fillText("Tc = " + cores[material].Tc + " C",  win_width-18, 102);
-                
                 fctx.fillText("\u03C1 = " + cores[material].R.toPrecision(2) + " \u03A9", win_width-18, 116);
+                fctx.fillText("[" + cores[material].mat + "]", win_width-18, 130);
 
                 /*
                 // Draw spacing text: (gap is to avoid collision of spacing and length texts)
@@ -985,7 +981,7 @@
                 data: {
                     datasets: [ 
                     {
-                        label: 'Z (\u03A9)',
+                        label: '|Z| (\u03A9)',
                         fill: false,
                         borderColor: 'black',
                         backgroundColor: 'black',
@@ -1064,8 +1060,17 @@
                         data: calculateB(),
                         borderWidth: 1,
                         yAxisID: 'bID'
+                    },
+                    {
+                        label: 'P(W)',
+                        fill: false,
+                        borderColor: 'rgb(50,50,50)',
+                        backgroundColor: 'rgb(100,100,100)',
+                        data: calculatePowerLoss(),
+                        borderWidth: 1,
+                        yAxisID: 'wattsID'
                     }]
-                },
+                }, 
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -1168,13 +1173,27 @@
                             },
                             min: 0.0,
                             position: 'right',
+                        },
+                        'wattsID' : {
+                            type: 'linear',
+                            display: 'auto',
+                            title: {
+                                display: true,
+                                text: 'W',
+                                color: 'rgb(50,50,50)',
+                                font: {
+                                    weight : 'bold'
+                                }
+                            },
+                            min: 0.0,
+                            position: 'right',
                         }
                     },
                     plugins : {
                         //showLines: true,
                         mode : 'nearest',
                         title: {
-                            display: true,
+                            display: false,
                             text: "Property vs Frequency",
                         },
                         tooltip: {
