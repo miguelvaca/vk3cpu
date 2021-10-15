@@ -332,6 +332,7 @@
                 cond_length_meters : 0.0,
                 Rdc : 0.0,
                 SRF : 0.0,
+                C : 0.0,
 
                 Xl : 0.0,
                 Z : 0.0,
@@ -339,8 +340,8 @@
                 Rac : 0.0,
                 Q : 0.0,
                 
-                i_before : 0,
-                i_after : 0,
+                //i_before : 0,
+                //i_after : 0,
                 
                 Z_vs_f : [],
                 R_vs_f : [],
@@ -348,7 +349,10 @@
                 Q_vs_f : [],
                 i_vs_f : [],
                 mu1_vs_f: [],
-                mu2_vs_f: []
+                mu2_vs_f: [],
+                
+                H_vs_f: [],
+                B_vs_f: [],
             };
             
             function acResistance(frequency_hz) {
@@ -407,11 +411,9 @@
                 //console.log(mu);
                 const Lo = 4.0 * Math.PI * toroid.N**2 * 1e-9 / toroid.core.CC;
                 const Rs = 2.0 * Math.PI * frequency * Lo * mu[1];
-                const wLs = 2.0 * Math.PI * frequency * Lo * mu[0];
+                const Xs = 2.0 * Math.PI * frequency * Lo * mu[0];
                 
-                const Rac = acResistance(frequency);
-                
-                return { real:(Rs + Rac) , imag:wLs };
+                return { real:Rs , imag:Xs };
             }
 
             function getResistance(frequency) {
@@ -457,6 +459,14 @@
                 return toroid.i_vs_f;
             }
             
+            function calculateH() {
+                return toroid.H_vs_f;
+            }
+            
+            function calculateB() {
+                return toroid.B_vs_f;
+            }
+            
             // Solve all the parameters, and re-draw the canvas:
             function recalculate() {
                 // Input variables:
@@ -472,6 +482,8 @@
                 toroid.B_peak = (toroid.Vrms * 1e8) / (4.44 * toroid.frequency_hz * toroid.N); // 
                 toroid.cond_length_meters = toroid.N * (2*toroid.core.C + toroid.core.A - toroid.core.B) * 1e-3;
                 toroid.Rdc = 1.68e-8 * toroid.cond_length_meters / (Math.PI * ((toroid.cond_diameter_meters*0.5)**2.0));
+                toroid.C = (0.9 + (78.1/toroid.N**2))*1e-12;                  // In Farads
+                toroid.SRF = 1.0/(2.0*Math.PI* Math.sqrt(toroid.L*toroid.C));
                 
                 // Frequency dependent characteristics:
                 toroid.Xl = 6.2832 * toroid.frequency_hz * toroid.L;
@@ -492,6 +504,8 @@
                 toroid.i_vs_f = [];
                 toroid.mu1_vs_f = [];
                 toroid.mu2_vs_f = [];
+                toroid.H_vs_f = [];
+                toroid.B_vs_f = [];
 
                 frequencies.forEach(freq => {
                     const mu = getComplexPermeability(freq);
@@ -512,6 +526,12 @@
                     toroid.i_vs_f.push({x:freq, y:(II.r*1e3)});
                     
                     toroid.Z_vs_f.push({x:freq, y:(ZZ.toPolar().r)});
+                    
+                    const H = ((0.4 * Math.PI * toroid.N * 1.414 * II.r) / toroid.core.le);
+                    //const B = ((toroid.Vrms * 1e8) / (4.44 * freq * toroid.N * toroid.core.Ae));
+                    const B = Math.sqrt(mu[0]**2, mu[1]**2) * H;
+                    toroid.H_vs_f.push({x:freq, y:H});
+                    toroid.B_vs_f.push({x:freq, y:B});
                 });
                 drawDesign();
             }
@@ -528,6 +548,8 @@
                 myChart.data.datasets[4].data = calculateCurrent();
                 myChart.data.datasets[5].data = calculatePermeability1();
                 myChart.data.datasets[6].data = calculatePermeability2();
+                myChart.data.datasets[7].data = calculateH();
+                myChart.data.datasets[8].data = calculateB();
                 myChart.update();
             }
 
@@ -543,6 +565,8 @@
                 myChart.data.datasets[4].data = calculateCurrent();
                 myChart.data.datasets[5].data = calculatePermeability1();
                 myChart.data.datasets[6].data = calculatePermeability2();
+                myChart.data.datasets[7].data = calculateH();
+                myChart.data.datasets[8].data = calculateB();
                 myChart.update();
             }
 
@@ -567,6 +591,8 @@
                 myChart.data.datasets[4].data = calculateCurrent();
                 // myChart.data.datasets[5].data = calculatePermeability1();
                 // myChart.data.datasets[6].data = calculatePermeability2();
+                myChart.data.datasets[7].data = calculateH();
+                myChart.data.datasets[8].data = calculateB();
                 myChart.update();
             }
 
@@ -580,6 +606,8 @@
                 myChart.data.datasets[4].data = calculateCurrent();
                 myChart.data.datasets[5].data = calculatePermeability1();
                 myChart.data.datasets[6].data = calculatePermeability2();
+                myChart.data.datasets[7].data = calculateH();
+                myChart.data.datasets[8].data = calculateB();
                 myChart.update();
             }
 
@@ -592,6 +620,8 @@
                 myChart.data.datasets[4].data = calculateCurrent();
                 myChart.data.datasets[5].data = calculatePermeability1();
                 myChart.data.datasets[6].data = calculatePermeability2();
+                myChart.data.datasets[7].data = calculateH();
+                myChart.data.datasets[8].data = calculateB();
                 myChart.update();
             }
 
@@ -882,9 +912,8 @@
                 }
                 fctx.fillText("Vrms = " + toroid.Vrms.toFixed(1) + " V", 8, 46);
                 fctx.fillText("Rdc = " + toroid.Rdc.toFixed(3) + " \u03A9", 8, 60);
-                fctx.fillText("H = " + (toroid.H_peak*1.0e3).toFixed(1) + " mOe", 8, 74);
-                fctx.fillText("B = " + (toroid.B_peak).toFixed(1) + " G", 8, 88);
-                fctx.fillText("\u03bc = " + (toroid.B_peak / toroid.H_peak).toFixed(1), 8, 102);
+                fctx.fillText("C = " + (toroid.C*1e12).toFixed(1) + " pF", 8, 74);
+                fctx.fillText("SRF = " + (toroid.SRF*1e-6).toFixed(2) + " MHz", 8, 88);
                 
                 fctx.textAlign = "center";
                 fctx.font = "bold 16px courier";
@@ -1017,6 +1046,24 @@
                         data: calculatePermeability2(),
                         borderWidth: 1,
                         yAxisID: 'muID'
+                    },
+                    {
+                        label: 'H(Oe)',
+                        fill: false,
+                        borderColor: 'rgb(255,0,0)',
+                        backgroundColor: 'rgb(255,127,0)',
+                        data: calculateH(),
+                        borderWidth: 1,
+                        yAxisID: 'hID'
+                    },
+                    {
+                        label: 'B(G)',
+                        fill: false,
+                        borderColor: 'rgb(255,127,0)',
+                        backgroundColor: 'rgb(255,255,0)',
+                        data: calculateB(),
+                        borderWidth: 1,
+                        yAxisID: 'bID'
                     }]
                 },
                 options: {
@@ -1065,7 +1112,7 @@
                                 }
                             },
                             position: 'left',
-                            id: 'qID'
+                            //id: 'qID'
                         },
                         'ccID' : {
                             type: 'linear',
@@ -1080,7 +1127,7 @@
                             },
                             min: 0.0,
                             position: 'right',
-                            id: 'ccID'
+                            //id: 'ccID'
                         },
                         'muID' : {
                             type: 'linear',
@@ -1095,7 +1142,37 @@
                             },
                             min: 0.0,
                             position: 'right',
-                            id: 'muID'
+                            //id: 'muID'
+                        },
+                        'hID' : {
+                            type: 'linear',
+                            display: 'auto',
+                            title: {
+                                display: true,
+                                text: 'Oe',
+                                color: 'rgb(0,128,128)',
+                                font: {
+                                    weight : 'bold'
+                                }
+                            },
+                            min: 0.0,
+                            position: 'right',
+                            //id: 'hID'
+                        },
+                        'bID' : {
+                            type: 'linear',
+                            display: 'auto',
+                            title: {
+                                display: true,
+                                text: 'G',
+                                color: 'rgb(128,128,128)',
+                                font: {
+                                    weight : 'bold'
+                                }
+                            },
+                            min: 0.0,
+                            position: 'right',
+                            //id: 'bID'
                         }
                     },
                     plugins : {
