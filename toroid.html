@@ -66,10 +66,16 @@
             <br>
             <b><u>Notes:</u></b><br>
             RF Toroid Calculator was developed to help users predict the RF characteristics of a ferrite toroid wound as an inductor. 
-            It uses the manufacturer's (Fair-Rite) published data including the toroid's dimensions and complex permeability characteristics.<br><br>
+            It uses the manufacturer's (Fair-Rite) published data including the toroid's dimensions and complex permeability characteristics.<br>
             The calculator has 4 separate display areas. At the top is the chart display for showing frequency-dependent characteristics. Next is the
             schematic display, where a scaled image of the toroid and windings is presented to help with intuitive design. Next is the control panel
-            section, where the user can select the toroid material, toroid size, wire size, number of windings and excitation voltage.
+            section, where the user can select the toroid material, toroid size, wire size, number of windings and excitation voltage.<br><br>
+            <u>Inputs via the select widgets:</u>
+            <ul> 
+                <li>Application : Inductor is the only application currently supported.</li>
+                <li>Size : Selects the size of the toroid. FT240 is 2.4" in diameter. FT80 is 0.8", etc...</li>
+                <li>Material : Manufacturers material mix code, with initial permeability [&#956;i] in square brackets. Pick lower &#956;i for higher frequency applications.</li>
+            </ul>
             <u>Inputs via the slider widgets:</u>
             <ul> 
                 <li>AWG : Select the wire gauge. Sliding L-R changes AWG from 40-0. (Defaults to 20 AWG)</li>
@@ -77,10 +83,9 @@
                 <li>Vrms : The RMS voltage applied to the inductor (Volts). Determines the flux-density (B) and field-intensity (H) within the ferrite toroid. (Defaults to 10Vrms)</li>
                 <li>f : Shifts the frequency of interest of the chart display from left-to-right. Left towards kHz, right towards GHz. </li>
             </ul>
-            <p>Characteristics on the left are independent of frequency, while the characteristics on the right are dependent on the selected frequency. <br><br>
-            Each of the graphic representations attempt to keep the relative geometry correct, without exceeding the drawing boundary. The coil diameter
-            relative to the conductor diameter are representative. </p>
+            <i>Note: Manufacturers recommend keeping the number of turns (N) to a minimum.</i><br><br>
             <u>Chart display:</u>
+            The chart title contains manufacturer, size, material and part number of the device. <br>
             Calculated parameters are displayed against frequency (log scale). Each parameter may be displayed or hidden
             by tapping on the legend key. Tapping on a data point will display the parameters for a single frequency.
             <ul>
@@ -90,13 +95,14 @@
                 <li> Q : Quality factor. </li>
                 <li> I(mA) : RMS current in milliamps. (Hidden by default.) </li>
                 <li> &#956;'  : Complex permeability - reactive part. (Hidden by default.) </li>
-                <li> &#956;'' : Complex permeability - resistance part. (Hidden by default.) </li>
+                <li> &#956;'' : Complex permeability - resistive part. (Hidden by default.) </li>
                 <li> H(Oe) : Core field intensity in Oersted. (Hidden by default.) </li>
                 <li> B(G) : Core flux density in Gauss. (Hidden by default.) </li>
                 <li> P(mW) : Power dissipation in milliwatts. </li>
             </ul>
+            <i>Note: To use as an inductor, avoid using where Q is small or less than 1. When Q is less than 1, core loss energy is higher than magnetisation energy.</i><br><br>
             <u>Schematic display:</u>
-            Scaled representation of the toroid and the windings. Wire gauge and toroid dimensions are provided.
+            Scaled representation of the toroid and the windings. Wire gauge and toroid dimensions are provided.<br>
             On the left of the display are the following:
             <ul>
                 <li>L : Inductance in microhenries.</li>
