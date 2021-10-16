@@ -95,7 +95,7 @@ div input {
     }
 
     section div.chart-container {
-        height: 100vw;
+        height: 50vh;
         width: 100vw;
         box-sizing: border-box; 
     }
@@ -108,6 +108,7 @@ div input {
     
     section div.slider_container {
         width: 100%;
+        height: 20vh;
     }
 }
 
@@ -124,7 +125,7 @@ div input {
     }
 
     section div.chart-container {
-        height: 100vh;
+        height: 95vh;
         width: 100vw;
         box-sizing: border-box; 
     }
