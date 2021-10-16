@@ -1095,8 +1095,8 @@
                     {
                         label: 'Q',
                         fill: false,
-                        borderColor: 'purple',
-                        backgroundColor: 'purple',
+                        borderColor: '#69359C',
+                        backgroundColor: '#9A4EAE',
                         data: calculateQualityFactor(),
                         borderWidth: 1,
                         yAxisID: 'qID'
@@ -1104,8 +1104,8 @@
                     {
                         label: 'I (mA)',
                         fill: false,
-                        borderColor: 'rgb(0,255,255)',
-                        backgroundColor: 'rgb(0,128,128)',
+                        borderColor: 'rgb(0,128,128)',
+                        backgroundColor: 'rgb(0,118,118)',
                         data: calculateCurrent(),
                         borderWidth: 1,
                         yAxisID: 'ccID'
@@ -1113,8 +1113,8 @@
                     {
                         label: '\u03bc\'',
                         fill: false,
-                        borderColor: 'rgb(10,10,255)',
-                        backgroundColor: 'rgb(150,150,255)',
+                        borderColor: '#0070FF',
+                        backgroundColor: '#1974D2',
                         data: calculatePermeability1(),
                         borderWidth: 1,
                         yAxisID: 'muID',
@@ -1123,8 +1123,8 @@
                     {
                         label: '\u03bc\'\'',
                         fill: false,
-                        borderColor: 'rgb(0,200,00)',
-                        backgroundColor: 'rgb(255,150,150)',
+                        borderColor: '#F78FA7',
+                        backgroundColor: '#FFC0CB',
                         data: calculatePermeability2(),
                         borderWidth: 1,
                         yAxisID: 'muID',
@@ -1133,18 +1133,18 @@
                     {
                         label: 'H(Oe)',
                         fill: false,
-                        borderColor: 'rgb(255,255,0)',
-                        backgroundColor: 'rgb(230,115,0)',
+                        borderColor: '#654321',
+                        backgroundColor: '#986960',
                         data: calculateH(),
-                        borderWidth: 2,
+                        borderWidth: 1,
                         yAxisID: 'hID',
                         hidden: true
                     },
                     {
                         label: 'B(G)',
                         fill: false,
-                        borderColor: 'rgb(255,127,0)',
-                        backgroundColor: 'rgb(255,255,0)',
+                        borderColor: '#FFD300',
+                        backgroundColor: '#F0E130',
                         data: calculateB(),
                         borderWidth: 1,
                         yAxisID: 'bID',
@@ -1164,6 +1164,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    elements: {
+                        point: {
+                            radius: 0,
+                        },
+                    },
                     scales: {
                         x: {
                             type: 'logarithmic',
