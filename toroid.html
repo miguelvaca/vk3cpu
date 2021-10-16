@@ -37,7 +37,6 @@
                         <option value="75">75 [5000]</option>
                         <option value="78">78 [2300]</option>
                         <option value="77">77 [2000]</option>
-                        <option value="31">31*[1500]</option>
                         <option value="79">79 [1400]</option>
                         <option value="43" selected='true'>43 [800]</option>
                         <option value="80">80 [600]</option>
@@ -60,7 +59,7 @@
                 </div>
                 <div class="sliders">
                     <label for="frequency_slider">f:</label>
-                    <input type="range" id="frequency_slider" min="0.0" max="4.0" value="2.0" step="0.02">
+                    <input type="range" id="frequency_slider" min="0.0" max="4.0" value="2.0" step="1.0">
                 </div>
             </div>
             <div id="notes" class="notes">
@@ -99,7 +98,7 @@
                 <li> &#956;'' : Complex permeability - resistive part. (Hidden by default.) </li>
                 <li> H(Oe) : Core field intensity in Oersted. (Hidden by default.) </li>
                 <li> B(G) : Core flux density in Gauss. (Hidden by default.) </li>
-                <li> P(mW) : Power dissipation in milliwatts. </li>
+                <li> Pd(mW) : Power dissipation in the core, in milliwatts. </li>
             </ul>
             <i>Note: To use as an inductor, avoid using where Q is small or less than 1. When Q is less than 1, core loss energy is higher than magnetisation energy.</i><br><br>
             <u>Schematic display:</u>
@@ -1124,7 +1123,7 @@
                     {
                         label: '\u03bc\'\'',
                         fill: false,
-                        borderColor: 'rgb(255,10,10)',
+                        borderColor: 'rgb(0,200,00)',
                         backgroundColor: 'rgb(255,150,150)',
                         data: calculatePermeability2(),
                         borderWidth: 1,
@@ -1134,10 +1133,10 @@
                     {
                         label: 'H(Oe)',
                         fill: false,
-                        borderColor: 'rgb(255,0,0)',
-                        backgroundColor: 'rgb(255,127,0)',
+                        borderColor: 'rgb(255,255,0)',
+                        backgroundColor: 'rgb(230,115,0)',
                         data: calculateH(),
-                        borderWidth: 1,
+                        borderWidth: 2,
                         yAxisID: 'hID',
                         hidden: true
                     },
@@ -1152,7 +1151,7 @@
                         hidden: true
                     },
                     {
-                        label: 'P(mW)',
+                        label: 'Pd(mW)',
                         fill: false,
                         borderColor: 'rgb(50,50,50)',
                         backgroundColor: 'rgb(100,100,100)',
