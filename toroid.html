@@ -20,9 +20,9 @@
             </div>
             <div class="slider_container">
                 <div>
-                    <select name="functions" id="function-select">
+                    <select name="modes" id="mode-select" onchange="setMode()">
                         <option value="Inductor">Inductor</option>
-                        <option value="CommonModeChoke" disabled="true">Suppressor</option>
+                        <option value="Suppressor">Suppressor</option>
                         <option value="Transformer" disabled="true">Transformer</option>
                     </select>
                     <select name="toroids" id="toroid-select" onchange="setToroid()">
@@ -34,15 +34,15 @@
                         <option value="FT37">FT37</option-->
                     </select>
                     <select name="materials" id="material-select" onchange="setMaterial()">
-                        <option value="75">75 [5000]</option>
-                        <option value="78">78 [2300]</option>
-                        <option value="77">77 [2000]</option>
-                        <option value="79">79 [1400]</option>
-                        <option value="43" selected='true'>43 [800]</option>
-                        <option value="80">80 [600]</option>
-                        <option value="52">52 [250]</option>
-                        <option value="61">61 [125]</option>
-                        <option value="67">67 [40]</option>
+                        <!--option value="75">75 [&#956;i=5000]</option>
+                        <option value="78">78 [&#956;i=2300]</option>
+                        <option value="77">77 [&#956;i=2000]</option>
+                        <option value="79">79 [&#956;i=1400]</option>
+                        <option value="43" selected='true'>43 [&#956;i=800]</option>
+                        <option value="80">80 [&#956;i=600]</option>
+                        <option value="52">52 [&#956;i=250]</option>
+                        <option value="61">61 [&#956;i=125]</option>
+                        <option value="67">67 [&#956;i=40]</option-->
                     </select>
                 </div>
                 <div class="sliders">
@@ -274,7 +274,12 @@
                         'FT100' : { PN:'5975006401', A:25.40, B:15.50, C:12.7, W:19.0,  CC:10.00, le:6.20, Ae:0.62,  Ve:3.80, Al:6250.0 },
                         'FT50'  : { PN:'5975000301', A:12.70, B:7.15,   C:4.90, W:2.00,   CC:22.90, le:2.95, Ae:0.129, Ve:0.38, Al:2725.0 }, 
                         'FT37'  : { PN:'5975000201', A:9.50,  B:4.75,  C:3.30, W:0.83,   CC:28.60, le:2.06, Ae:0.072, Ve:0.15, Al:2200.0 }, 
-                    },
+                    }, /*
+                    sup_size : {
+                        'FS122' : { PN:'2675821502', A:31.0,  B:19.00, C:15.0, W:34.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8,  Al:6850.0, Z:[11.0, 29.5,  43.0, 28.0, 20.0] },
+                        'FS100' : { PN:'2675102001', A:25.90, B:12.80, C:28.6, W:55.00,  CC:11.20, le:8.90, Ae:0.79, Ve:7.00, Al:5500.0, Z:[30.0, 83.0, 120.0, 70.0, 54.0] },
+                         'FS74' : { PN:'2675626402', A:18.70, B:10.15, C:28.6, W:26.60,  CC:10.00, le:6.20, Ae:0.62,  Ve:3.80, Al:6250.0, Z:[25.0, 62.0,  92.0, 97.0, 67.0] },
+                    }, */
                     mat     : "MnZn",
                     mu_i    : 5000,
                     B       : 4800,
@@ -289,7 +294,6 @@
                         mu_2: [23.3, 29.0, 37.5, 77.6, 739.8, 1695.5, 2424.0, 2820.0, 3087.4, 3137.4, 3170.0, 3191.1, 3201.6, 3204.9, 3192.9, 3165.4, 3133.1, 3074.0, 2996.8, 2894.4, 2766.3, 2614.6, 2440.2, 2252.9, 2060.9, 1868.9, 1687.2, 1518.0, 1365.0, 1227.4, 1106.0, 999.0, 903.2, 819.2, 743.3, 675.8, 614.4, 559.3, 509.1, 463.5, 421.8, 383.9, 349.6, 318.3, 289.9, 264.2, 240.6, 219.2, 199.8, 182.2, 166.2, 151.6, 138.3, 126.2, 115.3, 105.3, 96.2, 88.0, 80.4, 73.6, 67.4, 61.6, 56.5, 51.7, 47.4, 43.5, 39.9, 36.6, 33.6, 30.9, 28.4, 26.1, 24.1, 22.2, 20.4, 18.8, 17.4, 16.0, 14.8, 13.7, 12.7, 11.7, 10.9, 10.1, 9.3, 8.7, 8.1, 7.5, 7.0, 6.5, 6.0, 5.6, 5.2, 4.9, 4.6, 4.3, 4.0, 3.7, 3.5, 3.3, 3.1, 2.9, 2.8, 2.6, 2.5, 2.4, 2.3, 2.2],
                     }
                 },
-                
                 '67' : {
                     size : {
                         'FT240' : { PN:'5967003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8,  Al:55.0 },
@@ -314,7 +318,6 @@
                         mu_2: [0.47, 0.47, 0.46, 0.46, 0.45, 0.45, 0.43, 0.42, 0.42, 0.4, 0.39, 0.38, 0.38, 0.37, 0.36, 0.36, 0.35, 0.34, 0.34, 0.33, 0.33, 0.33, 0.32, 0.31, 0.31, 0.3, 0.3, 0.29, 0.29, 0.29, 0.28, 0.28, 0.28, 0.28, 0.27, 0.27, 0.27, 0.26, 0.26, 0.26, 0.26, 0.26, 0.26, 0.25, 0.25, 0.24, 0.24, 0.24, 0.23, 0.23, 0.23, 0.22, 0.22, 0.22, 0.22, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.19, 0.19, 0.19, 0.19, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.21, 0.21, 0.21, 0.21, 0.22, 0.22, 0.23, 0.23, 0.23, 0.24, 0.24, 0.24, 0.25, 0.25, 0.26, 0.27, 0.3, 0.31, 0.32, 0.35, 0.36, 0.37, 0.41, 0.44, 0.48, 0.54, 0.6, 0.67, 0.8, 1.0, 1.3, 1.83, 2.68, 4.09, 6.28, 9.77, 14.58, 19.26, 23.05, 25.77, 27.63, 28.81, 29.59, 30.01, 30.13, 30.07, 29.94, 29.73, 29.48, 29.22, 28.93, 28.61, 28.29, 27.98, 27.68, 27.39, 27.12, 26.82, 26.51, 26.21, 25.92, 25.64, 25.39, 25.17, 24.93, 24.7, 24.41, 24.14, 23.89, 23.63, 23.38, 23.13, 22.85, 22.53, 22.2, 21.92, 21.56, 21.25, 20.93, 20.57, 20.26, 19.77, 19.41, 19.07, 18.73, 18.38, 18.02, 17.68, 17.28, 16.89, 16.54, 16.16, 15.82, 15.51, 15.19, 14.75, 14.43, 14.08, 13.78, 13.47, 13.19, 12.92, 12.61, 12.27, 12.01, 11.72, 11.47, 11.22, 11.03, 10.84, 10.65, 10.49, 10.31, 10.16, 10.02, 9.89, 9.78, 11.49, 11.45, 8.88] ,                
                     }
                 },
-                
                 '61' : {
                     size : {
                         'FT240' : { PN:'5961003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8,  Al:170.0 },
@@ -363,6 +366,27 @@
                         mu_2: [1.43, 3.32, 3.14, 2.74, 2.74, 2.83, 2.87, 3.01, 5.62, 18.88, 24.42, 33.27, 43.8, 55.65, 70.27, 87.04, 103.16, 117.07, 129.99, 139.81, 145.57, 148.73, 149.32, 148.17, 145.94, 142.49, 137.95, 133.21, 128.53, 123.35, 118.07, 113.46, 108.87, 104.39, 100.66, 97.55, 94.55, 91.53, 89.01, 86.86, 84.65, 82.51, 80.63, 78.73, 76.75, 75.03, 73.49, 71.85, 70.17, 68.63, 67.13, 65.52, 63.64, 61.79, 59.64, 57.43, 55.34, 53.41, 51.33, 49.1, 47.04, 45.07, 42.97, 40.71, 38.63, 36.47, 34.07, 31.87, 29.84, 27.75, 25.57, 23.73, 22.14, 20.61, 19.22, 18.03, 16.99, 15.96, 15.08, 14.37, 13.67, 13.02, 12.44, 11.94, 11.39, 10.86, 10.41],
                     }
                 },
+                '46' : {
+                    size : {
+                        'FT240' : { PN:'2646803802', A:61.0,  B:35.55, C:12.7, W:118.0, CC:9.16,  le:14.5, Ae:1.58,  Ve:22.8, Al:1371.0 },
+                        'FT200' : { PN:'2646626202', A:50.80, B:25.40, C:38.1, W:285.0, CC:2.3791, le:11.1, Ae:4.65,  Ve:51.432, Al:5282.0  },
+                        'FT122' : { PN:'2646804502', A:31.10, B:19.05, C:16.3, W:36.0,  CC:8.0495, le:7.57, Ae:0.941,  Ve:7.12, Al:1561.0 },
+                        'FT112A': { PN:'2646101902', A:28.50, B:13.80, C:28.60, W:67.0,  CC:31.17, le:5.60, Ae:1.80,  Ve:1.0072, Al:4032.0 },
+                    },
+                    mat     : "MgZn",
+                    mu_i    : 500,
+                    B       : 2550,
+                    H       : 10,
+                    Br      : 1680,
+                    Hc      : 0.53,
+                    Tc      : 140,
+                    R       : 1.0e8,
+                    complex_mu : {
+                        freq: [10000.0, 100000.0, 200000.0, 300000.0, 400000.0, 500000.0, 600000.0, 800000.0, 1000000.0, 1170000.0, 1360000.0, 1580000.0, 1840000.0, 2150000.0, 2500000.0, 2920000.0, 3400000.0, 3960000.0, 4620000.0, 5380000.0, 6270000.0, 7310000.0, 8510000.0, 9920000.0, 11600000.0, 13500000.0, 15700000.0, 18300000.0, 21300000.0, 24800000.0, 28900000.0, 33700000.0, 39300000.0, 45800000.0, 53400000.0, 62200000.0, 72500000.0, 84400000.0, 98400000.0, 115000000.0, 134000000.0, 156000000.0, 181000000.0, 211000000.0, 246000000.0, 287000000.0, 335000000.0, 390000000.0, 454000000.0, 529000000.0, 617000000.0, 719000000.0, 838000000.0, 976000000.0, 1140000000.0, 1330000000.0, 1540000000.0, 1800000000.0] ,
+                        mu_1: [524.7, 514.9, 513.6, 512.8, 512.7, 512.9, 513.5, 515.7, 519.2, 525.4, 534.5, 546.5, 559.4, 567.2, 562.0, 541.2, 504.8, 458.0, 406.6, 357.3, 313.0, 274.5, 241.1, 212.3, 187.0, 165.1, 146.1, 129.4, 114.7, 101.4, 89.2, 78.2, 67.6, 57.9, 48.9, 40.7, 33.3, 26.5, 20.6, 15.6, 11.5, 8.3, 5.8, 3.8, 2.4, 1.2, 0.4, -0.3, -0.7, -1.0, -1.3, -1.5, -1.7, -1.9, -2.2, -2.4, -2.8, -3.5] ,
+                        mu_2: [7.0, 7.1, 7.5, 8.0, 8.9, 9.9, 10.9, 13.2, 18.2, 21.9, 28.3, 39.8, 62.0, 96.6, 142.3, 189.5, 231.3, 260.9, 276.0, 278.3, 272.3, 261.1, 247.6, 232.7, 217.3, 202.2, 187.4, 173.5, 160.6, 148.8, 138.0, 127.9, 118.3, 109.1, 100.4, 91.9, 83.8, 75.9, 68.2, 60.7, 53.6, 47.1, 41.1, 35.7, 31.0, 26.8, 23.2, 20.0, 17.2, 14.9, 12.9, 11.3, 9.8, 8.7, 7.7, 6.9, 6.4, 6.1] ,
+                    }
+                },
                 '43' : {
                     size : {
                         'FT240' : { PN:'5943003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8, Al:1075.0 },
@@ -389,7 +413,7 @@
                 },
                 '31' : {
                     size : {
-                        'FT240' : { PN:'2631803802', A:61.0,  B:35.55, C:12.7, W:118.0, CC:9.1627, le:14.5, Ae:1.58,  Ve:22.8, Al:1371.0  },
+                        'FT240' : { PN:'2631803802', A:61.0,  B:35.55, C:12.7, W:118.0, CC:9.1627, le:14.5, Ae:1.58,  Ve:22.8, Al:1371.0, Z:[12, 28, 40, 63, 119, 215] },
                         'FT200' : { PN:'2631626202', A:50.80, B:25.40, C:38.1, W:278.0, CC:2.3791, le:11.1, Ae:4.65,  Ve:51.432, Al:5282.0  },
                         'FT114' : { PN:'2631801202', A:29.00, B:19.00, C:13.85, W:25.0, CC:1.0795, le:7.33, Ae:0.679,  Ve:4.977, Al:1164.0  },
                     },
@@ -418,13 +442,13 @@
                 frequencies = [];
                 //for(var i = 4.0; i <= 8.0; i+=0.01) {
                 var f = 1.0 * frequency_slider.value;
-                for(var i = 4.00+f; i <= 5.52+f; i+=0.04) {
+                for(var i = 4.00+f; i <= 5.52+f; i+=0.02) {
                     frequencies.push(10.0**i);
                 }
             }
             
             // Define global storage for calculated values, so we don't recalculate the same things multiple times:
-            var usage = 'Inductor';
+            var t_mode = 'Inductor';
             var t_size = 'FT240';
             var material = '43';
             
@@ -634,7 +658,60 @@
                 });
                 drawDesign();
             }
-
+            
+            function setMode() {
+                var modes = document.getElementsByName("modes");
+                t_mode = modes[0].value;
+                
+                l_inductors = {
+                    "75":"75 [\u03bci=5000]",
+                    "78":"78 [\u03bci=2300]",
+                    "77":"77 [\u03bci=2000]",
+                    "79":"79 [\u03bci=1400]",
+                    "43":"43 [\u03bci=800]",
+                    "80":"80 [\u03bci=600]",
+                    "52":"52 [\u03bci=250]",
+                    "61":"61 [\u03bci=125]",
+                    "67":"67 [\u03bci=40]"};
+                
+                l_suppressors = {
+                    "61":"61 [200 MHz -   1 GHz]",
+                    "46":"46 [ 25 MHz - 300 MHz]",
+                    "43":"43 [ 25 MHz - 300 MHz]",
+                    "31":"31 [  1 MHz - 300 MHz]",
+                    "75":"75 [200 kHz -  30 MHz]"};
+                
+                // Clear the materials from the DOM:
+                var l_materials = document.getElementById("material-select");
+                while(l_materials.firstChild) {
+                    l_materials.removeChild(l_materials.firstChild);
+                } 
+                
+                var l_mat_selected;
+                if(t_mode == "Suppressor") {
+                    l_mat_selected = l_suppressors;
+                } else { // Inductors and Transformers should use the inductor material list:
+                    l_mat_selected = l_inductors;
+                } 
+                
+                // Now insert only the sizes that exist for this material:
+                for(const key in l_mat_selected) {
+                    // console.log(key);
+                    // Create an option tag:
+                    if(material == key) {
+                        // This is so that if the size was selected and still exists, then maintain the setting:
+                        l_materials.appendChild(new Option(l_mat_selected[key], key, false, true));
+                    } else {
+                        l_materials.appendChild(new Option(l_mat_selected[key], key));
+                    }
+                }
+                if(!(material in l_mat_selected)) {
+                    material = Object.keys(l_mat_selected)[0];
+                }
+                // Now rebuild the size DOM for the selected material:
+                rebuildSizeDOM();
+            }
+            
             function setToroid() {
                 //console.log("setToroid()")
                 var toroids = document.getElementsByName("toroids");
@@ -663,9 +740,7 @@
                 
                 // Now insert only the sizes that exist for this material:
                 for(const key in cores[material].size) {
-                    // console.log(key);
                     // Create an option tag:
-                    let size_opt = document.createElement('option',)
                     if(t_size == key) {
                         // This is so that if the size was selected and still exists, then maintain the setting:
                         toroid_sizes.appendChild(new Option(key, key, false, true));
@@ -855,7 +930,6 @@
                     fctx.fill();
                 }
                 
-
                 x1 = originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI - 0.5 * theta);
                 y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI - 0.5 * theta);
                 x2 = originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI - 0.5 * theta);
@@ -1058,7 +1132,8 @@
             const chartCanvasContext = chartCanvas.getContext('2d');
             
             updateFrequencies();
-            rebuildSizeDOM();
+            //rebuildSizeDOM();
+            setMode();
             recalculate();
             
             var myChart = new Chart(chartCanvasContext, {
