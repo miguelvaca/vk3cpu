@@ -317,7 +317,7 @@
                     size : {
                         'FT240' : { PN:'5961003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8,  Al:170.0 },
                         'FT140' : { PN:'5961002701', A:35.55, B:23.00, C:12.7, W:33.00,  CC:11.20, le:8.90, Ae:0.79, Ve:7.00, Al:140.0 },
-                        'FT114+': { PN:'5961001201', A:29.00, B:19.00, C:13.85, W:26.0,  CC:10.70, le:7.30, Ae:0.68,  Ve:5.0, Al:145.0 },
+                        'FT114A': { PN:'5961001201', A:29.00, B:19.00, C:13.85, W:26.0,  CC:10.70, le:7.30, Ae:0.68,  Ve:5.0, Al:145.0 },
                         'FT114' : { PN:'5961001001', A:29.00, B:19.00, C:7.50, W:13.0,  CC:19.80, le:7.30, Ae:0.37,  Ve:2.70, Al:80.0 },
                         'FT82'  : { PN:'5961000601', A:21.00, B:13.20, C:6.35, W:6.40,  CC:21.30, le:5.20, Ae:0.243, Ve:1.26, Al:75.0 }, 
                         'FT50'  : { PN:'5961000301', A:12.70, B:7.15,   C:4.90, W:2.00,   CC:22.90, le:2.95, Ae:0.129, Ve:0.38, Al:69 }, 
@@ -602,11 +602,11 @@
                 toroid.SRF = 1.0/(2.0*Math.PI* Math.sqrt(toroid.L*toroid.C));
                 
                 // Frequency dependent characteristics:
-                toroid.Xl = 6.2832 * toroid.frequency_hz * toroid.L;
-                toroid.skin_depth = Math.sqrt(1.0 / (Math.PI * toroid.frequency_hz * mu0 * cu_sigma));
+                //toroid.Xl = 6.2832 * toroid.frequency_hz * toroid.L;
+                //toroid.skin_depth = Math.sqrt(1.0 / (Math.PI * toroid.frequency_hz * mu0 * cu_sigma));
                 //toroid.Rac = dc2acFactor(toroid.cond_diameter_meters, toroid.skin_depth) * toroid.Rdc;
-                toroid.Rac = acResistance(toroid.frequency_hz);
-                toroid.Q = qualityFactor(toroid.Xl, toroid.Rac);
+                //toroid.Rac = acResistance(toroid.frequency_hz);
+                //toroid.Q = qualityFactor(toroid.Xl, toroid.Rac);
                 
                 // Calculate impedance:
                 /*
