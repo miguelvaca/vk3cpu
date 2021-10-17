@@ -50,7 +50,7 @@
                     <input type="range" id="conductor_diameter_slider" min="0" max="40" value="20" step="1">
                 </div>
                 <div class="sliders">
-                    <label for="loop_turns_slider">N%:</label>
+                    <label for="loop_turns_slider">N:</label>
                     <input type="range" id="loop_turns_slider" min="1" max="100" value="20.0" step="0.1">
                 </div>
                 <div class="sliders">
@@ -79,7 +79,7 @@
             <u>Inputs via the slider widgets:</u>
             <ul> 
                 <li>AWG : Select the wire gauge. Sliding L-R changes AWG from 40-0. (Defaults to 20 AWG)</li>
-                <li>N%  : Selects the turns or winding density. Maximum (100%) is reached when the turns are adjacent at the toroid's inner radius. (Defaults to 20%)</li>
+                <li>N  : Selects the number of turns based on the winding density. Maximum (100%, slider to hard-right) is reached when the turns are adjacent at the toroid's inner radius. (Defaults to 20%)</li>
                 <li>Vrms : The RMS voltage applied to the inductor (Volts). Determines the flux-density (B) and field-intensity (H) within the ferrite toroid. (Defaults to 10Vrms)</li>
                 <li>f : Shifts the frequency of interest of the chart display from left-to-right. Left towards kHz, right towards GHz. </li>
             </ul>
