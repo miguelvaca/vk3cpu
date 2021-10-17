@@ -65,14 +65,14 @@
             <div id="notes" class="notes">
             <br>
             <b><u>Notes:</u></b><br>
-            RF Toroid Calculator was developed to help users predict the RF characteristics of a ferrite toroid wound as an inductor. 
+            RF Toroid Calculator was developed to help users predict the RF characteristics of a ferrite toroid wound as an inductor or suppressor. 
             It uses the manufacturer's (Fair-Rite) published data including the toroid's dimensions and complex permeability characteristics.<br>
             The calculator has 4 separate display areas. At the top is the chart display for showing frequency-dependent characteristics. Next is the
             schematic display, where a scaled image of the toroid and windings is presented to help with intuitive design. Next is the control panel
-            section, where the user can select the toroid material, toroid size, wire size, number of windings and excitation voltage.<br><br>
+            section, where the user can select the application type, toroid material, toroid size, wire size, number of windings and excitation voltage.<br><br>
             <u>Inputs via the select widgets:</u>
             <ul> 
-                <li>Application : Inductor is the only application currently supported.</li>
+                <li>Application : Selects the intended use of the toroid, either Inductor or Suppressor is currently supported. This limits the material selection as appropriate.</li>
                 <li>Size : Selects the size of the toroid. FT240 is 2.4" in diameter. FT80 is 0.8", etc...</li>
                 <li>Material : Manufacturers material mix code, with initial permeability [&#956;i] in square brackets. Pick lower &#956;i for higher frequency applications.</li>
             </ul>
@@ -408,9 +408,9 @@
                 },
                 '31' : {
                     size : {
-                        'FT240' : { PN:'2631803802', A:61.0,  B:35.55, C:12.7, W:118.0, CC:9.1627, le:14.5, Ae:1.58,  Ve:22.8, Al:1371.0, Z:[12, 28, 40, 63, 119, 215] },
-                        'FT200' : { PN:'2631626202', A:50.80, B:25.40, C:38.1, W:278.0, CC:2.3791, le:11.1, Ae:4.65,  Ve:51.432, Al:5282.0  },
-                        'FT114' : { PN:'2631801202', A:29.00, B:19.00, C:13.85, W:25.0, CC:1.0795, le:7.33, Ae:0.679,  Ve:4.977, Al:1164.0  },
+                        'FT240' : { PN:'2631803802', A:61.0,  B:35.55, C:12.7, W:118.0, CC:9.1627, le:14.5, Ae:1.58,  Ve:22.8, Al:1371.0 },
+                        'FT200' : { PN:'2631626202', A:50.80, B:25.40, C:38.1, W:278.0, CC:2.3791, le:11.1, Ae:4.65,  Ve:51.432, Al:5282.0 },
+                        'FT114' : { PN:'2631801202', A:29.00, B:19.00, C:13.85, W:25.0, CC:1.0795, le:7.33, Ae:0.679, Ve:4.977, Al:1164.0 },
                     },
                     mat     : "MnZn",
                     mu_i    : 1500,
