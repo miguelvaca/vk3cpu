@@ -655,6 +655,7 @@
                 t_mode = modes[0].value;
                 
                 l_inductors = {
+                    sort_order : ["75", "78", "77", "79", "43", "80", "52", "61", "67"],
                     "75":"75 [\u03bci=5000]",
                     "78":"78 [\u03bci=2300]",
                     "77":"77 [\u03bci=2000]",
@@ -666,6 +667,7 @@
                     "67":"67 [\u03bci=40]"};
                 
                 l_suppressors = {
+                    sort_order : ["61", "46", "43", "31", "75"],
                     "61":"61 [200 MHz - 1 GHz]",
                     "46":"46 [25 MHz - 300 MHz]",
                     "43":"43 [25 MHz - 300 MHz]",
@@ -686,8 +688,7 @@
                 } 
                 
                 // Now insert only the sizes that exist for this material:
-                for(const key in l_mat_selected) {
-                    // console.log(key);
+                l_mat_selected.sort_order.forEach(function (key){
                     // Create an option tag:
                     if(material == key) {
                         // This is so that if the size was selected and still exists, then maintain the setting:
@@ -695,7 +696,8 @@
                     } else {
                         l_materials.appendChild(new Option(l_mat_selected[key], key));
                     }
-                }
+                });
+                
                 if(!(material in l_mat_selected)) {
                     material = Object.keys(l_mat_selected)[0];
                 }
@@ -1058,7 +1060,7 @@
                 fctx.textAlign = "center";
                 fctx.font = "bold 16px courier";
                 fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, 20);
-                fctx.fillText("N = " + toroid.N.toString(), loopx, win_height - 30);
+                fctx.fillText("N = " + toroid.N.toString(), loopx, win_height - 28);
                 
                 fctx.font = "12px arial";
                 fctx.fillText("wire = " + (toroid.cond_length_meters*100.0).toFixed(1)+ " cm (" + (3.2808399*toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
