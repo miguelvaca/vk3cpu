@@ -1368,7 +1368,7 @@
                                     if (label) {
                                         label += ': ';
                                     }
-                                    if((label[0] == 'R') || (label[0] == 'X') || (label[0] == 'Z')) {
+                                    if((label[0] == 'R') || (label[0] == 'X') || (label[1] == 'Z')) {
                                         var num = context.element.parsed.y;
                                         if(num >= 1e6) {
                                             label += (num * 1e-6).toPrecision(3).toString() + ' M';
