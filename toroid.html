@@ -389,6 +389,7 @@
                         'FT125' : { PN:'5943001701', A:31.75, B:19.05, C:9.50, W:23.0,  CC:12.90, le:7.60, Ae:0.59,  Ve:4.50, Al:775.0 },
                         'FT114' : { PN:'5943001001', A:29.00, B:19.00, C:7.50, W:13.0,  CC:19.80, le:7.30, Ae:0.37,  Ve:2.70, Al:510.0 },
                         'FT82'  : { PN:'5943000601', A:21.00, B:13.20, C:6.35, W:6.40,  CC:21.30, le:5.20, Ae:0.243, Ve:1.26, Al:470.0 }, 
+                        'FT50B'  : { PN:'2643801902', A:12.70, B:7.9,  C:12.70, W:4.70, CC:10.421, le:3.12, Ae:0.3, Ve:0.9325, Al:1206.0 }, 
                         'FT50'  : { PN:'5943000301', A:12.70, B:7.15,  C:4.90, W:2.00,  CC:22.90, le:2.95, Ae:0.129, Ve:0.38, Al:440.0 }, 
                         'FT37'  : { PN:'5943000201', A:9.50,  B:4.75,  C:3.30, W:0.83,  CC:28.60, le:2.07, Ae:0.072, Ve:0.15, Al:350.0 }, 
                     },
@@ -469,6 +470,7 @@
                 Rac : 0.0,
                 Q : 0.0,
                 
+                L_vs_f : [],
                 Z_vs_f : [],
                 R_vs_f : [],
                 X_vs_f : [],
@@ -522,21 +524,10 @@
                 return { real:Rs , imag:Xs };
             }
 
-            function getResistance(frequency) {
-                // Use the proximityResistance look-up table and interpolate values depending on the spacing ratio and the number of turns.
-                var mu_2 = 0.0;
-                var i = 0;
-                for (i = 0; i < (cores[material].complex_mu.freq.length-1); i++) {
-                    if(frequency <= cores[material].complex_mu.freq[i+1]) {
-                        // Linear interpolation between empirical proximity resistance values:
-                        mu_2 = (((frequency - cores[material].complex_mu.freq[i]) / (cores[material].complex_mu.freq[i+1] - cores[material].complex_mu.freq[i]) 
-                            * (cores[material].complex_mu.mu_2[i+1] - cores[material].complex_mu.mu_2[i])) + cores[material].complex_mu.mu_2[i]);
-                        break;
-                    }
-                }
-                return mu_2;
+            function calculateInductance() {
+                return toroid.L_vs_f;
             }
-
+            
             function calculateImpedance() {
                 return toroid.Z_vs_f;
             }
@@ -614,6 +605,7 @@
                 toroid.I = 1.414 * toroid.Vrms / toroid.Z.r;
                 toroid.H_peak = (0.4 * Math.PI * toroid.N * toroid.I) / toroid.core.le;
                 */
+                toroid.L_vs_f = [];
                 toroid.Z_vs_f = [];
                 toroid.R_vs_f = [];
                 toroid.X_vs_f = [];
@@ -634,6 +626,8 @@
                     toroid.mu1_vs_f.push({x:freq, y:mu[0]});
                     toroid.mu2_vs_f.push({x:freq, y:mu[1]});
                     
+                    toroid.L_vs_f.push({x:freq, y:(Math.sqrt(mu[0]**2 + mu[1]**2) * 4.0 * Math.PI * toroid.N**2 * 1e-3 / toroid.core.CC)});
+                    
                     toroid.R_vs_f.push({x:freq, y:Z.real});
                     toroid.X_vs_f.push({x:freq, y:Z.imag});
                     toroid.Q_vs_f.push({x:freq, y:(Z.imag/Z.real)});
@@ -642,12 +636,13 @@
                     const II = math.divide(toroid.Vrms, ZZ).toPolar();
                     
                     toroid.i_vs_f.push({x:freq, y:(II.r*1e3)});
+                    //toroid.P_vs_f.push({x:freq, y:((toroid.Vrms**2 / Z.real)*1e3)});
                     toroid.P_vs_f.push({x:freq, y:((Z.real * II.r**2)*1e3)});
                     toroid.Z_vs_f.push({x:freq, y:(ZZ.toPolar().r)});
                     
                     const H = ((0.4 * Math.PI * toroid.N * 1.414 * II.r) / toroid.core.le);
                     //const B = ((toroid.Vrms * 1e8) / (4.44 * freq * toroid.N * toroid.core.Ae));
-                    const B = Math.sqrt(mu[0]**2, mu[1]**2) * H;
+                    const B = Math.sqrt(mu[0]**2 + mu[1]**2) * H;
                     toroid.H_vs_f.push({x:freq, y:H});
                     toroid.B_vs_f.push({x:freq, y:B});
                 });
@@ -707,23 +702,28 @@
                 rebuildSizeDOM();
             }
             
+            function updateChart() {
+                myChart.options.plugins.title.text = "Fair-Rite " + t_size + "-" + material + " [" + toroid.core.PN + "]";
+                myChart.data.datasets[0].data = calculateInductance();
+                myChart.data.datasets[1].data = calculateImpedance();
+                myChart.data.datasets[2].data = calculateResistance();
+                myChart.data.datasets[3].data = calculateReactance();
+                myChart.data.datasets[4].data = calculateQualityFactor();
+                myChart.data.datasets[5].data = calculateCurrent();
+                myChart.data.datasets[6].data = calculatePermeability1();
+                myChart.data.datasets[7].data = calculatePermeability2();
+                myChart.data.datasets[8].data = calculateH();
+                myChart.data.datasets[9].data = calculateB();
+                myChart.data.datasets[10].data = calculatePowerLoss();
+                myChart.update();
+            }
+            
             function setToroid() {
                 //console.log("setToroid()")
                 var toroids = document.getElementsByName("toroids");
                 t_size = toroids[0].value;
                 recalculate()
-                myChart.options.plugins.title.text = "Fair-Rite " + t_size + "-" + material + " [" + toroid.core.PN + "]";
-                myChart.data.datasets[0].data = calculateImpedance();
-                myChart.data.datasets[1].data = calculateResistance();
-                myChart.data.datasets[2].data = calculateReactance();
-                myChart.data.datasets[3].data = calculateQualityFactor();
-                myChart.data.datasets[4].data = calculateCurrent();
-                myChart.data.datasets[5].data = calculatePermeability1();
-                myChart.data.datasets[6].data = calculatePermeability2();
-                myChart.data.datasets[7].data = calculateH();
-                myChart.data.datasets[8].data = calculateB();
-                myChart.data.datasets[9].data = calculatePowerLoss();
-                myChart.update();
+                updateChart();
             }
             
             function rebuildSizeDOM() {
@@ -756,87 +756,39 @@
                 
                 // Rebuild the list of available sizes for this material type:
                 rebuildSizeDOM();
-                
                 recalculate()
-                myChart.options.plugins.title.text = "Fair-Rite " + t_size + "-" + material + " [" + toroid.core.PN + "]";
-                myChart.data.datasets[0].data = calculateImpedance();
-                myChart.data.datasets[1].data = calculateResistance();
-                myChart.data.datasets[2].data = calculateReactance();
-                myChart.data.datasets[3].data = calculateQualityFactor();
-                myChart.data.datasets[4].data = calculateCurrent();
-                myChart.data.datasets[5].data = calculatePermeability1();
-                myChart.data.datasets[6].data = calculatePermeability2();
-                myChart.data.datasets[7].data = calculateH();
-                myChart.data.datasets[8].data = calculateB();
-                myChart.data.datasets[9].data = calculatePowerLoss();
-                myChart.update();
+                updateChart();
             }
 
             conductor_diameter_slider.oninput = function() {
                 recalculate();
-                myChart.data.datasets[0].data = calculateImpedance();
-                myChart.data.datasets[1].data = calculateResistance();
-                myChart.data.datasets[2].data = calculateReactance();
-                myChart.data.datasets[3].data = calculateQualityFactor();
-                myChart.data.datasets[4].data = calculateCurrent();
-               // myChart.data.datasets[5].data = calculatePermeability1();
-               // myChart.data.datasets[6].data = calculatePermeability2();
-                myChart.data.datasets[9].data = calculatePowerLoss();
-                myChart.update();
+                updateChart();
             }
 
             loop_turns_slider.oninput = function() {
                 recalculate();
-                myChart.data.datasets[0].data = calculateImpedance();
-                myChart.data.datasets[1].data = calculateResistance();
-                myChart.data.datasets[2].data = calculateReactance();
-                myChart.data.datasets[3].data = calculateQualityFactor();
-                myChart.data.datasets[4].data = calculateCurrent();
-                // myChart.data.datasets[5].data = calculatePermeability1();
-                // myChart.data.datasets[6].data = calculatePermeability2();
-                myChart.data.datasets[7].data = calculateH();
-                myChart.data.datasets[8].data = calculateB();
-                myChart.data.datasets[9].data = calculatePowerLoss();
-                myChart.update();
+                updateChart();
             }
 
             frequency_slider.oninput = function() {
                 updateFrequencies();
                 recalculate();
-                myChart.data.datasets[0].data = calculateImpedance();
-                myChart.data.datasets[1].data = calculateResistance();
-                myChart.data.datasets[2].data = calculateReactance();
-                myChart.data.datasets[3].data = calculateQualityFactor();
-                myChart.data.datasets[4].data = calculateCurrent();
-                myChart.data.datasets[5].data = calculatePermeability1();
-                myChart.data.datasets[6].data = calculatePermeability2();
-                myChart.data.datasets[7].data = calculateH();
-                myChart.data.datasets[8].data = calculateB();
-                myChart.data.datasets[9].data = calculatePowerLoss();
-                myChart.update();
+                updateChart();
             }
 
             voltage_slider.oninput = function() {
                 recalculate();
-                myChart.data.datasets[0].data = calculateImpedance();
-                myChart.data.datasets[1].data = calculateResistance();
-                myChart.data.datasets[2].data = calculateReactance();
-                myChart.data.datasets[3].data = calculateQualityFactor();
-                myChart.data.datasets[4].data = calculateCurrent();
-                myChart.data.datasets[5].data = calculatePermeability1();
-                myChart.data.datasets[6].data = calculatePermeability2();
-                myChart.data.datasets[7].data = calculateH();
-                myChart.data.datasets[8].data = calculateB();
-                myChart.data.datasets[9].data = calculatePowerLoss();
-                myChart.update();
+                updateChart();
             }
 
             window.onresize = function() {
                 recalculate();
+                updateChart();
             }
 
             window.onorientationchange = function() {
                 recalculate();
+                updateChart();
             }
 
             window.onbeforeprint = function() {
@@ -850,12 +802,14 @@
             function drawInductor(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns, width) {
                 let theta = Math.PI/12.0;
 
+                var front_originX = originX - 0.5*(1*outerRadius + 20 + width);
+                
                 // Draw entry and exit wires:
-                var x1 = originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI + 0.5 * theta);
+                var x1 = front_originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI + 0.5 * theta);
                 var y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI + 0.5 * theta);
                 //var x2 = originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI + 0.5 * theta);
                 //var y2 = originY + (innerRadius - wireRadius) * Math.sin(0.5 * Math.PI + 0.5 * theta);
-                var x2 = originX + (outerRadius - wireRadius) * Math.cos(0.5 * Math.PI + 0.5 * theta);
+                var x2 = front_originX + (outerRadius - wireRadius) * Math.cos(0.5 * Math.PI + 0.5 * theta);
                 var y2 = originY + (outerRadius - wireRadius) * Math.sin(0.5 * Math.PI + 0.5 * theta);
                 var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
                 fctx.beginPath();
@@ -868,53 +822,54 @@
                 fctx.lineWidth = outerRadius - innerRadius;
                 fctx.strokeStyle = "#7F7F7F"; // rgb(100, 100, 100);
                 fctx.beginPath();
-                fctx.arc(originX, originY, 0.5 * (outerRadius + innerRadius), 0.0, 2.0 * Math.PI, false);
+                fctx.arc(front_originX, originY, 0.5 * (outerRadius + innerRadius), 0.0, 2.0 * Math.PI, false);
                 fctx.stroke();
                 fctx.lineWidth = 1.0;
                 
                 // Draw side profile of toroid:
+                var side_originX = front_originX + outerRadius + 20;
                 fctx.fillStyle = "#7F7F7F"; // rgb(100, 100, 100);
-                fctx.fillRect(originX + outerRadius + 20, originY - outerRadius, width, (outerRadius - innerRadius));
-                fctx.fillRect(originX + outerRadius + 20, originY + innerRadius, width, (outerRadius - innerRadius));
+                fctx.fillRect(side_originX, originY - outerRadius, width, (outerRadius - innerRadius));
+                fctx.fillRect(side_originX, originY + innerRadius, width, (outerRadius - innerRadius));
                 fctx.fillStyle = 'lightgrey';
-                fctx.fillRect(originX + outerRadius + 20, originY - innerRadius, width, (2 * innerRadius));
+                fctx.fillRect(side_originX, originY - innerRadius, width, (2 * innerRadius));
                 
                 // Write width of cross-section of toroid (not including winding wire thickness):
                 fctx.font = "12px arial";
                 fctx.fillStyle = "black"; 
                 fctx.textAlign = "center";
-                fctx.fillText((toroid.core.C).toFixed(1) + " mm", originX + outerRadius + 20 + 0.5*width, originY + outerRadius + 20);
-                fctx.fillText("(" + (toroid.core.C*0.03937).toFixed(3) + "\")", originX + outerRadius + 20 + 0.5*width, originY + outerRadius + 34);
+                fctx.fillText((toroid.core.C).toFixed(1) + " mm", side_originX + 0.5*width, originY + outerRadius + 20);
+                fctx.fillText("(" + (toroid.core.C*0.03937).toFixed(3) + "\")", side_originX + 0.5*width, originY + outerRadius + 34);
                 
                 // Draw wire winding around top cross-section view: 
                 fctx.strokeStyle = "black"; 
                 fctx.beginPath();
                 fctx.lineWidth = 2.0 * wireRadius;
-                fctx.moveTo(originX + outerRadius + 20 + 0.5*width, originY - outerRadius - wireRadius);
-                fctx.arcTo(originX + outerRadius + 20 + width + wireRadius, originY - outerRadius - wireRadius, originX + outerRadius + 20 + width + wireRadius, originY - outerRadius + 0.5*innerRadius, wireRadius);
-                fctx.arcTo(originX + outerRadius + 20 + width + wireRadius, originY - innerRadius + wireRadius, originX + outerRadius + 20 + 0.5*width, originY - innerRadius + wireRadius, wireRadius);
-                fctx.arcTo(originX + outerRadius + 20 - wireRadius, originY - innerRadius + wireRadius, originX + outerRadius + 20 - wireRadius, originY - outerRadius + 0.5*innerRadius, wireRadius);
-                fctx.arcTo(originX + outerRadius + 20 - wireRadius, originY - outerRadius - wireRadius, originX + outerRadius + 20 + 0.5*width, originY - outerRadius - wireRadius, wireRadius);
-                fctx.lineTo(originX + outerRadius + 20 + 0.5*width, originY - outerRadius - wireRadius);
+                fctx.moveTo(side_originX + 0.5*width, originY - outerRadius - wireRadius);
+                fctx.arcTo(side_originX + width + wireRadius, originY - outerRadius - wireRadius, side_originX + width + wireRadius, originY - outerRadius + 0.5*innerRadius, wireRadius);
+                fctx.arcTo(side_originX + width + wireRadius, originY - innerRadius + wireRadius, side_originX + 0.5*width, originY - innerRadius + wireRadius, wireRadius);
+                fctx.arcTo(side_originX - wireRadius, originY - innerRadius + wireRadius, side_originX - wireRadius, originY - outerRadius + 0.5*innerRadius, wireRadius);
+                fctx.arcTo(side_originX - wireRadius, originY - outerRadius - wireRadius, side_originX + 0.5*width, originY - outerRadius - wireRadius, wireRadius);
+                fctx.lineTo(side_originX + 0.5*width, originY - outerRadius - wireRadius);
                 fctx.stroke();
                 
                 // Draw wire winding around bottom cross-section view: 
                 fctx.beginPath();
                 fctx.lineWidth = 2.0 * wireRadius;
-                fctx.moveTo(originX + outerRadius + 20 + 0.5*width, originY + outerRadius + wireRadius);
-                fctx.arcTo(originX + outerRadius + 20 + width + wireRadius, originY + outerRadius + wireRadius, originX + outerRadius + 20 + width + wireRadius, originY + outerRadius - 0.5*innerRadius, wireRadius);
-                fctx.arcTo(originX + outerRadius + 20 + width + wireRadius, originY + innerRadius - wireRadius, originX + outerRadius + 20 + 0.5*width, originY + innerRadius - wireRadius, wireRadius);
-                fctx.arcTo(originX + outerRadius + 20 - wireRadius, originY + innerRadius - wireRadius, originX + outerRadius + 20 - wireRadius, originY + outerRadius - 0.5*innerRadius, wireRadius);
-                fctx.arcTo(originX + outerRadius + 20 - wireRadius, originY + outerRadius + wireRadius, originX + outerRadius + 20 + 0.5*width, originY + outerRadius + wireRadius, wireRadius);
-                fctx.lineTo(originX + outerRadius + 20 + 0.5*width, originY + outerRadius + wireRadius);
+                fctx.moveTo(side_originX + 0.5*width, originY + outerRadius + wireRadius);
+                fctx.arcTo(side_originX + width + wireRadius, originY + outerRadius + wireRadius, side_originX + width + wireRadius, originY + outerRadius - 0.5*innerRadius, wireRadius);
+                fctx.arcTo(side_originX + width + wireRadius, originY + innerRadius - wireRadius, side_originX + 0.5*width, originY + innerRadius - wireRadius, wireRadius);
+                fctx.arcTo(side_originX - wireRadius, originY + innerRadius - wireRadius, side_originX - wireRadius, originY + outerRadius - 0.5*innerRadius, wireRadius);
+                fctx.arcTo(side_originX - wireRadius, originY + outerRadius + wireRadius, side_originX + 0.5*width, originY + outerRadius + wireRadius, wireRadius);
+                fctx.lineTo(side_originX + 0.5*width, originY + outerRadius + wireRadius);
                 fctx.stroke();
                 
                 // Draw horizontal wires across mid of cross-section view:
                 fctx.lineWidth = 1.0;
                 for(let i = 0; i < Math.floor(turns/2); i++) {
-                    x1 = (originX + outerRadius + 20 - wireRadius);
+                    x1 = (side_originX - wireRadius);
                     y1 = originY + (innerRadius-wireRadius) * Math.cos(Math.PI*(i/Math.floor(turns/2)));
-                    x2 = (originX + outerRadius + 20 + width + wireRadius);
+                    x2 = (side_originX + width + wireRadius);
                     y2 = y1;
                     angle = 0.5 * Math.PI;
 
@@ -925,9 +880,9 @@
                     fctx.fill();
                 }
                 
-                x1 = originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI - 0.5 * theta);
+                x1 = front_originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI - 0.5 * theta);
                 y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI - 0.5 * theta);
-                x2 = originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI - 0.5 * theta);
+                x2 = front_originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI - 0.5 * theta);
                 y2 = originY + (innerRadius - wireRadius) * Math.sin(0.5 * Math.PI - 0.5 * theta);
                 angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
                 fctx.beginPath();
@@ -944,9 +899,9 @@
                     x2 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
                     y2 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
                     */
-                    x1 = originX + (outerRadius + wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
+                    x1 = front_originX + (outerRadius + wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
                     y1 = originY + (outerRadius + wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
-                    x2 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    x2 = front_originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
                     y2 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
                     angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
 
@@ -962,17 +917,17 @@
                 
                 // Draw the Dimensions:
                 fctx.beginPath();
-                fctx.moveTo(originX - outerRadius, originY - outerRadius);
-                fctx.lineTo(originX - outerRadius - 20, originY - outerRadius);
-                fctx.moveTo(originX - outerRadius, originY + outerRadius);
-                fctx.lineTo(originX - outerRadius - 20, originY + outerRadius);
-                fctx.lineTo(originX - outerRadius - 20, originY - outerRadius);
+                fctx.moveTo(front_originX - outerRadius, originY - outerRadius);
+                fctx.lineTo(front_originX - outerRadius - 20, originY - outerRadius);
+                fctx.moveTo(front_originX - outerRadius, originY + outerRadius);
+                fctx.lineTo(front_originX - outerRadius - 20, originY + outerRadius);
+                fctx.lineTo(front_originX - outerRadius - 20, originY - outerRadius);
                 fctx.stroke();
                 
                 fctx.font = "12px arial";
                 fctx.textAlign = "right";
-                fctx.fillText((toroid.core.A).toFixed(1) + " mm", originX - outerRadius - 24, originY - 6);
-                fctx.fillText("(" + (toroid.core.A*0.03937).toFixed(3) + "\")", originX - outerRadius - 24, originY + 6);
+                fctx.fillText((toroid.core.A).toFixed(1) + " mm", front_originX - outerRadius - 24, originY - 6);
+                fctx.fillText("(" + (toroid.core.A*0.03937).toFixed(3) + "\")", front_originX - outerRadius - 24, originY + 6);
             }
 
             function drawTransformer(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
@@ -1090,7 +1045,7 @@
                 fctx.font = "12px arial";
                 fctx.textAlign = "left";
                 const L = toroid.L * 1.0e+6;
-                fctx.fillText("L = " + L.toFixed(0).toString() + " \u03bcH", 8, 18);
+                fctx.fillText("L\u1d62 = " + L.toFixed(0).toString() + " \u03bcH", 8, 18);
                 fctx.fillText("Rdc = " + toroid.Rdc.toFixed(3) + " \u03A9", 8, 32);
                 fctx.fillText("Vrms = " + toroid.Vrms.toFixed(1) + " V", 8, 46);
                 
@@ -1101,13 +1056,15 @@
                 
                 fctx.textAlign = "center";
                 fctx.font = "bold 16px courier";
-                fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, loopy - outer_radius - 50);
-                fctx.fillText("N = " + toroid.N.toString(), loopx, loopy + outer_radius + 36);
+                fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, 20);
+                fctx.fillText("N = " + toroid.N.toString(), loopx, win_height - 30);
+                
                 fctx.font = "12px arial";
-                fctx.fillText("wire = " + (toroid.cond_length_meters*100.0).toFixed(1)+ " cm", loopx, loopy + outer_radius + 50);
-                fctx.fillText("(" + (3.2808399*toroid.cond_length_meters).toFixed(2)+ "\')", loopx, loopy + outer_radius + 64);
-                fctx.fillText("\u2300 = " + (1e3 * toroid.cond_diameter_meters).toFixed(3) + " mm", loopx, loopy - outer_radius - 30);
-                fctx.fillText("(" + (39.37007874 * toroid.cond_diameter_meters).toFixed(3) + "\")", loopx, loopy - outer_radius - 16);
+                fctx.fillText("wire = " + (toroid.cond_length_meters*100.0).toFixed(1)+ " cm (" + (3.2808399*toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
+                //fctx.fillText("(" + (3.2808399*toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
+                
+                fctx.fillText("\u2300 = " + (1e3 * toroid.cond_diameter_meters).toFixed(3) + " mm" , loopx, 34);
+                fctx.fillText("(" + (39.37007874 * toroid.cond_diameter_meters).toFixed(3) + "\")", loopx, 48);
                 
                 // Top right text:
                 fctx.textAlign = "right";
@@ -1135,6 +1092,15 @@
                 type: 'line',
                 data: {
                     datasets: [ 
+                    {
+                        label: 'L (\u03bcH)',
+                        fill: false,
+                        borderColor: 'orange',
+                        backgroundColor: 'orange',
+                        data: calculateInductance(),
+                        borderWidth: 1,
+                        yAxisID: 'lID'
+                    },
                     {
                         label: '|Z| (\u03A9)',
                         fill: false,
@@ -1256,6 +1222,19 @@
                                 autoSkip: false,
                             }
                         },
+                        'lID': {
+                            type: 'linear',
+                            display: 'auto',
+                            title: {
+                                display: true,
+                                text: 'L(\u03bcH)',
+                                color: 'black',
+                                font: {
+                                    weight : 'bold'
+                                }
+                            },
+                            position: 'left',
+                        },
                         'ohmsID': {
                             type: 'logarithmic',
                             display: 'auto',
@@ -1268,7 +1247,6 @@
                                 }
                             },
                             position: 'left',
-                            id: 'ohmsID'
                         },
                         'qID' : {
                             type: 'linear',
