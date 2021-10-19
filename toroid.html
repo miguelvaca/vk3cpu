@@ -9,12 +9,12 @@
     <body>
         <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.7<br></header>
         <section class="gridLayoutClass">
-            <div id="chart-container" class="chart-container" style="position: relative;">
+            <div id="chart-container" class="chart-container">
                 <canvas id="chartCanvas" class="chartCanvasClass">
                     2D Chart Canvas
                 </canvas>
             </div>
-            <div id="inductor-container" class="inductor-container" style="position: relative;">
+            <div id="inductor-container" class="inductor-container">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
                 </canvas>
             </div>
@@ -803,18 +803,27 @@
             const fctx = afront_canvas.getContext('2d');
 
             function drawInductor(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns, width) {
-                let theta = Math.PI/12.0;
+                let theta = Math.PI/(turns);
 
                 var front_originX = originX - 0.5*(1*outerRadius + 20 + width);
                 originY -= 12;
                 
+                var x1 = 0;
+                var y1 = 0;
+                var x2 = 0;
+                var y2 = 0;
                 // Draw entry and exit wires:
-                var x1 = front_originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI + 0.5 * theta);
-                var y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI + 0.5 * theta);
-                //var x2 = originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI + 0.5 * theta);
-                //var y2 = originY + (innerRadius - wireRadius) * Math.sin(0.5 * Math.PI + 0.5 * theta);
-                var x2 = front_originX + (outerRadius - wireRadius) * Math.cos(0.5 * Math.PI + 0.5 * theta);
-                var y2 = originY + (outerRadius - wireRadius) * Math.sin(0.5 * Math.PI + 0.5 * theta);
+                if(turns > 1) {
+                    x1 = front_originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI + 0.5 * theta);
+                    y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI + 0.5 * theta);
+                    x2 = front_originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI + theta);
+                    y2 = originY + (innerRadius - wireRadius) * Math.sin(0.5 * Math.PI + theta);
+                } else {
+                    x1 = front_originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI + 0.1 * theta);
+                    y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI + 0.1 * theta);
+                    x2 = front_originX;
+                    y2 = originY + (innerRadius - wireRadius);
+                }
                 var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
                 fctx.beginPath();
                 fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
@@ -884,10 +893,18 @@
                     fctx.fill();
                 }
                 
-                x1 = front_originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI - 0.5 * theta);
-                y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI - 0.5 * theta);
-                x2 = front_originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI - 0.5 * theta);
-                y2 = originY + (innerRadius - wireRadius) * Math.sin(0.5 * Math.PI - 0.5 * theta);
+                // Draw the lead-in wires:
+                if(turns > 1) {
+                    x1 = front_originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI - 0.5 * theta);
+                    y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI - 0.5 * theta);
+                    x2 = front_originX + (innerRadius - wireRadius) * Math.cos(0.5 * Math.PI - theta);
+                    y2 = originY + (innerRadius - wireRadius) * Math.sin(0.5 * Math.PI - theta);
+                } else {
+                    x1 = front_originX + (outerRadius + 20) * Math.cos(0.5 * Math.PI - 0.1 * theta);
+                    y1 = originY + (outerRadius + 20) * Math.sin(0.5 * Math.PI - 0.1 * theta);
+                    x2 = front_originX;
+                    y2 = originY + (innerRadius - wireRadius);
+                }
                 angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
                 fctx.beginPath();
                 fctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
@@ -896,17 +913,24 @@
                 fctx.fill();
                 
                 // Now draw the rest of the wires:
-                for(let i = 0; i < (turns-1); i++) {
+                for(let i = 0; i < (turns - 1); i++) {
                     /*
                     x1 = originX + (outerRadius + wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
                     y1 = originY + (outerRadius + wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
                     x2 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
                     y2 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
                     */
+                    /*
                     x1 = front_originX + (outerRadius + wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
                     y1 = originY + (outerRadius + wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
                     x2 = front_originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
                     y2 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
+                    angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                    */
+                    x1 = front_originX + (outerRadius + wireRadius) * Math.cos((i/turns)* (2.0 * Math.PI) + 0.5*Math.PI + (1/turns) * Math.PI + Math.PI/turns);
+                    y1 =       originY + (outerRadius + wireRadius) * Math.sin((i/turns)* (2.0 * Math.PI) + 0.5*Math.PI + (1/turns) * Math.PI + Math.PI/turns);
+                    x2 = front_originX + (innerRadius - wireRadius) * Math.cos((i/turns)* (2.0 * Math.PI) + 0.5*Math.PI + (1/turns) * Math.PI);
+                    y2 =       originY + (innerRadius - wireRadius) * Math.sin((i/turns)* (2.0 * Math.PI) + 0.5*Math.PI + (1/turns) * Math.PI);
                     angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
 
                     fctx.beginPath();
@@ -916,7 +940,6 @@
                     fctx.fill();
                 }
                 
-                // Draw the side view:
                 
                 
                 // Draw the Dimensions:
