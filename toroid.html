@@ -390,7 +390,7 @@
                         'FT125' : { PN:'5943001701', A:31.75, B:19.05, C:9.50, W:23.0,  CC:12.90, le:7.60, Ae:0.59,  Ve:4.50, Al:775.0 },
                         'FT114' : { PN:'5943001001', A:29.00, B:19.00, C:7.50, W:13.0,  CC:19.80, le:7.30, Ae:0.37,  Ve:2.70, Al:510.0 },
                         'FT82'  : { PN:'5943000601', A:21.00, B:13.20, C:6.35, W:6.40,  CC:21.30, le:5.20, Ae:0.243, Ve:1.26, Al:470.0 }, 
-                        'FT50B'  : { PN:'2643801902', A:12.70, B:7.9,  C:12.70, W:4.70, CC:10.421, le:3.12, Ae:0.3, Ve:0.9325, Al:1206.0 }, 
+                        'FT50B' : { PN:'2643801902', A:12.70, B:7.9,  C:12.70, W:4.70, CC:10.421, le:3.12, Ae:0.3, Ve:0.9325, Al:1206.0 }, 
                         'FT50'  : { PN:'5943000301', A:12.70, B:7.15,  C:4.90, W:2.00,  CC:22.90, le:2.95, Ae:0.129, Ve:0.38, Al:440.0 }, 
                         'FT37'  : { PN:'5943000201', A:9.50,  B:4.75,  C:3.30, W:0.83,  CC:28.60, le:2.07, Ae:0.072, Ve:0.15, Al:350.0 }, 
                     },
@@ -763,25 +763,78 @@
                 updateChart();
             }
 
+            // Limit how often we update the chart, as it is quite a slow operation. But updating the graphic
+            // is very fast. So we update that with every event, but set a short timer for when we stop moving
+            // the slider.
+            const emphasis_delay = 40;
+            
+            var conductor_diameter_timer_handler = 0;
             conductor_diameter_slider.oninput = function() {
                 recalculate();
-                updateChart();
+                if(conductor_diameter_timer_handler == 0) {
+                    conductor_diameter_timer_handler = setTimeout(function(){
+                        updateChart();
+                        conductor_diameter_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(conductor_diameter_timer_handler);
+                    conductor_diameter_timer_handler = setTimeout(function(){
+                        updateChart();
+                        conductor_diameter_timer_handler = 0;
+                    }, emphasis_delay);
+                }
             }
 
+            var loop_turns_timer_handler = 0;
             loop_turns_slider.oninput = function() {
                 recalculate();
-                updateChart();
+                if(loop_turns_timer_handler == 0) {
+                    loop_turns_timer_handler = setTimeout(function(){
+                        updateChart();
+                        loop_turns_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(loop_turns_timer_handler);
+                    loop_turns_timer_handler = setTimeout(function(){
+                        updateChart();
+                        loop_turns_timer_handler = 0;
+                    }, emphasis_delay);
+                }
             }
 
+            var frequency_timer_handler = 0;
             frequency_slider.oninput = function() {
                 updateFrequencies();
                 recalculate();
-                updateChart();
+                if(frequency_timer_handler == 0) {
+                    frequency_timer_handler = setTimeout(function(){
+                        updateChart();
+                        frequency_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(frequency_timer_handler);
+                    frequency_timer_handler = setTimeout(function(){
+                        updateChart();
+                        frequency_timer_handler = 0;
+                    }, emphasis_delay);
+                }
             }
 
+            var voltage_timer_handler = 0;
             voltage_slider.oninput = function() {
                 recalculate();
-                updateChart();
+                if(voltage_timer_handler == 0) {
+                    voltage_timer_handler = setTimeout(function(){
+                        updateChart();
+                        voltage_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(voltage_timer_handler);
+                    voltage_timer_handler = setTimeout(function(){
+                        updateChart();
+                        voltage_timer_handler = 0;
+                    }, emphasis_delay);
+                }
             }
 
             window.onresize = function() {
