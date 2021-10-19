@@ -439,7 +439,7 @@
                 frequencies = [];
                 //for(var i = 4.0; i <= 8.0; i+=0.01) {
                 var f = 1.0 * frequency_slider.value;
-                for(var i = 4.00+f; i <= 5.52+f; i+=0.02) {
+                for(var i = 4.00+f; i <= 5.52+f; i+=0.01) {
                     frequencies.push(10.0**i);
                 }
             }
@@ -881,7 +881,7 @@
                 fctx.lineWidth = 1.0;
                 for(let i = 0; i < Math.floor(turns/2); i++) {
                     x1 = (side_originX - wireRadius);
-                    y1 = originY + (innerRadius-wireRadius) * Math.cos(Math.PI*(i/Math.floor(turns/2)));
+                    y1 = originY + (innerRadius-wireRadius) * Math.sin((i/turns)* (2.0 * Math.PI) + 0.5*Math.PI + (1/turns) * Math.PI); 
                     x2 = (side_originX + width + wireRadius);
                     y2 = y1;
                     angle = 0.5 * Math.PI;
@@ -914,19 +914,6 @@
                 
                 // Now draw the rest of the wires:
                 for(let i = 0; i < (turns - 1); i++) {
-                    /*
-                    x1 = originX + (outerRadius + wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
-                    y1 = originY + (outerRadius + wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
-                    x2 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
-                    y2 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
-                    */
-                    /*
-                    x1 = front_originX + (outerRadius + wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
-                    y1 = originY + (outerRadius + wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta + Math.PI/(turns-1));
-                    x2 = front_originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
-                    y2 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1))* (2.0 * Math.PI - theta) + 0.5*Math.PI + 0.5 * theta);
-                    angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
-                    */
                     x1 = front_originX + (outerRadius + wireRadius) * Math.cos((i/turns)* (2.0 * Math.PI) + 0.5*Math.PI + (1/turns) * Math.PI + Math.PI/turns);
                     y1 =       originY + (outerRadius + wireRadius) * Math.sin((i/turns)* (2.0 * Math.PI) + 0.5*Math.PI + (1/turns) * Math.PI + Math.PI/turns);
                     x2 = front_originX + (innerRadius - wireRadius) * Math.cos((i/turns)* (2.0 * Math.PI) + 0.5*Math.PI + (1/turns) * Math.PI);
@@ -939,8 +926,6 @@
                     fctx.fillStyle = "black";
                     fctx.fill();
                 }
-                
-                
                 
                 // Draw the Dimensions:
                 fctx.beginPath();
