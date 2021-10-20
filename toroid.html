@@ -627,7 +627,8 @@
                     toroid.mu1_vs_f.push({x:freq, y:mu[0]});
                     toroid.mu2_vs_f.push({x:freq, y:mu[1]});
                     
-                    toroid.L_vs_f.push({x:freq, y:(Math.sqrt(mu[0]**2 + mu[1]**2) * 4.0 * Math.PI * toroid.N**2 * 1e-3 / toroid.core.CC)});
+                    //toroid.L_vs_f.push({x:freq, y:(Math.sqrt(mu[0]**2 + mu[1]**2) * 4.0 * Math.PI * toroid.N**2 * 1e-3 / toroid.core.CC)});
+                    toroid.L_vs_f.push({x:freq, y:(mu[0] * 4.0 * Math.PI * toroid.N**2 * 1e-3 / toroid.core.CC)});
                     
                     toroid.R_vs_f.push({x:freq, y:Z.real});
                     toroid.X_vs_f.push({x:freq, y:Z.imag});
