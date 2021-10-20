@@ -618,7 +618,10 @@
                 toroid.N = 1 + Math.floor(loop_turns_slider.value * toroid.N_max / 100);
                 toroid.L = (toroid.N**2) * toroid.core.Al * 1.0e-9;      // In Henries
                 toroid.B_peak = (toroid.Vrms * 1e8) / (4.44 * toroid.frequency_hz * toroid.N); // 
-                toroid.cond_length_meters = toroid.N * (2*toroid.core.C + toroid.core.A - toroid.core.B) * 1e-3;
+                
+                //toroid.cond_length_meters = toroid.N * (2*toroid.core.C + toroid.core.A - toroid.core.B) * 1e-3;
+                toroid.cond_length_meters = 2e-3 * Math.sqrt ( (Math.PI * 0.5 * (toroid.core.A + toroid.core.B))**2 + (toroid.N * (2*toroid.core.C + toroid.core.A - toroid.core.B))**2 ); 
+                
                 toroid.Rdc = 1.68e-8 * toroid.cond_length_meters / (Math.PI * ((toroid.cond_diameter_meters*0.5)**2.0));
                 
                 //const Cpmult = 12.9*()
