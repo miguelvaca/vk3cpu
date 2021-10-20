@@ -661,9 +661,9 @@
                     const ZZ = math.complex(Z.real, Z.imag);
                     const II = math.divide(toroid.Vrms, ZZ).toPolar();
                     
-                    toroid.i_vs_f.push({x:freq, y:(II.r*1e3)});
+                    toroid.i_vs_f.push({x:freq, y:(II.r*1e3)});  // in mA
                     //toroid.P_vs_f.push({x:freq, y:((toroid.Vrms**2 / Z.real)*1e3)});
-                    toroid.P_vs_f.push({x:freq, y:((Z.real * II.r**2)*1e3)});
+                    toroid.P_vs_f.push({x:freq, y:((Z.real * II.r**2)*1e3)});  // in mW
                     toroid.Z_vs_f.push({x:freq, y:(ZZ.toPolar().r)});
                     
                     const H = ((0.4 * Math.PI * toroid.N * 1.414 * II.r) / toroid.core.le);
@@ -1171,6 +1171,17 @@
                 fctx.fillText("[" + toroid.core.PN + "]", win_width-18, 144);
             }
             
+            function getMetricPrefix(num) {
+                if(num >= 1e9) return [num*1e-9, 'G'];
+                if(num >= 1e6) return [num*1e-6, 'M'];
+                if(num >= 1e3) return [num*1e-3, 'k'];
+                if(num < 1e-9) return [num*1e12, 'p'];
+                if(num < 1e-6) return [num*1e9, 'n'];
+                if(num < 1e-3) return [num*1e6, '\u03bc'];
+                if(num < 1.0) return [num*1e3, 'm'];
+                return [num, ''];
+            }
+            
             const chartCanvas = document.getElementById("chartCanvas");
             const chartCanvasContext = chartCanvas.getContext('2d');
             
@@ -1318,7 +1329,7 @@
                             display: 'auto',
                             title: {
                                 display: true,
-                                text: 'L(\u03bcH)',
+                                text: '\u03bcH',
                                 color: 'black',
                                 font: {
                                     weight : 'bold'
@@ -1453,18 +1464,36 @@
                                 label: function(context) {
                                     var label = context.dataset.label || '';
                                     if (label) {
-                                        label += ': ';
+                                        label += ' = ';
                                     }
-                                    if((label[0] == 'R') || (label[0] == 'X') || (label[1] == 'Z')) {
-                                        var num = context.element.parsed.y;
-                                        if(num >= 1e6) {
-                                            label += (num * 1e-6).toPrecision(3).toString() + ' M';
-                                        } else
-                                        if(num >= 1e3) {
-                                            label += (num * 1e-3).toPrecision(3).toString() + ' k';
-                                        } else {
-                                            label += context.element.parsed.y.toPrecision(3).toString();
-                                        }
+                                    if((label[0] == 'R') || (label[0] == 'X')) {
+                                        label = label[0] + ' = ';
+                                        var num = getMetricPrefix(context.element.parsed.y);
+                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + '\u03A9';
+                                    } else if(label[1] == 'Z') {
+                                        label = '|Z| = ';
+                                        var num = getMetricPrefix(context.element.parsed.y);
+                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + '\u03A9';
+                                    } else if(label[0] == 'L') {
+                                        label = 'L = ';
+                                        var num = getMetricPrefix(context.element.parsed.y * 1e-6);
+                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'H';
+                                    } else if(label[0] == 'I') {
+                                        label = 'I = ';
+                                        var num = getMetricPrefix(context.element.parsed.y * 1e-3);
+                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'A';
+                                    } else if(label[0] == 'B') {
+                                        label = 'B = ';
+                                        var num = getMetricPrefix(context.element.parsed.y);
+                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'G';
+                                    } else if(label[0] == 'H') {
+                                        label = 'H = ';
+                                        var num = getMetricPrefix(context.element.parsed.y);
+                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'Oe';
+                                    } else if(label[0] == 'P') {
+                                        label = 'Pd = ';
+                                        var num = getMetricPrefix(context.element.parsed.y * 1e-3);
+                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'W';
                                     } else {
                                         label += context.element.parsed.y.toPrecision(3).toString();
                                     }
