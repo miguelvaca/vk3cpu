@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="toroid.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.7<br></header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.8<br></header>
         <section class="gridLayoutClass">
             <div id="chart-container" class="chart-container">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -55,7 +55,7 @@
                 </div>
                 <div class="sliders">
                     <label for="voltage_slider">Vrms:</label>
-                    <input type="range" id="voltage_slider" min="1.0" max="200.0" value="10.0" step="0.2">
+                    <input type="range" id="voltage_slider" min="0.0" max="3.0" value="1.0" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="frequency_slider">f:</label>
@@ -611,7 +611,7 @@
                 toroid.core = cores[material].size[t_size];
                 toroid.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
                 toroid.frequency_hz = 10.0**frequency_slider.value;
-                toroid.Vrms = 1.0 * voltage_slider.value;
+                toroid.Vrms = 10.0 ** voltage_slider.value;
 
                 // Frequency independent characteristics:
                 toroid.N_max = Math.PI / (Math.atan2(0.5e3 * toroid.cond_diameter_meters, (0.5 * toroid.core.B - 0.5e3 * toroid.cond_diameter_meters)));
@@ -1138,7 +1138,7 @@
                 const L = toroid.L * 1.0e+6;
                 fctx.fillText("L\u1d62 = " + L.toFixed(0).toString() + " \u03bcH", 8, 18);
                 fctx.fillText("Rdc = " + toroid.Rdc.toFixed(3) + " \u03A9", 8, 32);
-                fctx.fillText("Vrms = " + toroid.Vrms.toFixed(1) + " V", 8, 46);
+                fctx.fillText("Vrms = " + toroid.Vrms.toFixed(2) + " V", 8, 46);
                 
                 fctx.fillStyle = "lightgrey";
                 fctx.fillText("Ceff = " + (toroid.C*1e12).toFixed(1) + " pF", 8, win_height - 28);
