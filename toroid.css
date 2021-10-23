@@ -22,8 +22,11 @@ canvas.inductorClass {
 }
 
 section div.slider_container {
+    /*
     width: 100%;
     height: 100%;
+    */
+    height: 140px;
     background: rgb(255, 255, 255);
     border: 1px solid rgb(0, 0, 0);
     margin: 0px;
@@ -56,6 +59,12 @@ section div.inductor-container {
     background: white;
     border: 1px solid rgb(0, 0, 0);
     position: relative;
+}
+    
+section div.notes {
+    background: lightgray;
+    min-height: fit-content; 
+    width: 100%;
 }
 
 section div.sliders {
@@ -107,7 +116,7 @@ div input {
     }
     
     section div.slider_container {
-        height: 20vh;
+        /*height: 20vh;*/
         width: 100%;
     }
 }
@@ -116,11 +125,12 @@ div input {
     section.gridLayoutClass {
         display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: 1fr 0.3fr;
+        grid-template-rows: 1fr 0.3fr 0.3fr 2fr;
         grid-template-areas: 
         "chart-container"
         "inductor-container" 
-        "slider-container";
+        "slider-container" 
+        "notes";
         justify-items: stretch;
     }
 
@@ -137,6 +147,11 @@ div input {
     }
     
     section div.slider_container {
+        min-height: fit-content; 
+        width: 100%;
+    }
+    
+    section div.notes {
         width: 100%;
     }
 }
@@ -145,11 +160,12 @@ div input {
     section.gridLayoutClass {
         display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: 1fr 0.3fr;
+        grid-template-rows: 1fr 0.3fr 0.2fr 5fr;
         grid-template-areas: 
         "chart-container"
         "inductor-container" 
-        "slider-container";
+        "slider-container" 
+        "notes";
         justify-items: stretch;
     }
 
@@ -167,7 +183,7 @@ div input {
     
     section div.slider_container {
         width: 100%;
-        height: 10vh;
+        /*height: 10vh;*/
     }
 }
 
