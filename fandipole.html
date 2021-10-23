@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>VK3CPU Fan-Dipole Antenna Calculator</title>
+        <link rel="stylesheet" href="fandipole.css">
+    </head>
+    <body>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.1</header>
+        <section class="gridLayoutClass">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="chartCanvas" class="chartCanvasClass">
+                    2D Chart Canvas
+                </canvas>
+            </div>
+            <div class="slider_container">
+                <div class="sliders">
+                    <label for="conductor_diameter_slider">&#8960a:</label>
+                    <input type="range" id="conductor_diameter_slider" min="0" max="40" value="20" step="1">
+                </div>
+                <div class="sliders">
+                    <label for="length1_slider">l1:</label>
+                    <input type="range" id="length1_slider" min="0.9" max="1.1" value="1.0" step="0.01">
+                </div>
+                <div class="sliders">
+                    <label for="length2_slider">l2:</label>
+                    <input type="range" id="length2_slider" min="0.9" max="1.1" value="1.0" step="0.01">
+                </div>
+                <div class="sliders">
+                    <label for="length3_slider">l3:</label>
+                    <input type="range" id="length3_slider" min="0.9" max="1.1" value="1.0" step="0.01">
+                </div>
+                <div class="radios">
+                    <label>40</label>
+                    <input type="checkbox" name="band_checkbox" onclick="return ValidateBandSelection();" id="40m" value="1"/>
+                    <label>30</label>
+                    <input type="checkbox" name="band_checkbox" onclick="return ValidateBandSelection();" id="30m" value="1"/>
+                    <label>20</label>
+                    <input type="checkbox" name="band_checkbox" onclick="return ValidateBandSelection();" id="20m" value="1" checked/>
+                    <label>18</label>
+                    <input type="checkbox" name="band_checkbox" onclick="return ValidateBandSelection();" id="18m" value="1" checked/>
+                    <label>15</label>
+                    <input type="checkbox" name="band_checkbox" onclick="return ValidateBandSelection();" id="15m" value="1" checked/>
+                    <label>12</label>
+                    <input type="checkbox" name="band_checkbox" onclick="return ValidateBandSelection();" id="12m" value="1"/>
+                    <label>10</label>
+                    <input type="checkbox" name="band_checkbox" onclick="return ValidateBandSelection();" id="10m" value="1"/>
+                </div>
+            </div>
+            <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
+                <canvas id="antennaFront2D" class="antennaFrontClass" width="312" height="150">
+                </canvas>    
+            </div>
+            <!--div id="antenna-side-container" class="antennaSide-container" style="position: relative;">
+                <canvas id="antennaSide2D" class="antennaSideClass" width="150" height="150">
+                </canvas>
+            </div-->
+            <div class="notes">
+            <p style="text-align:center"><b><u><a href="./magloop_equations.html"> EQUATIONS USED </a></u></b></p>
+            <b><u>Notes:</u></b><br>
+            The Magloop Antenna Calculator was developed to predict the characteristics of a small-loop (aka "magnetic loop" or "magloop")
+            antenna, given physical dimensions entered via slider widgets. <br>
+            It supports:
+            <ul>
+                <li>circular, octagonal, hexagonal and square-shaped loops</li>
+                <li>main loops made from either hollow round anodised-copper or aluminium conductors</li>
+                <li>metric and imperial units</li>
+                <li>magloops with 1-to-8 turns</li>
+            </ul>
+            I developed this multi-turn capable magloop calculator to take advantage of the 
+            touch-screens and high-speed of modern mobile phones, to allow users to get realtime feedback of the predicted
+            behaviour of a magloop antenna. <br>-- 73 de VK3CPU<br><br>
+            <u><b>Inputs via the slider and radio widgets:</b></u>
+            <ul> 
+                <li>&#8960a : Conductor diameter in millimeters (mm) or inches ("). (Measured between opposing conductor outer surfaces.)</li>
+                <li>&#8960b : Loop diameter in meters (m) or feet ('). (Measured between the conductor centers.)</li>
+                <li>N : Number of turns or loops.</li>
+                <li>c/a : is the spacing ratio; based on 'c' being the inter-winding spacing for multi-turn loops measured between conductor centers, and 'a' is the conductor diameter. (Must be >= 1.1) 
+                    A low-value will increase the resistance due to the proximity effect. (Ignore for single-turn loops.)</li>
+                <li>Tx : The transmit power in Watts. This affects the predicted voltage across the capacitor (Vcap), and the RMS loop current (Ia).</li>
+                <li>Re : Additional resistance due to external losses, due mainly from capacitor contact resistance and proximity-to-ground effects. 
+                Use Re=0.0 to assume the loop is in free-space with no capacitor losses (i.e. ideal conditions, with loop-related losses only).
+                Adding Re will reduce antenna efficiency, Q, Vcap and Ia, while increasing antenna BW. 
+                According to [1] and [2], a 1 m diameter loop of 22 mm copper tubing at a height of 1.5 m above the ground operating at 7 MHz had a calculated capacitor contact resistance of ~190 m&#937; 
+                and an additional ground proximity loss resistance of ~30 m&#937;. Note that true ground losses are dependent on both frequency and height-above-ground.</li>
+                <li>Metric or Imperial : selects the measuring system.</li>
+                <li>Cu or Al : selects the type of metal conductor (annealed copper or aluminum).</li>
+                <li>Circ, Oct, Hex or Sqr : selects the shape of the magloop.</li>
+            </ul>
+            <u><b>Calculated parameters:</b></u>
+            <ul>
+                <li>L : Inductance in microhenries.</li>
+                <li>A : Loop area in square meters or square feet.</li>
+                <li>C : Effective capacitance of the loop in picofarads.</li>
+                <li>peri : Perimeter of the main loop in meters or feet.</li>
+                <li>c : Distance between windings, measured from the conductor centers in mm or inches.</li>
+                <li>cond : Total required conductor length in meters or feet.</li>
+                <li>Tuning Cap (pF): The capacitance required to bring the loop into resonance at the given frequency. Value in picofarads.</li>
+                <li>Vcap (kV): The predicted voltage across the capacitance given the desired transmit power.</li>
+                <li>BW (kHz): The predicted 3dB bandwidth of the magloop antenna. </li>
+                <li>Efficiency (%): The percentage of input energy that is actually radiated and not lost as heat.</li>
+                <li>R-radiation (&#937): The calculated radiation resistance of the loop in ohms.</li>
+                <li>R-loop (&#937): The calculated resistance of the loop in ohms, due to the combination of material conductance, conductor length, skin-effect and proximity effects.</li>
+                <li>Reactance (j&#937): The inductive reactance of the loop in ohms.</li>
+                <li>Q : The antenna Q (quality) factor.</li>
+                <li>Ia (A): The RMS loop current in amps.</li>
+                <li>Perimeter (&#955): Antenna perimeter size relative to the wavelength.</li>
+            </ul>
+            <u><b>Usage hints:</b></u>
+                <li>Tap on legend items to disable or enable an output parameter. This can be used to declutter the chart.</li>
+                <li>Tap on a chart 'dot' to display a tooltip containing calculated output parameters for that frequency or band.</li>
+            <br>
+            <b><u>References:</u></b><br>
+            [1]: B. Austin, A. Boswell and M. Perks, <b>"Loss Mechanisms in the Electrically Small Loop Antenna"</b> <i>, IEEE Antennas and Propagation Magazine, 56, 4, August 2014, pp. 143.</i> <br>
+            [2]: A. Boswell, A. J. Tyler and A. White, <b>"Performance of a Small Loop Antenna in the 3 - 10 MHz Band"</b> <i>, IEEE Antennas and Propagation Magazine, 47, 2, April 2005, pp. 5 1 -56.</i> <br>
+            <br>
+            <b><u>Change history:</u></b><br>
+            <b>[28-Sep-21]</b> <br>
+            * Commenced development.<br>
+            <br>
+            </div>
+        </section>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.1.2"></script>
+        <!--script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.5.0/math.js"></script-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
+        <script>
+            // GUI control widgets:
+            var conductor_diameter_slider = document.getElementById("conductor_diameter_slider");
+            var length1_slider = document.getElementById("length1_slider");
+            var length2_slider = document.getElementById("length2_slider");
+            var length3_slider = document.getElementById("length3_slider");
+            
+            var m40_radio = document.getElementById("40m");
+            var m30_radio = document.getElementById("30m");
+            var m20_radio = document.getElementById("20m");
+            var m10_radio = document.getElementById("10m");
+            
+            // Global variables:
+            var global = {
+                conductor_diameter_meters : 0.0,
+                conductor_radius_meters : 0.0,
+                
+            };
+            
+            function setGlobals() {
+                global.conductor_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
+                global.conductor_radius_meters = 0.5 * global.conductor_diameter_meters;
+            }
+            
+            //var units = "metric";
+            //var conductivity = 58e6;            // Default is annealed copper
+            //var shape = "circle";               // Shape of the main loop
+            
+            //var inductance = 0.0;
+            //var area = 0.0;                     // Loop area in square meters. 
+            //var perimeter = 0.0;                // Perimeter of a single turn of the main loop
+            //var loop_capacitance = 0.0;         // Effective capacitance of a single or multi-turn loop
+            //var srf = 0.0;                      // Self-resonant frequency SRF
+            //var conductor_length = 0.0;         // Total conductor length
+            //var R_ext = 0.0;                    // External losses due to capacitor resistance and ground effects, in ohms
+            //var metal = "Cu";                   // Default metal is copper
+            
+            function awgToMm(awg) {
+                //
+                switch (awg) {
+                    case 40: return 0.0799;
+                    case 39: return 0.0897;
+                    case 38: return 0.101;
+                    case 37: return 0.113;
+                    case 36: return 0.127;
+                    case 35: return 0.143;
+                    case 34: return 0.160;
+                    case 33: return 0.180;
+                    case 32: return 0.202;
+                    case 31: return 0.227;
+                    case 30: return 0.255;
+                    case 29: return 0.286;
+                    case 28: return 0.321;
+                    case 27: return 0.361;
+                    case 26: return 0.405;
+                    case 25: return 0.455;
+                    case 24: return 0.511;
+                    case 23: return 0.573;
+                    case 22: return 0.644;
+                    case 21: return 0.723;
+                    case 20: return 0.812;
+                    case 19: return 0.912;
+                    case 18: return 1.024;
+                    case 17: return 1.150;
+                    case 16: return 1.291;
+                    case 15: return 1.450;
+                    case 14: return 1.628;
+                    case 13: return 1.828;
+                    case 12: return 2.053;
+                    case 11: return 2.305;
+                    case 10: return 2.588;
+                    case  9: return 2.906;
+                    case  8: return 3.264;
+                    case  7: return 3.665;
+                    case  6: return 4.115;
+                    case  5: return 4.621;
+                    case  4: return 5.189;
+                    case  3: return 5.827;
+                    case  2: return 6.544;
+                    case  1: return 7.348; 
+                    case  0: return 8.251; 
+                    default: return 0.0;
+                }
+            }
+            
+            var frequencies = [];
+
+            function updateFrequencies() {
+                const hamFrequencies = [
+                    1.8, 3.5, 5.3, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7
+                ];
+                
+                frequencies = [];
+                hamFrequencies.forEach(freq => {
+                    for(var i=0; i<10; i++) {
+                        frequencies.push(1.0e6 * freq + i * 1.0e3);
+                    }
+                });
+            }
+            
+            var wavelengths = [];
+            function updateWavelength() {
+                wavelengths = [];
+                for(var i=1; i<=60; i++) {
+                    wavelengths.push(0.025*i);
+                }
+            }
+            
+            function Cin(x) {
+                var retval = 0.0;
+                for(var k=1; k<40; k++) {
+                    var k2 = 2*k;
+                    var delta = (x**k2)/(math.factorial(k2)*(k2));
+                    if(k & 1) {
+                        retval += delta;
+                    } else {
+                        retval -= delta;
+                    }
+                    if(delta < 1e-6) {break;}
+                }
+                //console.log("Cin(" + x + ") =", k, retval);
+                return retval;
+            }            
+            
+            function Ci(x) {
+                var retval = 0.577175 + Math.log(x) - Cin(x);
+                //console.log("Ci(" + x + ") =", retval);
+                return retval;
+            }
+            
+            function Si(x) {
+                var retval = x;
+                for(var k=1; k<40; k++) {
+                    var k2 = 2*k+1;
+                    var delta = (x**k2)/(math.factorial(k2)*(k2));
+                    if(k & 1) {
+                        retval -= delta;
+                    } else {
+                        retval += delta;
+                    }
+                    if(delta < 1e-6) {break;}
+                }
+                //console.log("Si(" + x + ") =", k, retval);
+                return retval;
+            } 
+            
+            function Rrad(k, l) {
+                const neta = 120.0 * Math.PI;
+                const C = 0.5772;               // Euler's constant
+                const kl = k*l;
+                var retval = 60.0 * (C + Math.log(kl) - Ci(kl) + 0.5*Math.sin(kl) * (Si(2.0*kl) - 2.0*Si(kl)) + 0.5*Math.cos(kl)*(C + Math.log(kl*0.5) + Ci(2.0*kl) - 2.0*Ci(kl)));
+                return retval;
+            }
+            
+            function calculateRrad() {
+                var retval = [];
+                wavelengths.forEach(wl => {
+                    var k = 2.0 * Math.PI;
+                    const rr = Rrad(k, wl);
+                    retval.push({x:wl, y:rr});
+                });
+                return retval;
+            }
+            
+            function Rin(k, l) {
+                var retval = Rrad(k, l) / (Math.sin(0.5*k*l)**2);
+                return retval;
+            }
+            
+            function calculateRin() {
+                var retval = [];
+                wavelengths.forEach(wl => {
+                    var k = 2.0 * Math.PI;
+                    const rr = Rin(k, wl);
+                    retval.push({x:wl, y:rr});
+                });
+                return retval;
+            }
+            
+            function vswr(frequency) {
+                // 
+                return 3.0*Math.sin(frequency) + 4.0;
+            }
+            
+            function calculateVSWR() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const bw = vswr(freq * 1e6);
+                    retval.push({x:freq, y:bw});
+                });
+                return retval;
+            }
+
+            function s11(frequency) {
+                // 
+                return 3.0*Math.cos(frequency) + 4.0;
+            }
+            
+            function calculateS11() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const bw = s11(freq * 1e6);
+                    retval.push({x:freq, y:bw});
+                });
+                return retval;
+            }
+
+            function Xm(k, l) {
+                //const neta = 120.0 * Math.PI;
+                const C = 0.5772;               // Euler's constant
+                const kl = k*l;
+                const a2_l = global.conductor_radius_meters ** 2;
+                var retval = 30.0 * (2*Si(kl) + Math.cos(kl) * (2*Si(kl)-Si(2*kl)) - Math.sin(kl) * (2*Ci(kl) - Ci(2*kl) - Ci(2*k*a2_l)));
+                return retval;
+            }
+            
+            function calculateXm() {
+                var retval = [];
+                wavelengths.forEach(wl => {
+                    var k = 2.0 * Math.PI;
+                    const xm = Xm(k, wl);
+                    retval.push({x:wl, y:xm});
+                });
+                return retval;
+            }
+            
+            function Xin(k, l) {
+                const kl = k*l;
+                var retval = Xm(k,l) / (Math.sin(kl * 0.5)**2);
+                return retval;
+            }
+            
+            function calculateXin() {
+                var retval = [];
+                wavelengths.forEach(wl => {
+                    var k = 2.0 * Math.PI;
+                    const xin = Xin(k, wl);
+                    retval.push({x:wl, y:xin});
+                });
+                return retval;
+            }
+            
+            function ValidateBandSelection() {
+            }
+            
+            // Specify fonts for changing parameters controlled by the sliders:
+            const normal_font = "12px arial";
+            const emphasis_font = "bold 14px arial";
+            const emphasis_delay = 1200;
+            
+            const normal_width = 1;
+            const emphasis_width = 3;
+            
+            var cond_dia_timer_handler = 0;
+            var cond_dia_font = normal_font;
+            var cond_dia_thickness = normal_width;
+            
+            conductor_diameter_slider.oninput = function() {
+                if(cond_dia_timer_handler == 0) {
+                    cond_dia_font = emphasis_font;
+                    cond_dia_thickness = emphasis_width;
+                    cond_dia_timer_handler = setTimeout(function(){
+                        cond_dia_font = normal_font;
+                        drawFrontDesign();
+                        cond_dia_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(cond_dia_timer_handler);
+                    cond_dia_timer_handler = setTimeout(function(){
+                        cond_dia_font = normal_font;
+                        cond_dia_thickness = normal_width;
+                        drawFrontDesign();
+                        cond_dia_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                
+                setGlobals();
+                drawFrontDesign();
+                myChart.data.datasets[0].data = calculateRrad();
+                myChart.data.datasets[1].data = calculateRin();
+                myChart.data.datasets[2].data = calculateXm();
+                myChart.data.datasets[3].data = calculateXin();
+                //myChart.data.datasets[0].data = calculateVSWR();
+                //myChart.data.datasets[1].data = calculateS11();
+                myChart.update();
+            }
+
+            var length1_timer_handler = 0;
+            var length1_font = normal_font;
+            
+            length1_slider.oninput = function() {
+                if(length1_timer_handler == 0) {
+                    length1_font = emphasis_font;
+                    length1_timer_handler = setTimeout(function(){
+                        length1_font = normal_font;
+                        drawSideDesign();
+                        length1_timer_handler = 0;
+                    }, emphasis_delay);
+                } else {
+                    clearTimeout(length1_timer_handler);
+                    length1_timer_handler = setTimeout(function(){
+                        length1_font = normal_font;
+                        drawSideDesign();
+                        length1_timer_handler = 0;
+                    }, emphasis_delay);
+                }
+                
+                setGlobals();
+                drawFrontDesign();
+                myChart.data.datasets[0].data = calculateRrad();
+                myChart.data.datasets[1].data = calculateRin();
+                myChart.data.datasets[2].data = calculateXm();
+                myChart.update();
+            }
+
+            length2_slider.oninput = function() {
+            }
+
+            length3_slider.oninput = function() {
+            }
+
+            window.onresize = function() {
+                myChart.resize();
+                //myChart.update();
+                drawFrontDesign();
+                //drawSideDesign();
+                // console.log("resize!");
+            }
+
+            window.onorientationchange = function() {
+                //myChart.resize();
+                //myChart.update();
+                drawFrontDesign();
+                //drawSideDesign();
+            }
+
+            window.onbeforeprint = function() {
+                console.log("onbeforeprint");
+                //myChart.resize();
+                drawFrontDesign();
+                //drawSideDesign();
+            }
+
+            const afront_canvas = document.getElementById("antennaFront2D");
+            const fctx = afront_canvas.getContext('2d');
+
+            function drawFrontDesign() {
+                const win_width  = document.getElementById("antenna-front-container").offsetWidth; 
+                const win_height = document.getElementById("antenna-front-container").offsetHeight; 
+                afront_canvas.width = win_width-2; 
+                afront_canvas.height = win_height-2; 
+
+                fctx.clearRect(0, 0, win_width, win_height);
+                const loop_radius = win_width < win_height ? 0.32 * win_width : 0.32 * win_height; 
+                const cond_radius = conductor_diameter_slider.value / 12;
+                const loopx = win_width/2; 
+                const loopy = win_height/2;
+                
+                fctx.textAlign = "center";
+                //fctx.font = "14px courier";
+                fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, loopy + 3);
+                
+                //fctx.fillText("c/a = ", 8, win_height * 0.1 + 18);
+                //fctx.fillText((loop_spacing_slider.value*1.0).toPrecision(3).toString(), 8, win_height * 0.1 + 33);
+                // *****
+            }
+            
+            // Set the global variables, which are all determined by physical dimensions, and are thus frequency-independent:
+            setGlobals();
+            // Update the frequencies, now that we have the sliders available:
+            //updateFrequencies();
+            updateWavelength();
+            
+            drawFrontDesign();
+            
+            
+            const chartCanvas = document.getElementById("chartCanvas");
+            const chartCanvasContext = chartCanvas.getContext('2d');
+
+            var myChart = new Chart(chartCanvasContext, {
+                type: 'line',
+                data: {
+                    datasets: [
+                    {
+                        label: 'Rrad', //'VSWR',
+                        fill: false,
+                        borderColor: 'green',
+                        borderDash: [5, 5],
+                        backgroundColor: 'green',
+                        data: calculateRrad(), //calculateVSWR(),
+                        borderWidth: 1,
+                        yAxisID: 'vswrID'
+                    },
+                    {
+                        label: 'Rin', //'S11',
+                        fill: false,
+                        borderColor: 'purple',
+                        backgroundColor: 'purple',
+                        data: calculateRin(), //calculateS11(),
+                        borderWidth: 1,
+                        yAxisID: 's11ID'
+                    },
+                    {
+                        label: 'Xm', //'S11',
+                        fill: false,
+                        borderColor: 'orange',
+                        backgroundColor: 'orange',
+                        data: calculateXm(), //calculateS11(),
+                        borderWidth: 1,
+                        yAxisID: 'xmID'
+                    },
+                    {
+                        label: 'Xin', //'S11',
+                        fill: false,
+                        borderColor: 'blue',
+                        backgroundColor: 'blue',
+                        borderDash: [5, 5],
+                        data: calculateXin(), //calculateS11(),
+                        borderWidth: 1,
+                        yAxisID: 'xinID'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            type: 'linear',
+                            position: 'bottom',
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Dipole length', //'Frequency (MHz)'
+                            }
+                        }],
+                        yAxes: [{
+                            type: 'linear',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'VSWR',
+                                fontColor: 'green',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                max: 1000.0,
+                                min: 0.0,
+                            },
+                            position: 'left',
+                            id: 'vswrID'
+                        },{
+                            type: 'linear', //'logarithmic',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'S11',
+                                fontColor: 'purple',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                min: 0.0,
+                                max: 1000.0,
+                            },
+                            position: 'left',
+                            id: 's11ID'
+                        },{
+                            type: 'linear', //'logarithmic',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Xm',
+                                fontColor: 'orange',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                min: -3000.0,
+                                max: 3000.0,
+                            },
+                            position: 'right',
+                            id: 'xmID'
+                        },{
+                            type: 'linear', //'logarithmic',
+                            display: 'auto',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Xin',
+                                fontColor: 'blue',
+                                fontStyle: 'bold'
+                            },
+                            ticks: {
+                                //min: -3000.0,
+                                //max: 3000.0,
+                            },
+                            position: 'right',
+                            id: 'xinID'
+                        }]
+                    },
+                    showLines: true,
+                    tooltips: {
+                        mode: 'interpolate',
+                        intersect: false,
+                        position: 'nearest',
+                        callbacks: {
+                            title: function(tooltipItem, data) {
+                                var lut = {0.1365:'2200', 0.475:'600', 1.8:'160', 3.5:'80', 5.3:'60', 7.0:'40', 10.1:'30', 14.0:'20', 18.068:'18', 21.0:'15', 24.89:'12', 28.0:'10', 29.7:'10', 35.0:'', 40.0:'', 45.0:'', 50.0:'6', 52.0:'6', 54.0:'6'};
+                                var label = '' + tooltipItem[0].xLabel.toPrecision(3).toString() + ' MHz';
+                                if(lut[tooltipItem[0].xLabel]) {
+                                    label += ' (';
+                                    label += lut[tooltipItem[0].xLabel] + ' m)';
+                                }
+                                return label;
+                            },
+                            label: function(tooltipItem, data) {
+                                var label = data.datasets[tooltipItem.datasetIndex].label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if(data.datasets[tooltipItem.datasetIndex].label == "Tuning Cap (pF)" || data.datasets[tooltipItem.datasetIndex].label == "Q") {
+                                    label += Math.round(tooltipItem.yLabel);
+                                } else {
+                                    label += tooltipItem.yLabel.toFixed(3).toString();
+                                    //label += Math.round(tooltipItem.yLabel * 1000) / 1000;
+                                }
+                                return label;
+                            }
+                        }
+                    } ,
+                    plugins: {
+                        crosshair: {
+                            line: {
+                                color: 'grey',   // crosshair line color
+                                width: 1,       // crosshair line width
+                                dashPattern: [100, 100]
+                            },
+                            sync: {
+                                enabled: false,            // enable trace line syncing with other charts
+                                group: 1,                 // chart group
+                                suppressTooltips: true   // suppress tooltips when showing a synced tracer
+                            },
+                            zoom: {
+                                enabled: true,                                      // enable zooming
+                                zoomboxBackgroundColor: 'rgba(66,133,244,0.2)',     // background color of zoom box 
+                                zoomboxBorderColor: '#48F',                         // border color of zoom box
+                                zoomButtonText: 'Reset Zoom',                       // reset zoom button text
+                                zoomButtonClass: 'reset-zoom',                      // reset zoom button class
+                            },
+                            callbacks: {
+                                beforeZoom: function(start, end) {                  // called before zoom, return false to prevent zoom
+                                    return false;                                   // return true to enable zooming
+                                },
+                                afterZoom: function(start, end) {                   // called after zoom
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

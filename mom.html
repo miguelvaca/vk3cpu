@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <meta charset="utf-8">
+        <title>Method of Moments development environment</title>
+        <link rel="stylesheet" href="mom.css">
+        <style>
+            canvas { display: block; }
+
+            @media (orientation: portrait) {
+                body {
+                    background-color: red;
+                }
+            }
+
+            @media (orientation: landscape) {
+                body {
+                    background-color: blue;
+                }
+            }
+        </style>
+    </header>
+    <body>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Wire Antenna Calculator</header>
+
+        <section class="gridLayoutClass">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="chartCanvas" class="chartCanvasClass">
+                    2D Chart Canvas
+                </canvas>
+            </div>
+        </section>
+
+        <!-- math.js library scripts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
+
+        <!-- Chart.js library scripts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.1.2"></script>
+
+        <!-- Three.js library scripts -->
+        <script src="https://threejs.org/build/three.js"></script>
+        <script src="https://threejs.org/examples/js/libs/dat.gui.min.js"></script>
+        <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+
+        <!-- Local scripts -->
+        <script>
+        // Javascript in here:
+
+        /* First MoM-Electromagnetics related code: */
+        
+        // Solve for the electric field at point m from point n:
+        // n = {i, x, y, z, length}; m = {i, x, y, z}
+        // i is the index of the segment
+        /*
+        function psi(n, m) {
+            var retval = 0.0;
+            const Rmn = Math.sqrt((m.x-n.x)**2 + (m.y-n.y)**2 + (m.z-n.z)**2);
+            const alpha = 0.5 * n.length;
+            const zeta = ;
+            const rho = ;
+            retval = (1.0 / (8.0 * Math.PI * alpha)) * Math.log((zeta + alpha + Math.sqrt(rho**2 + (zeta+alpha)**2)) / (zeta - alpha + Math.sqrt(rho**2 + (zeta - alpha)**2)));
+            return retval;
+        }
+        */
+/*
+        function createWire(length, wire_radius, segments) {
+            // dimensions in lambda
+            var wire = [];
+            const seg_len = length / segments;
+            const offset = 0.5 * length;
+            for (let i = 0; i < segments; i++) {
+                var segment = {}
+                segment.radius = wire_radius;
+                segment.minus = {
+                    x: i * seg_len - offset,
+                    y: 0.0,
+                    z: 0.0
+                };
+                segment.plus = {
+                    x: (i+1) * seg_len - offset,
+                    y: 0.0,
+                    z: 0.0
+                }
+                segment.x = (segment.minus.x + segment.plus.x) * 0.5;
+                segment.y = 0.0;
+                segment.z = 0.0;
+                // vectors:
+                segment.vec = [
+                    (segment.plus.x - segment.minus.x),
+                    (segment.plus.y - segment.minus.y),
+                    (segment.plus.z - segment.minus.z)
+                ]
+                segment.length = seg_len; // Prepare to make this Pythagorean in the future if this function changes
+                wire.push(segment);
+            }
+            return wire;
+        }
+*/
+        function createWire(length, wire_radius, segments) {
+            // dimensions in lambda
+            var wire = {};
+            wire.length = length;
+            wire.seg_len = length / segments;
+            wire.radius = wire_radius;
+            const offset = 0.5 * length;
+            wire.points = [];
+            wire.points.push([0.0, 0.0, -offset]);
+            for (let i = 0; i < segments; i++) {
+                wire.points.push([0.0, 0.0, i * wire.seg_len + 0.5 * wire.seg_len - offset]);
+                wire.points.push([0.0, 0.0, (i+1) * wire.seg_len - offset]);
+            }
+            return wire;
+        }
+/*
+        // m,n = {  x:0.0, y:0.0, z:0.0,
+        //          xm:0.0, ym:0.0, zm:0.0, xp:0.0, yp:0.0, zp:0.0,
+        //          l:sqrt((zp-zm)**2 + (yp-ym)**2 + (xp-xm)**2), radius:0.0}
+        function psi(atMseg, n, m) {
+            var retval = 0.0;
+            const Rmn = Math.sqrt((m.x-n.x)**2 + (m.y-n.y)**2 + (m.z-n.z)**2);
+            const alpha = 0.5 * atMseg.length;
+            const k = 2.0 * Math.PI; // Normalised wavelength is equal to 1.0 - otherwise 2*pi/wavelength
+            const fourPI = 4.0 * Math.PI;
+            // From MININEC thesis (3-36) and (3-37):
+            if(m==n) {
+                console.log("m==n");
+                retval = math.complex((0.5*Math.PI*atMseg.length) * Math.log(atMseg.length / atMseg.radius), -(k/fourPI));
+            } else {
+                console.log("m!=n");
+                retval = math.multiply(math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn)), (1/(fourPI*Rmn)));
+            }
+            return retval;
+        }
+*/
+        function psi(wire, n, m) {
+            var retval = 0.0;
+            const k = 2.0 * Math.PI; // Normalised wavelength is equal to 1.0 - otherwise 2*pi/wavelength
+            const fourPI = 4.0 * Math.PI;
+            var Rmn = 0.0;
+            // From MININEC thesis (3-36) and (3-37):
+            if(m==n) {
+                retval = math.complex((1.0/(2.0*Math.PI*wire.seg_len)) * Math.log(wire.seg_len / wire.radius), (-k/fourPI));
+            } else {
+                Rmn = Math.sqrt((wire.points[m][0] - wire.points[n][0])**2 + (wire.points[m][1] - wire.points[n][1])**2 + (wire.points[m][2] - wire.points[n][2])**2);
+                retval = math.multiply(math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn)), (1/(fourPI*Rmn)));
+            }
+            //console.log(n, m, retval);
+            return retval;
+        }
+
+        function psi_old(wire, n, m) {
+            var retval = 0.0;
+            const k = 2.0 * Math.PI; // Normalised wavelength is equal to 1.0 - otherwise 2*pi/wavelength
+            const fourPI = 4.0 * Math.PI;
+            var Rmn = 0.0;
+            // From MININEC thesis (3-36) and (3-37):
+            if(m==n) {
+                Rmn = Math.sqrt(wire.radius**2 + (wire.seg_len*0.5)**2);
+            } else {
+                Rmn = Math.sqrt((wire.points[m][0] - wire.points[n][0])**2 + (wire.points[m][1] - wire.points[n][1])**2 + (wire.points[m][2] - wire.points[n][2])**2);
+            }
+            retval = math.multiply(math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn)), (1/(fourPI*Rmn)));
+            //console.log(n, m, retval);
+            return retval;
+        }
+
+        // Use Harrington's equations (129) and (135):
+        function psi2(wire, n, m) {
+            var retval = 0.0;
+            var Rmn = 0.0;
+            // Calculate the range from the source point (n) to the observation point (m) depending whether it is the same segment or not:
+            if(m==n) {
+                Rmn = Math.sqrt(wire.radius**2 + (wire.seg_len*0.5)**2);
+            } else {
+                Rmn = Math.sqrt((wire.points[m][0] - wire.points[n][0])**2 + (wire.points[m][1] - wire.points[n][1])**2 + (wire.points[m][2] - wire.points[n][2])**2);
+            }
+            // Now if r<10a, use 129. If r>=10a, use 135:
+            const alpha = wire.seg_len*0.5;
+            const zeta = wire.points[m][2] - wire.points[n][2]; // This is z at m when n is set as the coordinate space origin. So need to transform coord-space to make it N-centric first! Uugh!
+            // zeta is the projection of m onto the n segment, if the n-segment were centered at the origin along the z-direction.
+            const mn = math.subtract(wire.points[m], wire.points[n-1])
+            //var zeta = math.dot(wire.points[m], wire.points[n]);
+            //zeta = zeta / ()
+            const rho = 0;
+            if(Rmn < (10.0 * alpha)) {
+                // Eq 129:
+                var t1 = math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn));
+                t1 = math.multiply((1.0/(8.0*Math.PI*alpha)), t1);
+                const i1 = Math.log((zeta + alpha + Math.sqrt(rho**2 + (zeta + alpha)**2)) / (zeta - alpha + Math.sqrt(rho**2 + (zeta - alpha)**2)));
+                const i2 = 2 * alpha;
+                const i3 = (0.5 * (alpha + zeta)) * Math.sqrt(rho**2 + (alpha + zeta)**2) + (0.5 * (alpha - zeta)) * Math.sqrt(rho**2 + (zeta - alpha)**2) + (0.5 * rho**2 * i1);
+                const i4 = (2*alpha*rho**2) + (0.333333 * (2*alpha**3 + 6*alpha*zeta**2));
+                const re = i1 - 0.5*k**2 * (i3 - 2*Rmn*i2 + Rmn**2*i1);
+                const im = -k*(i2 - Rmn*i1) + (1.0/6)*k**3*(i4 - 3*Rmn*i3 + 3*Rmn**2*i2 - Rmn**3*i1);
+                retval = math.complex(math.multiply(t1, re), math.multiply(t1, im));
+            } else {
+                // Eq 135:
+
+            }
+            return retval;
+        }
+
+        function calculateZMatrix(wire) {
+            const w = 2.0 * Math.PI * frequency;
+            const k = 2.0 * Math.PI * frequency / 3e8; // 2*pi/lambda
+            const e0 =  8.854187e-12;
+            const mu0 = 4.0 * Math.PI * 1e-7;
+            const fourPI = 4.0 * Math.PI;
+            var Z = [];
+            for (let m = 1; m < wire.points.length; m+=2) {
+                var row = [];
+                for (let n = 1; n < wire.points.length; n+=2) {
+                    // Use Harrington's method:
+                    var tmp = math.dot(math.subtract(wire.points[n+1], wire.points[n-1]), math.subtract(wire.points[m+1], wire.points[m-1]));
+                    tmp *= w * mu0;
+                    tmp = math.multiply(math.complex(0,tmp), psi(wire, n, m));
+                    var tmp2 = math.add(psi(wire, n+1, m+1), psi(wire, n-1, m-1));
+                    var tmp3 = math.add(psi(wire, n-1, m+1), psi(wire, n+1, m-1));
+                    var tmp4 = math.subtract(tmp2, tmp3);
+                    tmp2 = math.multiply(tmp4, math.complex(0,-1/(w*e0)));
+                    row.push(math.add(tmp, tmp2)); 
+                }
+                Z.push(row);
+            }
+            return Z;
+        }
+/*
+        function calculateZMatrix(wire) {
+            const w = 2.0 * Math.PI * frequency;
+            const k = 2.0 * Math.PI * frequency / 3e8; // 2*pi/lambda
+            const e0 =  8.854187e-12;
+            const mu0 = 4.0 * Math.PI * 1e-7;
+            const fourPI = 4.0 * Math.PI;
+            var Z = [];
+            for (let m = 1; m < wire.points.length; m+=2) {
+                var row = [];
+                for (let n = 1; n < wire.points.length; n+=2) {
+                    // Use Harrington's method:
+                    var tmp = math.dot(math.subtract(wire.points[n+1], wire.points[n-1]), math.subtract(wire.points[m+1], wire.points[m-1]));
+                    tmp *= w * mu0;
+                    tmp = math.multiply(math.complex(0,tmp), psi(wire, n, m));
+                    var tmp2 = math.add(psi(wire, n+1, m+1), psi(wire, n-1, m-1));
+                    var tmp3 = math.add(psi(wire, n-1, m+1), psi(wire, n+1, m-1));
+                    var tmp4 = math.subtract(tmp2, tmp3);
+                    tmp2 = math.multiply(tmp4, math.complex(0,-1/(w*e0)));
+                    row.push(math.add(tmp, tmp2)); 
+                }
+                Z.push(row);
+            }
+            return Z;
+        }
+*/
+        function createVoltageVector(segments) {
+            var retval = [];
+            for(var i=0; i<segments; i++){
+                if(i == 22) {
+                    retval.push(math.complex(1,0));
+                } else {
+                    retval.push(math.complex(0,0));
+                }
+            }
+            return retval;
+        }
+
+        function calculateVoltage() {
+            var retval = [];
+            var x_axis = 0.0;
+            for(var i=0; i<V.length; i++) {
+                x_axis += wire.seg_len;
+                retval.push({x:x_axis, y:V[i].toPolar().r});
+            }
+            return retval;
+        }
+
+        function calculateCurrent() {
+            var retval = [];
+            var x_axis = 0.0;
+            for(var i=0; i<I.length; i++) {
+                x_axis += wire.seg_len;
+                retval.push({x:x_axis, y:I[i].toPolar().r});
+            }
+            return retval;
+        }
+
+        /* Next is Three.js related code functions/methods: */
+
+        /* Now run the code: */
+
+        // Create a half-wavelength long wire, with a radius of 0.001 lambda, and segmented into 10 pieces:
+        wire = createWire(0.5, 0.0001, 45);
+        //console.log(wire);
+        //console.log(wire);
+        frequency = 3e8;
+
+        // Solve the z-matrix:
+        var impedance = calculateZMatrix(wire);
+        console.log(impedance[22][22]);
+        var admittance = math.inv(impedance);
+        //console.log(admittance);
+        var V = createVoltageVector(45);
+        var I = math.multiply(admittance, V);
+        console.log(I[23]);
+        V = math.multiply(impedance, I);
+        //console.log(V, I);
+        const chartCanvas = document.getElementById("chartCanvas");
+        const chartCanvasContext = chartCanvas.getContext('2d');
+
+/*
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+        //console.log(chartCanvas.innerWidth, chartCanvas.innerHeight);
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+        const cube = new THREE.Mesh( geometry, material );
+        scene.add( cube );
+
+        camera.position.z = 5;
+
+        const animate = function () {
+            requestAnimationFrame( animate );
+
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            console.log(cube.rotation.x);
+            renderer.render( scene, camera );
+        };
+
+        animate();
+*/
+
+        var myChart = new Chart(chartCanvasContext, {
+            type: 'line',
+            data: {
+                datasets: [
+                {
+                    label: 'Voltage',
+                    fill: false,
+                    borderColor: 'red',
+                    backgroundColor: 'red',
+                    data: calculateVoltage(),
+                    borderWidth: 1,
+                    yAxisID: 'voltageID'
+                },
+                {
+                    label: 'Current',
+                    fill: false,
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    data: calculateCurrent(),
+                    borderWidth: 1,
+                    yAxisID: 'currentID'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        type: 'linear',
+                        position: 'bottom',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Wavelength (\u03bb)'
+                        }
+                    }],
+                    yAxes: [{
+                        type: 'linear',
+                        display: 'auto',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'V',
+                            fontColor: 'red',
+                            fontStyle: 'bold'
+                        },
+                        position: 'left',
+                        id: 'voltageID'
+                    },{
+                        type: 'linear',
+                        display: 'auto',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'I',
+                            fontColor: 'blue',
+                            fontStyle: 'bold'
+                        },
+                        position: 'left',
+                        id: 'currentID'
+                    }]
+                },
+                showLines: true,
+                tooltips: {
+                    mode: 'interpolate',
+                    intersect: false,
+                    position: 'nearest',
+                    callbacks: {
+                        title: function(tooltipItem, data) {
+                            var label = '' + tooltipItem[0].xLabel.toFixed(3).toString();
+                            label += ' \u03BB '; // lambda character code, representing wavelength
+                            return label;
+                        },
+                        label: function(tooltipItem, data) {
+                            var label = data.datasets[tooltipItem.datasetIndex].label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += Math.round(tooltipItem.yLabel * 1000) / 1000;
+                            return label;
+                        }
+                    }
+                },
+                plugins: {
+                    crosshair: {
+                        line: {
+                            color: 'red',   // crosshair line color
+                            width: 1,       // crosshair line width
+                            dashPattern: [100, 100]
+                        },
+                        sync: {
+                            enabled: false,            // enable trace line syncing with other charts
+                            group: 1,                 // chart group
+                            suppressTooltips: true   // suppress tooltips when showing a synced tracer
+                        },
+                        zoom: {
+                            enabled: false,                                      // enable zooming
+                            zoomboxBackgroundColor: 'rgba(66,133,244,0.2)',     // background color of zoom box 
+                            zoomboxBorderColor: '#48F',                         // border color of zoom box
+                            zoomButtonText: 'Reset Zoom',                       // reset zoom button text
+                            zoomButtonClass: 'reset-zoom',                      // reset zoom button class
+                        },
+                        callbacks: {
+                            beforeZoom: function(start, end) {                  // called before zoom, return false to prevent zoom
+                                return false;                                   // return true to enable zooming
+                            },
+                            afterZoom: function(start, end) {                   // called after zoom
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        </script>
+    </body>
+</html>
