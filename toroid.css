@@ -125,7 +125,7 @@ div input {
     section.gridLayoutClass {
         display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: 1fr 0.3fr 0.3fr 2fr;
+        grid-template-rows: 1fr 0.3fr;
         grid-template-areas: 
         "chart-container"
         "inductor-container" 
