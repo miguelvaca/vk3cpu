@@ -109,8 +109,8 @@
                 <li>L&#7522; : Initial inductance in microhenries. This is based on the initial permeability figure found in data sheets. For accuracy, use the frequency-dependent inductance displayed in the chart.</li>
                 <li>Vrms : Excitation RMS voltage selected.</li>
                 <li>Rdc : Wire resistance in ohms.</li>
-                <li>Ceff : Experimental effective-capacitance calculation to determine SRF. (Under development so greyed-out.)</li>
-                <li>SRF : Experimental self-resonant frequency prediction in MHz. (Under development so greyed-out.)</li>
+                <li>Ceff : Experimental effective-capacitance calculation to determine SRF. (Under development so greyed-out. Based on David Knight's G3YNH work on the self-capacitance of toroidal inductors detailed <a href="https://www.g3ynh.info/zdocs/magnetics/appendix/Toroid_selfC.html">HERE</a>).</li>
+                <li>SRF : Experimental self-resonant frequency prediction in MHz. (Under development so greyed-out. From the same paper detailed above.)</li>
             </ul>
             On the right are the manufacturers data for the selected material.
             <ul>
@@ -575,50 +575,17 @@
                 return { real:Rs , imag:Xs };
             }
 
-            function calculateInductance() {
-                return toroid.L_vs_f;
+            function getSRF() {
+                // First, use the initial permeability to start:
+                var mu = cores[material].mu_i;
+                var c_0 = 3e8;
+                var c_r = (1/Math.sqrt(mu)) * c_0;
+                
+                var srf = c_r / (2 * toroid.cond_length_meters);
+                return srf;
             }
             
-            function calculateImpedance() {
-                return toroid.Z_vs_f;
-            }
-            
-            function calculatePermeability1() {
-                return toroid.mu1_vs_f;
-            }
-            
-            function calculatePermeability2() {
-                return toroid.mu2_vs_f;
-            }
-            
-            function calculateResistance() {
-                return toroid.R_vs_f;
-            }
-            
-            function calculateReactance() {
-                return toroid.X_vs_f;
-            }
-            
-            function calculateQualityFactor() {
-                return toroid.Q_vs_f;
-            }
-            
-            function calculateCurrent() {
-                return toroid.i_vs_f;
-            }
-            
-            function calculatePowerLoss() {
-                return toroid.P_vs_f;
-            }
-            
-            function calculateH() {
-                return toroid.H_vs_f;
-            }
-            
-            function calculateB() {
-                return toroid.B_vs_f;
-            }
-            
+
             // Solve all the parameters, and re-draw the canvas:
             function recalculate() {
                 // Input variables:
@@ -635,6 +602,9 @@
                 
                 //toroid.cond_length_meters = toroid.N * (2*toroid.core.C + toroid.core.A - toroid.core.B) * 1e-3;
                 toroid.cond_length_meters = 2e-3 * Math.sqrt ( (Math.PI * 0.5 * (toroid.core.A + toroid.core.B))**2 + (toroid.N * (2*toroid.core.C + toroid.core.A - toroid.core.B))**2 ); 
+                toroid.cond_length_meters = 2e-3 * Math.sqrt ( (Math.PI * 0.5 * (toroid.core.A + toroid.core.B))**2 + (toroid.N * (2*(toroid.cond_diameter_meters*1e3) + 2*toroid.core.C + toroid.core.A - toroid.core.B))**2 ); 
+                
+                //toroid.cond_length_meters2 = 2 * Math.PI * M ((2*(h+w)+8*rcw*M)*(L-0.5*M)+ 1.333 * rcw*(1-M**2));
                 
                 toroid.Rdc = 1.68e-8 * toroid.cond_length_meters / (Math.PI * ((toroid.cond_diameter_meters*0.5)**2.0));
                 
@@ -690,6 +660,50 @@
                     toroid.B_vs_f.push({x:freq, y:B});
                 });
                 drawDesign();
+            }
+            
+            function calculateInductance() {
+                return toroid.L_vs_f;
+            }
+            
+            function calculateImpedance() {
+                return toroid.Z_vs_f;
+            }
+            
+            function calculatePermeability1() {
+                return toroid.mu1_vs_f;
+            }
+            
+            function calculatePermeability2() {
+                return toroid.mu2_vs_f;
+            }
+            
+            function calculateResistance() {
+                return toroid.R_vs_f;
+            }
+            
+            function calculateReactance() {
+                return toroid.X_vs_f;
+            }
+            
+            function calculateQualityFactor() {
+                return toroid.Q_vs_f;
+            }
+            
+            function calculateCurrent() {
+                return toroid.i_vs_f;
+            }
+            
+            function calculatePowerLoss() {
+                return toroid.P_vs_f;
+            }
+            
+            function calculateH() {
+                return toroid.H_vs_f;
+            }
+            
+            function calculateB() {
+                return toroid.B_vs_f;
             }
             
             function setMode() {
@@ -1158,9 +1172,14 @@
                 fctx.fillText("Rdc = " + toroid.Rdc.toFixed(3) + " \u03A9", 8, 32);
                 fctx.fillText("Vrms = " + toroid.Vrms.toFixed(2) + " V", 8, 46);
                 
-                fctx.fillStyle = "lightgrey";
-                fctx.fillText("Ceff = " + (toroid.C*1e12).toFixed(1) + " pF", 8, win_height - 28);
-                fctx.fillText("SRF = " + (toroid.SRF*1e-6).toFixed(2) + " MHz", 8, win_height - 14);
+                //fctx.fillStyle = "lightgrey";
+                //fctx.fillText("Ceff = " + (toroid.C*1e12).toFixed(1) + " pF", 8, win_height - 28);
+                //fctx.fillText("SRF = " + (toroid.SRF*1e-6).toFixed(2) + " MHz", 8, win_height - 14);
+                //fctx.fillStyle = "lightgrey";
+                fctx.fillStyle = "grey";
+                fctx.fillText("Ceff \u2248 " + (toroid.C*1e12).toFixed(1) + " pF", 8, win_height - 28);
+                fctx.fillText("SRF \u2248 " + (toroid.SRF*1e-6).toFixed(2) + " MHz", 8, win_height - 14);
+                //fctx.fillText("SRF = " + (getSRF()*1e-6).toFixed(1) + " MHz", 8, win_height - 14);
                 fctx.fillStyle = "black";
                 
                 fctx.textAlign = "center";
