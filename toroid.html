@@ -70,13 +70,13 @@
             The calculator has 4 separate display areas. At the top is the chart display for showing frequency-dependent characteristics. Next is the
             schematic display, where a scaled image of the toroid and windings is presented to help with intuitive design. Next is the control panel
             section, where the user can select the application type, toroid material, toroid size, wire size, number of windings and excitation voltage.<br><br>
-            <u>Inputs via the select widgets:</u>
+            <b><u>Inputs via the select widgets:</u></b>
             <ul> 
                 <li>Application : Selects the intended use of the toroid, either Inductor or Suppressor is currently supported. This limits the material selection as appropriate.</li>
                 <li>Size : Selects the size of the toroid. FT240 is 2.4" in diameter. FT80 is 0.8", etc...</li>
                 <li>Material : Manufacturers material mix code. Inductor mode shows initial permeability [&#956;i] in square brackets. (Pick lower &#956;i for higher frequency applications.) Suppressor mode displays effective suppression frequency range in square brackets.</li>
             </ul>
-            <u>Inputs via the slider widgets:</u>
+            <b><u>Inputs via the slider widgets:</u></b>
             <ul> 
                 <li>AWG : Select the wire gauge. Sliding L-R changes AWG from 40-0. (Defaults to 20 AWG)</li>
                 <li>N  : Selects the number of turns based on the winding density. Maximum (100%, slider to hard-right) is reached when the turns are adjacent at the toroid's inner radius. (Defaults to 20%)</li>
@@ -84,7 +84,7 @@
                 <li>f : Shifts the frequency of interest of the chart display from left-to-right. Left towards kHz, right towards GHz. </li>
             </ul>
             <i>Note: Manufacturers recommend keeping the number of turns (N) to a minimum.</i><br><br>
-            <u>Chart display:</u>
+            <b><u>Chart display:</u></b>
             The chart title contains manufacturer, size, material and part number of the device. <br>
             Calculated parameters are displayed against frequency (log scale). Each parameter may be displayed or hidden
             by tapping on the legend key. Tapping on a data point will display the parameters for a single frequency.
@@ -102,7 +102,7 @@
                 <li> Pd(mW) : Power dissipation in the core, in milliwatts. </li>
             </ul>
             <i>Note: To use as an inductor, avoid using where Q is small or less than 1. When Q is less than 1, core loss energy is higher than magnetisation energy.</i><br><br>
-            <u>Schematic display:</u>
+            <b><u>Schematic display:</u></b>
             Scaled representation of the toroid and the windings. Wire gauge and toroid dimensions are provided.<br>
             On the left of the display are the following:
             <ul>
@@ -124,6 +124,11 @@
                 <li>[NiZn] : Material composition. (NiZn, MnZn)</li>
                 <li>[nnnn] : Manufacturer's part number.</li>
             </ul>
+            <br>
+            <b><u>Change history:</u></b><br>
+            <b>[24-Oct-21]</b> <br>
+            * Fixed frozen f-slider issue that was occurring in some browsers running on Windows.<br>
+            * Increased contrast for experimental Ceff and SRF calculations, based on David Knight's (G3YNH) paper.
             </div>
         </section>
        
