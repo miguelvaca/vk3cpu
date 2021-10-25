@@ -436,7 +436,7 @@
             function getProximityResFromSpacing(spacing_ratio) {
                 // Use the proximityResistance look-up table and interpolate values depending on the spacing ratio and the number of turns.
                 var retval = 0.0;
-                var n_turns = loop_turns_slider.value;
+                var n_turns = 1 * loop_turns_slider.value;
                 var i = 0;
                 for (i = 0; i < (proximityResistance[0].length-1); i++) {
                     if(spacing_ratio <= proximityResistance[0][i+1]) {
