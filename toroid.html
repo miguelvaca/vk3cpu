@@ -770,7 +770,6 @@
             }
             
             function updateChart() {
-                myChart.options.plugins.title.text = "Fair-Rite " + t_size + "-" + material + " [" + toroid.core.PN + "]";
                 myChart.options.plugins.title.text = cores[material].manufacturer + " " + t_size + "-" + material + " [" + toroid.core.PN + "]";
                 myChart.data.datasets[0].data = calculateInductance();
                 myChart.data.datasets[1].data = calculateImpedance();
