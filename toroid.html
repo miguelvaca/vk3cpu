@@ -836,10 +836,10 @@
             var conductor_diameter_timer_handler = 0;
             conductor_diameter_slider.oninput = function() {
                 // Check if we have exceeded the maximum turns:
-                const max_N = getMaxTurnsFrom();
-                if(max_N > toroid.N) {
-                    loop_turns_slider.value = (toroid.N * 100.0) / max_N;
-                }
+                //const max_N = getMaxTurnsFrom();
+                //if(max_N > toroid.N) {
+                //    loop_turns_slider.value = (toroid.N * 100.0) / max_N;
+                //}
                 
                 recalculate();
                 
