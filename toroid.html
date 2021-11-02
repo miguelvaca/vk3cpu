@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="toroid.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.8<br></header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.9a<br></header>
         <section class="gridLayoutClass">
             <div id="chart-container" class="chart-container">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -51,7 +51,7 @@
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
-                    <input type="range" id="loop_turns_slider" min="1" max="100" value="20.0" step="0.1">
+                    <input type="range" id="loop_turns_slider" min="0.0" max="1.0" value="0.2" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="voltage_slider">Vrms:</label>
@@ -74,7 +74,8 @@
             <ul> 
                 <li>Application : Selects the intended use of the toroid, either Inductor or Suppressor is currently supported. This limits the material selection as appropriate.</li>
                 <li>Size : Selects the size of the toroid. FT240 is 2.4" in diameter. FT80 is 0.8", etc...</li>
-                <li>Material : Manufacturers material mix code. Inductor mode shows initial permeability [&#956;i] in square brackets. (Pick lower &#956;i for higher frequency applications.) Suppressor mode displays effective suppression frequency range in square brackets.</li>
+                <li>Material : Manufacturers material mix code. Inductor mode shows initial permeability [&#956;i] in square brackets. (Pick lower &#956;i for higher frequency applications.) 
+                Suppressor mode displays effective suppression frequency range in square brackets.</li>
             </ul>
             <b><u>Inputs via the slider widgets:</u></b>
             <ul> 
@@ -91,17 +92,19 @@
             <ul>
                 <li>L(&#956;H) : Inductance in microhenries. </li>
                 <li>|Z|(&#937;) : Impedance magnitude in Ohms. </li>
-                <li> R(&#937;) : Resistance due to core losses in Ohms. </li>
                 <li> X(&#937;) : Reactance in Ohms. </li>
-                <li> Q : Quality factor. </li>
-                <li> I(mA) : RMS current in milliamps. (Hidden by default.) </li>
+                <li> R(&#937;) : (F) - Resistance due to core losses in Ohms. </li>
+                <li> Rc(&#937;) : (PI) - Resistance due to core losses in Ohms. </li>
+                <li> Rw(&#937;) : (PI) - Resistance due to wire losses in Ohms. </li>
+                <li> Q : Quality factor. (X/R) </li>
+                <li> I(mA) : RMS current in milliamps. </li>
                 <li> &#956;'  : Complex permeability - reactive part. (Hidden by default.) </li>
                 <li> &#956;'' : Complex permeability - resistive part. (Hidden by default.) </li>
                 <li> H(Oe) : Core field intensity in Oersted. (Hidden by default.) </li>
                 <li> B(G) : Core flux density in Gauss. (Hidden by default.) </li>
-                <li> Pd(mW) : Power dissipation in the core, in milliwatts. </li>
+                <li> Pd(mW) : Sum of the power dissipation in the core, in milliwatts. For PI, it includes power dissipated in the wire also. </li>
             </ul>
-            <i>Note: To use as an inductor, avoid using where Q is small or less than 1. When Q is less than 1, core loss energy is higher than magnetisation energy.</i><br><br>
+            <br><br>
             <b><u>Schematic display:</u></b>
             Scaled representation of the toroid and the windings. Wire gauge and toroid dimensions are provided.<br>
             On the left of the display are the following:
@@ -140,6 +143,7 @@
         <script src="inductor.js"></script>
         
         <script>
+            
             function awgToMm(awg) {
                 // AWG to diameter in mm:
                 switch (awg) {
@@ -188,8 +192,38 @@
                 }
             }
             
-            // TODO - add 77 material in FT240, FT140, FT50A, FT50 and FT23
-            const cores = {
+            function Ferrite() {
+                // Current selected material type:
+                this.material = '43';
+                
+                // Current selected ferrite size:
+                this.size = 'FT240';
+                
+                // User-selected variables:
+                this.cond_diameter_meters = 0.0;
+                this.N = 0;
+                this.Vrms = 0.0; 
+                
+                // Calculated frequency-independent variables:
+                this.cond_length_meters = 0.0;
+                this.Rdc = 0.0;
+                this.N_max = 0;
+                this.L = 0.0;
+                
+                // Calculated and charted frequency-dependent variables:
+                this.L_vs_f   = [];
+                this.Z_vs_f   = [];
+                this.R_vs_f   = [];
+                this.X_vs_f   = [];
+                this.Q_vs_f   = [];
+                this.i_vs_f   = [];
+                this.P_vs_f   = [];
+                this.mu1_vs_f = [];
+                this.mu2_vs_f = [];
+                this.H_vs_f   = [];
+                this.B_vs_f   = [];
+
+                this.cores = {
                 '80' : {
                     size : {
                         'FT114' : { PN:'5980001001', A:29.00, B:19.00, C:7.50, W:21.0, CC:19.80, le:7.32, Ae:0.37, Ve:2.70, Al:350.0 },
@@ -474,112 +508,1245 @@
                         mu_2: [10.45, 27.02, 41.61, 57.82, 72.67, 89.6, 106.76, 119.0, 141.03, 173.33, 183.07, 228.68, 248.07, 260.16, 345.99, 444.47, 463.22, 734.77, 752.33, 728.33, 696.33, 657.67, 616.0, 571.33, 527.0, 484.33, 444.33, 408.33, 375.33, 346.67, 321.67, 299.0, 278.67, 260.0, 242.3333333, 226.3333333, 210.3333333, 195.0, 180.0, 165.3333333, 151.6666667, 138.6666667, 130.0, 125.0, 86.5, 52.1, 32.1, 18.7, 12.5],
                     }
                 },
-                // Powdered iron cores:
-                '2' : {
-                    size : {
-                        'T300' : { PN:'T300-2', A:77.4, B:49.0, C:12.7, W:0.0, CC:0.0, le:19.8, Ae:1.68, Ve:33.4, Al:11.4 },
-                        'T225' : { PN:'T225-2', A:57.2, B:35.6, C:14.0, W:0.0, CC:0.0, le:14.6, Ae:1.42, Ve:20.7, Al:12.0 },
-                        'T200' : { PN:'T200-2', A:50.8, B:31.8, C:14.0, W:0.0, CC:0.0, le:13.0, Ae:1.27, Ve:16.4, Al:12.0 },
-                    },
-                    manufacturer : "Powedered ",
-                    mat     : "Carbonyl E",
-                    mu_i    : 10,
-                }
-            };
-            
-            //const mu0 = Math.PI * 4e-7;
-            //const cu_sigma = 58e6;      // Copper conductance value
-            
-            var frequencies = [];
-
-            function updateFrequencies() {
-                frequencies = [];
-                //for(var i = 4.0; i <= 8.0; i+=0.01) {
-                var f = 1.0 * frequency_slider.value;
-                for(var i = Math.floor(4.00+f); i <= 5.52+f; i+=0.01) {
-                    frequencies.push(10.0**i);
-                }
-            }
-            
-            // Define global storage for calculated values, so we don't recalculate the same things multiple times:
-            var t_mode = 'Inductor';
-            var t_size = 'FT240';
-            var material = '43';
-            
-            var toroid = {
-                core : cores[material].size[t_size], 
-                cond_diameter_meters : 0.0,
-                N_max : 0,
-                N : 0,
-                frequency_hz : 0.0,
-                Vrms : 0.0, 
-
-                L : 0.0,
-                B_peak : 0.0,
-                H_peak : 0.0, 
-                cond_length_meters : 0.0,
-                Rdc : 0.0,
-                SRF : 0.0,
-                C : 0.0,
-
-                Xl : 0.0,
-                Z : 0.0,
-                skin_depth : 0.0,
-                Rac : 0.0,
-                Q : 0.0,
+                };
                 
-                L_vs_f : [],
-                Z_vs_f : [],
-                R_vs_f : [],
-                X_vs_f : [],
-                Q_vs_f : [],
-                i_vs_f : [],
-                P_vs_f : [],
-                mu1_vs_f: [],
-                mu2_vs_f: [],
-                H_vs_f: [],
-                B_vs_f: [],
+                this.mat = this.cores[this.material];
+                this.core = this.mat.size[this.size];
+                
+                this.setMaterial = function (material) {
+                    this.material = material;
+                    this.mat = this.cores[this.material];
+                };
+                
+                this.setSize = function (size) {
+                    this.size = size;
+                    this.core = this.mat.size[this.size];
+                };
+                
+                this.setTurns = function (turns) {
+                    this.N = turns;
+                };
+                
+                this.getMaterialTypes = function () {
+                    return ["75", "31", "78", "77", "79", "43", "43_old", "46", "80", "52", "61", "67"];
+                };
+                
+                this.getSizesForMaterial = function (material) {
+                    return Object.keys(this.cores[material].size);
+                };
+                
+                this.getComplexPermeability = function (frequency) {
+                    // Use the proximityResistance look-up table and interpolate values depending on the spacing ratio and the number of turns.
+                    var mu_1 = 0.0;
+                    var mu_2 = 0.0;
+
+                    var i_before = 0;
+                    var i_after = this.cores[this.material].complex_mu.freq.length-1;
+                    var i = Math.floor((i_after + i_before)/2);
+                
+                    while((i_before+1) < i_after) {
+                        if(frequency >= this.cores[this.material].complex_mu.freq[i]) {
+                            i_before = i;
+                        } else {
+                            i_after = i;
+                        }
+                        i = Math.floor((i_after + i_before)/2);
+                    }
+                
+                    // Linear interpolation between empirical proximity resistance values:
+                    mu_1 = (((frequency - this.cores[this.material].complex_mu.freq[i]) / (this.cores[this.material].complex_mu.freq[i+1] - this.cores[this.material].complex_mu.freq[i]) 
+                        * (this.cores[this.material].complex_mu.mu_1[i+1] - this.cores[this.material].complex_mu.mu_1[i])) + this.cores[this.material].complex_mu.mu_1[i]);
+                    mu_2 = (((frequency - this.cores[this.material].complex_mu.freq[i]) / (this.cores[this.material].complex_mu.freq[i+1] - this.cores[this.material].complex_mu.freq[i]) 
+                        * (this.cores[this.material].complex_mu.mu_2[i+1] - this.cores[this.material].complex_mu.mu_2[i])) + this.cores[this.material].complex_mu.mu_2[i]);
+                
+                    return [mu_1, mu_2];
+                };
+                
+                this.getInductance = function (frequency) {
+                    const mu = this.getComplexPermeability(frequency);
+                    const L = mu[0] * 4.0 * Math.PI * toroid.N**2 * 1e-9 / toroid.core.CC;
+                    return L;
+                };
+
+                this.getImpedance = function (frequency) {
+                    const mu = this.getComplexPermeability(frequency);
+                    //console.log(mu);
+                    const Lo = 4.0 * Math.PI * this.N**2 * 1e-9 / this.core.CC;
+                    const Rs = 2.0 * Math.PI * frequency * Lo * mu[1];
+                    const Xs = 2.0 * Math.PI * frequency * Lo * mu[0];
+                
+                    return { real:Rs , imag:Xs };
+                };
+                
+                this.getWireResistance = function(frequency) {
+                    // Calculate AC wire-resistance, using IEC 60287-1-1:
+                    const Ks = 1.0; // Solid core conductor
+                    const xs4 = ((8 * Math.PI * frequency * Ks) / (this.Rdc * 1e7))**2;
+                    const Ys = xs4 / (192.0 + 0.8 * xs4);
+                    const Rac = this.Rdc * (1 + Ys);
+                    return Rac;
+                };
+                
+                this.recalculate = function (frequencies) {
+                    // Input variables:
+                    this.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
+                    this.Vrms = 10.0 ** voltage_slider.value;
+
+                    // Frequency independent characteristics:
+                    this.N_max = Math.PI / (Math.atan2(0.5e3 * this.cond_diameter_meters, (0.5 * this.core.B - 0.5e3 * this.cond_diameter_meters)));
+                    this.N = 1 + Math.round(loop_turns_slider.value * (this.N_max - 1));
+                
+                    //this.cond_length_meters = this.N * (2*this.core.C + this.core.A - this.core.B) * 1e-3;
+                    //this.cond_length_meters = 2e-3 * Math.sqrt ( (Math.PI * 0.5 * (this.core.A + this.core.B))**2 + (this.N * (2*this.core.C + this.core.A - this.core.B))**2 ); 
+                    this.cond_length_meters = 2e-3 * Math.sqrt ( (Math.PI * 0.5 * (this.core.A + this.core.B))**2 + (this.N * (2*(this.cond_diameter_meters*1e3) + 2*this.core.C + this.core.A - this.core.B))**2 ); 
+                
+                    this.Rdc = 1.68e-8 * this.cond_length_meters / (Math.PI * ((this.cond_diameter_meters*0.5)**2.0));
+                
+                    //const Cpmult = 12.9*()
+                    //this.C = (0.9 + (78.1/this.N**2))*1e-12;                  // In Farads
+                
+                    this.L = (this.N**2) * this.core.Al * 1.0e-9;      // In Henries
+                    
+                    // Based on David Knight's equation:
+                    this.C = (0.9 + (78.1/this.N**2))*1e-12;                  // In Farads
+                    this.SRF = 1.0/(2.0*Math.PI* Math.sqrt(this.L*this.C));
+                    
+                    // Clear the frequency dependent characteristics before appending new data:
+                    this.L_vs_f = [];
+                    this.Z_vs_f = [];
+                    this.R_vs_f = [];
+                    this.X_vs_f = [];
+                    this.Q_vs_f = [];
+                    this.i_vs_f = [];
+                    this.P_vs_f = [];
+                    this.mu1_vs_f = [];
+                    this.mu2_vs_f = [];
+                    this.H_vs_f = [];
+                    this.B_vs_f = [];
+
+                    frequencies.forEach(freq => {
+                        const mu = this.getComplexPermeability(freq);
+                        const Z = this.getImpedance(freq);
+
+                        // Make freq in kHz from Hz:
+                        freq *= 1e-3;
+                    
+                        this.mu1_vs_f.push({x:freq, y:mu[0]});
+                        this.mu2_vs_f.push({x:freq, y:mu[1]});
+                    
+                        //this.L_vs_f.push({x:freq, y:(Math.sqrt(mu[0]**2 + mu[1]**2) * 4.0 * Math.PI * this.N**2 * 1e-3 / this.core.CC)});
+                        this.L_vs_f.push({x:freq, y:(mu[0] * 4.0 * Math.PI * this.N**2 * 1e-3 / this.core.CC)});
+                    
+                        this.R_vs_f.push({x:freq, y:Z.real});
+                        this.X_vs_f.push({x:freq, y:Z.imag});
+                        this.Q_vs_f.push({x:freq, y:(Z.imag/Z.real)});
+                    
+                        const ZZ = math.complex(Z.real, Z.imag);
+                        const II = math.divide(this.Vrms, ZZ).toPolar();
+                    
+                        this.i_vs_f.push({x:freq, y:(II.r*1e3)});  // in mA
+                        //this.P_vs_f.push({x:freq, y:((this.Vrms**2 / Z.real)*1e3)});
+                        this.P_vs_f.push({x:freq, y:((Z.real * II.r**2)*1e3)});  // in mW
+                        this.Z_vs_f.push({x:freq, y:(ZZ.toPolar().r)});
+                    
+                        const H = ((0.4 * Math.PI * this.N * 1.414 * II.r) / this.core.le);
+                        const B = ((this.Vrms * 1e8) / (4.44e3 * freq * this.N * this.core.Ae));
+                        //const B = Math.sqrt(mu[0]**2 + mu[1]**2) * H;
+                        this.H_vs_f.push({x:freq, y:H});
+                        this.B_vs_f.push({x:freq, y:B});
+                    });
+                };
+                
+                // 
+                this.calculateInductance = function () {
+                    return this.L_vs_f;
+                };
+                
+                this.calculateImpedance = function () {
+                    return this.Z_vs_f;
+                };
+                
+                this.calculatePermeability1 = function () {
+                    return this.mu1_vs_f;
+                };
+                
+                this.calculatePermeability2 = function () {
+                    return this.mu2_vs_f;
+                };
+                
+                this.calculateResistance = function () {
+                    return this.R_vs_f;
+                };
+                
+                this.calculateReactance = function () {
+                    return this.X_vs_f;
+                };
+                
+                this.calculateQualityFactor = function () {
+                    return this.Q_vs_f;
+                };
+                
+                this.calculateCurrent = function () {
+                    return this.i_vs_f;
+                };
+                
+                this.calculatePowerLoss = function () {
+                    return this.P_vs_f;
+                };
+                
+                this.calculateH = function () {
+                    return this.H_vs_f;
+                };
+                
+                this.calculateB = function () {
+                    return this.B_vs_f;
+                };
+            } 
+            
+            function PowderedIron() {
+                // Current selected material type:
+                this.material = '2';
+                
+                // Current selected ferrite size:
+                this.size = 'T300';
+                
+                // User-selected variables:
+                this.cond_diameter_meters = 0.0;
+                this.N = 0;
+                this.Vrms = 0.0; 
+                
+                // Calculated frequency-independent variables:
+                this.cond_length_meters = 0.0;
+                this.Rdc = 0.0;
+                this.N_max = 0;
+                this.L = 0.0;
+                this.C = 0.0;
+                this.SRF = 0.0;
+                
+                // Calculated and charted frequency-dependent variables:
+                this.L_vs_f  = [];
+                this.Z_vs_f  = [];
+                this.R_vs_f  = [];
+                this.Rac_vs_f  = [];
+                this.X_vs_f  = [];
+                this.Q_vs_f  = [];
+                this.i_vs_f  = [];
+                this.P_vs_f  = [];
+                this.mu_vs_f = [];
+                this.H_vs_f  = [];
+                this.B_vs_f  = [];
+                
+                this.cores = {
+                    '0' : {
+                        size : {
+                            'T300' : { PN:'T300-0', A:77.22, B:49.02, C:12.70, W:73.5, CC:0.0, le:19.8, Ae:1.68,  Ve:33.4,  Al:1.5 },
+                            'T184' : { PN:'T184-0', A:46.74, B:24.13, C:18.03, W:46.2, CC:0.0, le:11.2, Ae:1.88,  Ve:21.0,  Al:3.0 },
+                            'T157' : { PN:'T157-0', A:39.88, B:24.13, C:14.48, W:23.5, CC:0.0, le:10.1, Ae:1.06,  Ve:10.7,  Al:1.8 },
+                            'T130' : { PN:'T130-0', A:33.02, B:19.81, C:11.10, W:12.7, CC:0.0, le:8.28, Ae:0.698, Ve:5.78,  Al:1.5 },
+                            'T106' : { PN:'T106-0', A:26.92, B:14.48, C:11.10, W:9.41, CC:0.0, le:6.49, Ae:0.659, Ve:4.28,  Al:1.9 },
+                            'T94'  : { PN:'T94-0',  A:23.93, B:14.22, C:7.92,  W:4.75, CC:0.0, le:5.97, Ae:0.362, Ve:2.16,  Al:1.06 },
+                            'T80'  : { PN:'T80-0',  A:20.19, B:12.57, C:6.35,  W:2.62, CC:0.0, le:5.14, Ae:0.231, Ve:1.19,  Al:0.85 },
+                            'T68'  : { PN:'T68-0',  A:17.53, B:9.40,  C:4.83,  W:1.67, CC:0.0, le:4.23, Ae:0.179, Ve:0.759, Al:0.75 },
+                            'T50'  : { PN:'T50-0',  A:12.70, B:7.70,  C:4.83,  W:0.79, CC:0.0, le:3.19, Ae:0.112, Ve:0.358, Al:0.64 },
+                            'T44'  : { PN:'T44-0',  A:11.18, B:5.82,  C:4.04,  W:0.59, CC:0.0, le:2.68, Ae:0.099, Ve:0.266, Al:0.65 },
+                            'T37'  : { PN:'T37-0',  A:9.53,  B:5.21,  C:3.25,  W:0.32, CC:0.0, le:2.31, Ae:0.064, Ve:0.147, Al:0.49 },
+                            'T30'  : { PN:'T30-0',  A:7.80,  B:3.84,  C:3.25,  W:0.24, CC:0.0, le:1.84, Ae:0.060, Ve:0.110, Al:0.60 },
+                            'T25'  : { PN:'T25-0',  A:6.48,  B:3.05,  C:2.44,  W:0.12, CC:0.0, le:1.50, Ae:0.037, Ve:0.055, Al:0.45 },
+                        },
+                        manufacturer : "Micrometals",
+                        mat     : "Phenolic",
+                        mu_i    : 1,
+                        B       : 14800.0,
+                        H       : 1480.0,
+                        Br      : 0.0,
+                        Hc      : 0.0,
+                        mu_vs_f : { a:1.0e1, b:1.0e-90, c:1.00e1, d:1.0e-90 }, 
+                        mu_vs_B : { a:1.00e4, b:1.0e-90, c:1.0e-90, d:1.0e-90, e:1.0e-90 }, 
+                        mu_vs_H : { a:1.00e-2, b:1.0e-90, c:1.0e-90, d:1.0e-90 }, 
+                        CL_vs_f_B : { a:1.0e90, b:1.0e90, c:1.0e90, d:1.0e-90 }, 
+                    },
+                    '2' : {
+                        size : {
+                            'T300' : { PN:'T300-2', A:77.22, B:49.02, C:12.70, W:167.0, CC:0.0, le:19.8, Ae:1.68,  Ve:33.4,  Al:11.4 },
+                            'T225' : { PN:'T225-2', A:57.15, B:35.69, C:13.97, W:103.5, CC:0.0, le:14.6, Ae:1.42,  Ve:20.7,  Al:12.0 },
+                            'T200' : { PN:'T200-2', A:50.80, B:31.75, C:13.97, W:82.0,  CC:0.0, le:13.0, Ae:1.27,  Ve:16.4,  Al:12.0 },
+                            'T157' : { PN:'T157-2', A:39.88, B:24.13, C:14.48, W:53.5,  CC:0.0, le:10.1, Ae:1.06,  Ve:10.7,  Al:14.0 },
+                            'T130' : { PN:'T130-2', A:33.02, B:19.81, C:11.10, W:28.9,  CC:0.0, le:8.28, Ae:0.698, Ve:5.78,  Al:11.0 },
+                            'T106' : { PN:'T106-2', A:26.92, B:14.48, C:11.10, W:21.4,  CC:0.0, le:6.49, Ae:0.659, Ve:4.28,  Al:13.5 },
+                            'T94'  : { PN:'T94-2',  A:23.93, B:14.22, C:7.92,  W:10.8,  CC:0.0, le:5.97, Ae:0.362, Ve:2.16,  Al:8.4 },
+                            'T80'  : { PN:'T80-2',  A:20.19, B:12.57, C:6.35,  W:5.95,  CC:0.0, le:5.14, Ae:0.231, Ve:1.19,  Al:5.5 },
+                            'T68'  : { PN:'T68-2',  A:17.53, B:9.40,  C:4.83,  W:3.795, CC:0.0, le:4.23, Ae:0.179, Ve:0.759, Al:5.7 },
+                            'T50'  : { PN:'T50-2',  A:12.70, B:7.70,  C:4.83,  W:1.79,  CC:0.0, le:3.19, Ae:0.112, Ve:0.358, Al:4.9 },
+                            'T44'  : { PN:'T44-2',  A:11.18, B:5.82,  C:4.04,  W:1.33,  CC:0.0, le:2.68, Ae:0.099, Ve:0.266, Al:5.2 },
+                            'T37'  : { PN:'T37-2',  A:9.53,  B:5.21,  C:3.25,  W:0.735, CC:0.0, le:2.31, Ae:0.064, Ve:0.147, Al:4.0 },
+                            'T30'  : { PN:'T30-2',  A:7.80,  B:3.84,  C:3.25,  W:0.55,  CC:0.0, le:1.84, Ae:0.060, Ve:0.110, Al:4.3 },
+                            'T25'  : { PN:'T25-2',  A:6.48,  B:3.05,  C:2.44,  W:0.275, CC:0.0, le:1.50, Ae:0.037, Ve:0.055, Al:3.4 },
+                        },
+                        manufacturer : "Micrometals",
+                        mat     : "Carbonyl E",
+                        mu_i    : 10,
+                        B       : 14800.0,
+                        H       : 1480.0,
+                        Br      : 30.0,
+                        Hc      : 3.0,
+                        mu_vs_f : { a:1.11e-1, b:7.01e-11, c:9.00e-1, d:1.0e0 },
+                        mu_vs_B : { a:1.00e4, b:4.81e-4, c:6.19e0, d:-7.67e-8, e:-1.03e-3 },
+                        mu_vs_H : { a:1.00e-2, b:1.83e-7, c:1.46e0, d:0.0e0 },
+                        CL_vs_f_B : { a:4.0e9, b:3.0e8, c:2.7e6, d:9.6e-16 },
+                    },
+                    '6' : {
+                        size : {
+                            'T300' : { PN:'T300-6', A:77.22, B:49.02, C:12.70, W:167.0, CC:0.0, le:19.8, Ae:1.68,  Ve:33.4,  Al:9.5 },
+                            'T225' : { PN:'T225-6', A:57.15, B:35.69, C:13.97, W:103.5, CC:0.0, le:14.6, Ae:1.42,  Ve:20.7,  Al:10.4 },
+                            'T200' : { PN:'T200-6', A:50.80, B:31.75, C:13.97, W:82.0,  CC:0.0, le:13.0, Ae:1.27,  Ve:16.4,  Al:10.4 },
+                            'T130' : { PN:'T130-6', A:33.02, B:19.81, C:11.10, W:28.9,  CC:0.0, le:8.28, Ae:0.698, Ve:5.78,  Al:9.6 },
+                            'T106' : { PN:'T106-6', A:26.92, B:14.48, C:11.10, W:21.4,  CC:0.0, le:6.49, Ae:0.659, Ve:4.28,  Al:11.6 },
+                            'T94'  : { PN:'T94-6',  A:23.93, B:14.22, C:7.92,  W:10.8,  CC:0.0, le:5.97, Ae:0.362, Ve:2.16,  Al:7.0 },
+                            'T68'  : { PN:'T68-6',  A:17.53, B:9.40,  C:4.83,  W:3.795, CC:0.0, le:4.23, Ae:0.179, Ve:0.759, Al:4.7 },
+                            'T50'  : { PN:'T50-6',  A:12.70, B:7.70,  C:4.83,  W:1.79,  CC:0.0, le:3.19, Ae:0.112, Ve:0.358, Al:4.0 },
+                            'T44'  : { PN:'T44-6',  A:11.18, B:5.82,  C:4.04,  W:1.33,  CC:0.0, le:2.68, Ae:0.099, Ve:0.266, Al:4.2 },
+                            'T37'  : { PN:'T37-6',  A:9.53,  B:5.21,  C:3.25,  W:0.735, CC:0.0, le:2.31, Ae:0.064, Ve:0.147, Al:3.0 },
+                            'T30'  : { PN:'T30-6',  A:7.80,  B:3.84,  C:3.25,  W:0.55,  CC:0.0, le:1.84, Ae:0.060, Ve:0.110, Al:3.6 },
+                            'T25'  : { PN:'T25-6',  A:6.48,  B:3.05,  C:2.44,  W:0.275, CC:0.0, le:1.50, Ae:0.037, Ve:0.055, Al:2.7 },
+                        },
+                        manufacturer : "Micrometals",
+                        mat     : "Carbonyl E",
+                        mu_i    : 8.5,
+                        B       : 14800.0,
+                        H       : 1740.0,
+                        Br      : 26.0,
+                        Hc      : 3.0,
+                        mu_vs_f : { a:1.33e-1, b:7.01e-11, c:9.00e-1, d:1.0e0 },
+                        mu_vs_B : { a:1.00e4, b:4.81e-4, c:6.19e0, d:-7.67e-8, e:-1.03e-3 },
+                        mu_vs_H : { a:1.00e-2, b:4.87e-8, c:1.57e0, d:0.0e0 },
+                        CL_vs_f_B : { a:4.0e9, b:3.0e8, c:2.7e6, d:8.9e-16 },
+                    },
+                    '10' : {
+                        size : {
+                            'T184' : { PN:'T184-10', A:46.74, B:24.13, C:18.03, W:102.9, CC:0.0, le:11.2, Ae:1.88,  Ve:21.0,  Al:13.8 },
+                            'T157' : { PN:'T157-10', A:39.88, B:24.13, C:14.48, W:52.43, CC:0.0, le:10.1, Ae:1.06,  Ve:10.7,  Al:8.2 },
+                            'T130' : { PN:'T130-10', A:33.02, B:19.81, C:11.10, W:28.32, CC:0.0, le:8.28, Ae:0.698, Ve:5.78,  Al:6.83 },
+                            'T94'  : { PN:'T94-10',  A:23.93, B:14.22, C:7.92,  W:10.58, CC:0.0, le:5.97, Ae:0.362, Ve:2.16,  Al:5.8 },
+                            'T68'  : { PN:'T68-10',  A:17.53, B:9.40,  C:4.83,  W:3.72,  CC:0.0, le:4.23, Ae:0.179, Ve:0.759, Al:3.2 },
+                            'T50'  : { PN:'T50-10',  A:12.70, B:7.70,  C:4.83,  W:1.75,  CC:0.0, le:3.19, Ae:0.112, Ve:0.358, Al:3.1 },
+                            'T44'  : { PN:'T44-10',  A:11.18, B:5.82,  C:4.04,  W:1.30,  CC:0.0, le:2.68, Ae:0.099, Ve:0.266, Al:3.3 },
+                            'T37'  : { PN:'T37-10',  A:9.53,  B:5.21,  C:3.25,  W:0.72,  CC:0.0, le:2.31, Ae:0.064, Ve:0.147, Al:2.5 },
+                        },
+                        manufacturer : "Micrometals",
+                        mat     : "Carbonyl E",
+                        mu_i    : 6,
+                        B       : 14600.0,
+                        H       : 2430.0,
+                        Br      : 18.0,
+                        Hc      : 3.0,
+                        mu_vs_f : { a:2.00e-1, b:7.01e-11, c:9.00e-1, d:1.0e0 },
+                        mu_vs_B : { a:1.00e4, b:4.81e-4, c:6.19e0, d:-7.67e-8, e:-1.03e-3 },
+                        mu_vs_H : { a:1.00e-2, b:5.54e-9, c:1.69e0, d:0.0e0 },
+                        CL_vs_f_B : { a:4.0e9, b:3.0e8, c:2.7e6, d:8.0e-16 },
+                    },
+                };
+                
+                this.mat = this.cores[this.material];
+                this.core = this.mat.size[this.size];
+                
+                this.setMaterial = function (material) {
+                    this.material = material;
+                    this.mat = this.cores[this.material];
+                    this.core = this.mat.size[this.size];
+                };
+                
+                this.setSize = function (size) {
+                    this.size = size;
+                    this.core = this.mat.size[this.size];
+                };
+                
+                this.setTurns = function (turns) {
+                    this.N = turns;
+                };
+                
+                this.getMaterialTypes = function () {
+                    return ["2", "6", "10", '0'];
+                };
+                
+                this.getSizesForMaterial = function (material) {
+                    return Object.keys(this.cores[material].size);
+                };
+                
+                this.getMuFromFreq = function (f) { 
+                    return 1/(this.mat.mu_vs_f.a + this.mat.mu_vs_f.b * f**this.mat.mu_vs_f.c) + this.mat.mu_vs_f.d; 
+                };
+                
+                this.getMuFromBpk  = function (B) { 
+                    return ((this.mat.mu_vs_B.a + this.mat.mu_vs_B.c * B + this.mat.mu_vs_B.e * B**2) / (1 + this.mat.mu_vs_B.b * B + this.mat.mu_vs_B.d * B**2))**0.5; 
+                };
+                
+                this.getMuFromH    = function (H) { 
+                    return 1/(this.mat.mu_vs_H.a + this.mat.mu_vs_H.b * H**this.mat.mu_vs_H.c) + this.mat.mu_vs_H.d; 
+                };
+                
+                // Return power loss in Watts:
+                this.getPdFromfB   = function (f, B) { 
+                    return this.core.Ve * 1e-3 * (f / (this.mat.CL_vs_f_B.a / B**3 + this.mat.CL_vs_f_B.b / B**2.3 + this.mat.CL_vs_f_B.c / B**1.65) + this.mat.CL_vs_f_B.d * B**2 * f**2); 
+                };
+                
+                this.getInductance = function (frequency) {
+                    const mu = this.getMuFromFreq(frequency);
+                    //const L = mu * 4.0 * Math.PI * this.N**2 * 1e-9 / this.core.CC;
+                    const CC = this.core.le / this.core.Ae;
+                    const L = mu * 4.0 * Math.PI * this.N**2 * 1e-9 / CC;
+                    return L;
+                };
+
+                this.getReactance = function (frequency) {
+                    const mu = this.getMuFromFreq(frequency);
+                    //const Lo = 4.0 * Math.PI * this.N**2 * 1e-9 / this.core.CC;
+                    const CC = this.core.le / this.core.Ae;
+                    const Lo = 4.0 * Math.PI * this.N**2 * 1e-9 / CC;
+                    const Xs = 2.0 * Math.PI * frequency * Lo * mu;
+                    return Xs;
+                };
+                
+                this.getWireResistance = function(frequency) {
+                    // Calculate AC wire-resistance, using IEC 60287-1-1:
+                    const Ks = 1.0; // Solid core conductor
+                    const xs4 = ((8 * Math.PI * frequency * Ks) / (this.Rdc * 1e7))**2;
+                    const Ys = xs4 / (192.0 + 0.8 * xs4);
+                    const Rac = this.Rdc * (1 + Ys);
+                    return Rac;
+                };
+                
+                this.I_inductor = function (frequency, voltage) {
+                    const K1 = 4.44 * frequency * this.N * this.core.Ae * 1e-8;
+                    const K2 = 0.4 * Math.PI * this.N / this.core.le;
+                    const B = voltage * 1e8 / (4.44 * frequency * this.N * this.core.Ae);
+                    const mu = this.getMuFromFreq(frequency) * this.getMuFromBpk(B) * 1e-2;
+                    return voltage / (mu * K1 * K2 * 1.414);
+                }
+                
+                this.I_wire = function (frequency, voltage) {
+                    const Rac = this.getWireResistance(frequency);
+                    return (voltage / Rac);
+                }
+                
+                this.solve_V_inductor = function (frequency, voltage) {
+                    // Initially assume voltage is divided between wire resistance and inductor core-loss resistance equivalently:
+                    var voltage_upper = voltage;
+                    var voltage_lower = 0.0;
+                    var voltage_fraction = 0.5 * voltage;
+                    var i_inductor = 0.0;
+                    var i_wire = 0.0;
+                    var count = 0;
+                    while(true) {
+                        count++;
+                        i_inductor = this.I_inductor(frequency, (voltage - voltage_fraction));
+                        i_wire = this.I_wire(frequency, voltage_fraction);
+                        
+                        if(count > 60) {
+                            console.log("ERROR!", count);
+                            break;
+                        }
+                        
+                        if(i_inductor > (i_wire * 1.005)) {
+                            voltage_lower = voltage_fraction;
+                            voltage_fraction = 0.5 * (voltage_lower + voltage_upper);
+                            continue;
+                        }
+                        
+                        if(i_wire > (i_inductor * 1.005)) {
+                            voltage_upper = voltage_fraction;
+                            voltage_fraction = 0.5 * (voltage_lower + voltage_upper);
+                            continue;
+                        }
+                        
+                        // Current's are within 1% of each other, which is good-enough for now.
+                        break;
+                    }
+                    const Rac = this.getWireResistance(frequency);
+                    const V = (voltage - voltage_fraction);
+                    //console.log(count, frequency, V, i_wire);
+                    const B = V * 1e8 / (4.44 * frequency * this.N * this.core.Ae);
+                    const Pd = this.getPdFromfB(frequency, B);
+                    const Pw = (i_wire**2 * Rac);
+                    const X = this.getReactance(frequency);
+                    const H = 0.4 * Math.PI * this.N * i_inductor / this.core.le;
+                    const Ri = Pd / i_inductor**2;
+                    const Q = X / (Ri+Rac);
+                    const mu = this.getMuFromFreq(frequency) * this.getMuFromBpk(B) * 1e-2;
+                    const L = this.getInductance(frequency);
+                    return {
+                        V  : V, // Voltage across inductor in the L-R model.
+                        I  : i_wire,
+                        Pd : Pd,
+                        Pw : Pw,
+                        L  : L,
+                        X  : X,
+                        B  : B,
+                        H  : H,
+                        Ri : Ri,
+                        Rac: Rac,
+                        R  : (Ri+Rac),
+                        u  : mu,
+                        Q  : Q,
+                        Z  : (X**2 + (Ri+Rac)**2)**0.5,
+                    }
+                }
+                
+                // frequencies = [] of frequencies in Hz
+                this.recalculate = function (awg, turns_density, voltage, frequencies) {
+                    // Input variables:
+                    // awg = 40.0 - conductor_diameter_slider.value;
+                    this.cond_diameter_meters = 0.001 * awgToMm(awg); 
+                    // voltage = voltage_slider.value;
+                    this.Vrms = 10.0 ** voltage;
+
+                    // Frequency independent characteristics:
+                    this.N_max = Math.PI / (Math.atan2(0.5e3 * this.cond_diameter_meters, (0.5 * this.core.B - 0.5e3 * this.cond_diameter_meters)));
+                    this.N = 1 + Math.round(turns_density * (this.N_max - 1));
+                
+                    //this.cond_length_meters = this.N * (2*this.core.C + this.core.A - this.core.B) * 1e-3;
+                    //this.cond_length_meters = 2e-3 * Math.sqrt ( (Math.PI * 0.5 * (this.core.A + this.core.B))**2 + (this.N * (2*this.core.C + this.core.A - this.core.B))**2 ); 
+                    this.cond_length_meters = 2e-3 * Math.sqrt ( (Math.PI * 0.5 * (this.core.A + this.core.B))**2 + (this.N * (4*(this.cond_diameter_meters*1e3) + 2*this.core.C + this.core.A - this.core.B))**2 ); 
+                    
+                    this.Rdc = 1.68e-8 * this.cond_length_meters / (Math.PI * ((this.cond_diameter_meters*0.5)**2.0));
+                    
+                    //const Cpmult = 12.9*()
+                    //this.C = (0.9 + (78.1/this.N**2))*1e-12;                  // In Farads
+                
+                    this.L = (this.N**2) * this.core.Al * 1.0e-9;      // In Henries
+                    
+                    // Based on David Knight's equation:
+                    this.C = (0.9 + (78.1/this.N**2))*1e-12;                  // In Farads
+                    this.SRF = 1.0/(2.0*Math.PI* Math.sqrt(this.L*this.C));
+                    
+                    // Clear the frequency dependent characteristics before appending new data:
+                    this.L_vs_f = [];
+                    this.Z_vs_f = [];
+                    this.R_vs_f = [];
+                    this.Rac_vs_f = [];
+                    this.X_vs_f = [];
+                    this.Q_vs_f = [];
+                    this.i_vs_f = [];
+                    this.P_vs_f = [];
+                    this.mu_vs_f = [];
+                    this.H_vs_f = [];
+                    this.B_vs_f = [];
+
+                    frequencies.forEach(freq => {
+                        const ind = this.solve_V_inductor(freq, this.Vrms);
+                        
+                        freq *= 1e-3;
+                        
+                        this.mu_vs_f.push({x:freq, y:ind.u});
+                        this.L_vs_f.push({x:freq, y:ind.L*1e6});
+                        this.R_vs_f.push({x:freq, y:ind.Ri});
+                        this.Rac_vs_f.push({x:freq, y:ind.Rac});
+                        this.X_vs_f.push({x:freq, y:ind.X});
+                        this.Q_vs_f.push({x:freq, y:ind.Q});
+                        this.i_vs_f.push({x:freq, y:(ind.I*1e3)});  // in mA
+                        this.P_vs_f.push({x:freq, y:((ind.Pd + ind.Pw)*1e3)});  // in mW
+                        this.Z_vs_f.push({x:freq, y:ind.Z});
+                        this.H_vs_f.push({x:freq, y:ind.H});
+                        this.B_vs_f.push({x:freq, y:ind.B});
+                    });
+                };
+                
+                // 
+                this.calculateInductance = function () {
+                    return this.L_vs_f;
+                };
+                
+                this.calculateImpedance = function () {
+                    return this.Z_vs_f;
+                };
+                
+                this.calculatePermeability = function () {
+                    return this.mu_vs_f;
+                };
+                
+                this.calculateResistance = function () {
+                    return this.R_vs_f;
+                };
+                
+                this.calculateWireResistance = function () {
+                    return this.Rac_vs_f;
+                };
+                
+                this.calculateReactance = function () {
+                    return this.X_vs_f;
+                };
+                
+                this.calculateQualityFactor = function () {
+                    return this.Q_vs_f;
+                };
+                
+                this.calculateCurrent = function () {
+                    return this.i_vs_f;
+                };
+                
+                this.calculatePowerLoss = function () {
+                    return this.P_vs_f;
+                };
+                
+                this.calculateH = function () {
+                    return this.H_vs_f;
+                };
+                
+                this.calculateB = function () {
+                    return this.B_vs_f;
+                };
+                
             };
+            
+            function Controller() {
+                
+                // Define global storage for calculated values, so we don't recalculate the same things multiple times:
+                this.t_mode   = 'Inductor';
+                this.t_size   = 'FT240';
+                this.t_material = '43';
+                this.t_type = 'ferrite';
+                this.frequencies = [];
+                
+                // Create a ferrite and powdered-iron object:
+                this.ferrite = new Ferrite();
+                this.powdered_iron = new PowderedIron();
+                
+                this.toroid = this.ferrite;
+                
+                this.setSize = function (size) {
+                    this.t_size   = size;
+                    this.toroid.setSize(this.t_size);
+                };
+                
+                this.setMaterial = function (material) {
+                    if(material in this.ferrite.cores) {
+                        this.toroid = this.ferrite;
+                        this.toroid.setMaterial(material);
+                        this.t_material = material;
+                        this.t_type = 'ferrite';
+                        
+                        // Now re-configure the chart axes options:
+                        this.myChart.data = {
+                            datasets: [ 
+                            {
+                                label: 'L (\u03bcH)',
+                                fill: false,
+                                borderColor: 'orange',
+                                backgroundColor: 'orange',
+                                data: this.toroid.calculateInductance(),
+                                borderWidth: 1,
+                                yAxisID: 'lID'
+                            },
+                            {
+                                label: '|Z| (\u03A9)',
+                                fill: false,
+                                borderColor: 'black',
+                                backgroundColor: 'black',
+                                data: this.toroid.calculateImpedance(),
+                                borderWidth: 1,
+                                yAxisID: 'ohmsID'
+                            },
+                            {
+                                label: 'X (j\u03A9)',
+                                fill: false,
+                                borderColor: 'blue',
+                                backgroundColor: 'blue',
+                                data: this.toroid.calculateReactance(),
+                                borderWidth: 1,
+                                yAxisID: 'ohmsID'
+                            },
+                            {
+                                label: 'R (\u03A9)',
+                                fill: false,
+                                borderColor: 'red',
+                                backgroundColor: 'red',
+                                data: this.toroid.calculateResistance(),
+                                borderWidth: 1,
+                                yAxisID: 'ohmsID'
+                            },
+                            {
+                                label: 'Q',
+                                fill: false,
+                                borderColor: '#69359C',
+                                backgroundColor: '#9A4EAE',
+                                data: this.toroid.calculateQualityFactor(),
+                                borderWidth: 1,
+                                yAxisID: 'qID'
+                            },
+                            {
+                                label: 'I (mA)',
+                                fill: false,
+                                borderColor: 'rgb(0,128,128)',
+                                backgroundColor: 'rgb(0,118,118)',
+                                data: this.toroid.calculateCurrent(),
+                                borderWidth: 1,
+                                yAxisID: 'ccID'
+                            },
+                            {
+                                label: '\u03bc\'',
+                                fill: false,
+                                borderColor: '#0070FF',
+                                backgroundColor: '#1974D2',
+                                data: this.toroid.calculatePermeability1(),
+                                borderWidth: 1,
+                                yAxisID: 'muID',
+                                hidden: true
+                            },
+                            {
+                                label: '\u03bc\'\'',
+                                fill: false,
+                                borderColor: '#F78FA7',
+                                backgroundColor: '#FFC0CB',
+                                data: this.toroid.calculatePermeability2(),
+                                borderWidth: 1,
+                                yAxisID: 'muID',
+                                hidden: true
+                            },
+                            {
+                                label: 'H(Oe)',
+                                fill: false,
+                                borderColor: '#654321',
+                                backgroundColor: '#986960',
+                                data: this.toroid.calculateH(),
+                                borderWidth: 1,
+                                yAxisID: 'hID',
+                                hidden: true
+                            },
+                            {
+                                label: 'B(G)',
+                                fill: false,
+                                borderColor: '#FFD300',
+                                backgroundColor: '#F0E130',
+                                data: this.toroid.calculateB(),
+                                borderWidth: 1,
+                                yAxisID: 'bID',
+                                hidden: true
+                            },
+                            {
+                                label: 'Pd(mW)',
+                                fill: false,
+                                borderColor: 'rgb(50,50,50)',
+                                backgroundColor: 'rgb(100,100,100)',
+                                data: this.toroid.calculatePowerLoss(),
+                                borderWidth: 1,
+                                yAxisID: 'wattsID',
+                                hidden: false
+                            }]
+                        };
+                    } else
+                    if(material in this.powdered_iron.cores) {
+                        this.toroid = this.powdered_iron;
+                        this.toroid.setMaterial(material);
+                        this.t_material = material;
+                        this.t_type = 'powdered_iron';
+                        
+                        // Now re-configure the chart axes options:
+                        this.myChart.data = {
+                            datasets: [ 
+                            {
+                                label: 'L (\u03bcH)',
+                                fill: false,
+                                borderColor: 'orange',
+                                backgroundColor: 'orange',
+                                data: this.toroid.calculateInductance(),
+                                borderWidth: 1,
+                                yAxisID: 'lID'
+                            },
+                            {
+                                label: '|Z| (\u03A9)',
+                                fill: false,
+                                borderColor: 'black',
+                                backgroundColor: 'black',
+                                data: this.toroid.calculateImpedance(),
+                                borderWidth: 1,
+                                yAxisID: 'ohmsID'
+                            },
+                            {
+                                label: 'X (j\u03A9)',
+                                fill: false,
+                                borderColor: 'blue',
+                                backgroundColor: 'blue',
+                                data: this.toroid.calculateReactance(),
+                                borderWidth: 1,
+                                yAxisID: 'ohmsID'
+                            },
+                            {
+                                label: 'Rc (\u03A9)',
+                                fill: false,
+                                borderColor: 'red',
+                                backgroundColor: 'red',
+                                data: this.toroid.calculateResistance(),
+                                borderWidth: 1,
+                                yAxisID: 'ohmsID'
+                            },
+                            {
+                                label: 'Rw (\u03A9)',
+                                fill: false,
+                                borderColor: '#F78FA7',
+                                backgroundColor: '#FFC0CB',
+                                //borderColor: 'pink',
+                                //backgroundColor: 'pink',
+                                data: this.toroid.calculateWireResistance(),
+                                borderWidth: 1,
+                                yAxisID: 'ohmsID'
+                            },
+                            {
+                                label: 'Q',
+                                fill: false,
+                                borderColor: '#69359C',
+                                backgroundColor: '#9A4EAE',
+                                data: this.toroid.calculateQualityFactor(),
+                                borderWidth: 1,
+                                yAxisID: 'qID'
+                            },
+                            {
+                                label: 'I (mA)',
+                                fill: false,
+                                borderColor: 'rgb(0,128,128)',
+                                backgroundColor: 'rgb(0,118,118)',
+                                data: this.toroid.calculateCurrent(),
+                                borderWidth: 1,
+                                yAxisID: 'ccID'
+                            },
+                            {
+                                label: '\u03bc',
+                                fill: false,
+                                borderColor: '#0070FF',
+                                backgroundColor: '#1974D2',
+                                data: this.toroid.calculatePermeability(),
+                                borderWidth: 1,
+                                yAxisID: 'muID',
+                                hidden: true
+                            },
+                            {
+                                label: 'H(Oe)',
+                                fill: false,
+                                borderColor: '#654321',
+                                backgroundColor: '#986960',
+                                data: this.toroid.calculateH(),
+                                borderWidth: 1,
+                                yAxisID: 'hID',
+                                hidden: true
+                            },
+                            {
+                                label: 'B(G)',
+                                fill: false,
+                                borderColor: '#FFD300',
+                                backgroundColor: '#F0E130',
+                                data: this.toroid.calculateB(),
+                                borderWidth: 1,
+                                yAxisID: 'bID',
+                                hidden: true
+                            },
+                            {
+                                label: 'Pd(mW)',
+                                fill: false,
+                                borderColor: 'rgb(50,50,50)',
+                                backgroundColor: 'rgb(100,100,100)',
+                                data: this.toroid.calculatePowerLoss(),
+                                borderWidth: 1,
+                                yAxisID: 'wattsID',
+                                hidden: false
+                            }]
+                        }
+                        
+                    } else {
+                        console.log("Unrecognised material selected =", material);
+                    }
+                };
+                
+                this.updateFrequencies = function (slider_value) {
+                    this.frequencies = [];
+                    //for(var i = 4.0; i <= 8.0; i+=0.01) {
+                    var f = 1.0 * slider_value;
+                    for(var i = Math.floor(4.00+f); i <= 5.52+f; i+=0.01) {
+                        this.frequencies.push(10.0**i);
+                    }
+                }
+                
+                this.buildSelectors = function () {
+                };
+                
+                this.updateChart = function () {
+                    if(this.t_type == 'ferrite') {
+                        this.myChart.options.plugins.title.text 
+                            = this.ferrite.mat.manufacturer + " " + this.t_size + "-" + this.t_material + " [" + this.ferrite.core.PN + "]";
+                        this.myChart.data.datasets[0].data  = this.ferrite.calculateInductance();
+                        this.myChart.data.datasets[1].data  = this.ferrite.calculateImpedance();
+                        this.myChart.data.datasets[2].data  = this.ferrite.calculateReactance();
+                        this.myChart.data.datasets[3].data  = this.ferrite.calculateResistance();
+                        this.myChart.data.datasets[4].data  = this.ferrite.calculateQualityFactor();
+                        this.myChart.data.datasets[5].data  = this.ferrite.calculateCurrent();
+                        this.myChart.data.datasets[6].data  = this.ferrite.calculatePermeability1();
+                        this.myChart.data.datasets[7].data  = this.ferrite.calculatePermeability2();
+                        this.myChart.data.datasets[8].data  = this.ferrite.calculateH();
+                        this.myChart.data.datasets[9].data  = this.ferrite.calculateB();
+                        this.myChart.data.datasets[10].data = this.ferrite.calculatePowerLoss();
+                        this.myChart.update();
+                    } else {
+                        this.myChart.options.plugins.title.text 
+                            = this.powdered_iron.mat.manufacturer + " " + this.t_size + "-" + this.t_material + " [" + this.powdered_iron.core.PN + "]";
+                        this.myChart.data.datasets[0].data  = this.powdered_iron.calculateInductance();
+                        this.myChart.data.datasets[1].data  = this.powdered_iron.calculateImpedance();
+                        this.myChart.data.datasets[2].data  = this.powdered_iron.calculateReactance();
+                        this.myChart.data.datasets[3].data  = this.powdered_iron.calculateResistance();
+                        this.myChart.data.datasets[4].data  = this.powdered_iron.calculateWireResistance();
+                        this.myChart.data.datasets[5].data  = this.powdered_iron.calculateQualityFactor();
+                        this.myChart.data.datasets[6].data  = this.powdered_iron.calculateCurrent();
+                        this.myChart.data.datasets[7].data  = this.powdered_iron.calculatePermeability();
+                        this.myChart.data.datasets[8].data  = this.powdered_iron.calculateH();
+                        this.myChart.data.datasets[9].data  = this.powdered_iron.calculateB();
+                        this.myChart.data.datasets[10].data  = this.powdered_iron.calculatePowerLoss();
+                        this.myChart.update();
+                    }
+                };
+                
+                this.recalculate = function () {
+                    if(this.t_type == 'ferrite') {
+                        this.ferrite.recalculate(this.frequencies);
+                    } else {
+                        this.powdered_iron.recalculate((40.0 - conductor_diameter_slider.value), loop_turns_slider.value, voltage_slider.value, this.frequencies);
+                    }
+                    drawDesign();
+                };
+                
+                // Startup methods:
+                this.updateFrequencies(voltage_slider.value);
+                
+                this.chartCanvas = document.getElementById("chartCanvas");
+                this.chartCanvasContext = chartCanvas.getContext('2d');
+                
+                this.myChart = new Chart(this.chartCanvasContext, {
+                    type: 'line',
+                    data: {
+                        datasets: [ 
+                        {
+                            label: 'L (\u03bcH)',
+                            fill: false,
+                            borderColor: 'orange',
+                            backgroundColor: 'orange',
+                            data: this.toroid.calculateInductance(),
+                            borderWidth: 1,
+                            yAxisID: 'lID'
+                        },
+                        {
+                            label: '|Z| (\u03A9)',
+                            fill: false,
+                            borderColor: 'black',
+                            backgroundColor: 'black',
+                            data: this.toroid.calculateImpedance(),
+                            borderWidth: 1,
+                            yAxisID: 'ohmsID'
+                        },
+                        {
+                            label: 'X (j\u03A9)',
+                            fill: false,
+                            borderColor: 'blue',
+                            backgroundColor: 'blue',
+                            data: this.toroid.calculateReactance(),
+                            borderWidth: 1,
+                            yAxisID: 'ohmsID'
+                        },
+                        {
+                            label: 'R (\u03A9)',
+                            fill: false,
+                            borderColor: 'red',
+                            backgroundColor: 'red',
+                            data: this.toroid.calculateResistance(),
+                            borderWidth: 1,
+                            yAxisID: 'ohmsID'
+                        },
+                        {
+                            label: 'Q',
+                            fill: false,
+                            borderColor: '#69359C',
+                            backgroundColor: '#9A4EAE',
+                            data: this.toroid.calculateQualityFactor(),
+                            borderWidth: 1,
+                            yAxisID: 'qID'
+                        },
+                        {
+                            label: 'I (mA)',
+                            fill: false,
+                            borderColor: 'rgb(0,128,128)',
+                            backgroundColor: 'rgb(0,118,118)',
+                            data: this.toroid.calculateCurrent(),
+                            borderWidth: 1,
+                            yAxisID: 'ccID'
+                        },
+                        {
+                            label: '\u03bc\'',
+                            fill: false,
+                            borderColor: '#0070FF',
+                            backgroundColor: '#1974D2',
+                            data: this.toroid.calculatePermeability1(),
+                            borderWidth: 1,
+                            yAxisID: 'muID',
+                            hidden: true
+                        },
+                        {
+                            label: '\u03bc\'\'',
+                            fill: false,
+                            borderColor: '#F78FA7',
+                            backgroundColor: '#FFC0CB',
+                            data: this.toroid.calculatePermeability2(),
+                            borderWidth: 1,
+                            yAxisID: 'muID',
+                            hidden: true
+                        },
+                        {
+                            label: 'H(Oe)',
+                            fill: false,
+                            borderColor: '#654321',
+                            backgroundColor: '#986960',
+                            data: this.toroid.calculateH(),
+                            borderWidth: 1,
+                            yAxisID: 'hID',
+                            hidden: true
+                        },
+                        {
+                            label: 'B(G)',
+                            fill: false,
+                            borderColor: '#FFD300',
+                            backgroundColor: '#F0E130',
+                            data: this.toroid.calculateB(),
+                            borderWidth: 1,
+                            yAxisID: 'bID',
+                            hidden: true
+                        },
+                        {
+                            label: 'Pd(mW)',
+                            fill: false,
+                            borderColor: 'rgb(50,50,50)',
+                            backgroundColor: 'rgb(100,100,100)',
+                            data: this.toroid.calculatePowerLoss(),
+                            borderWidth: 1,
+                            yAxisID: 'wattsID',
+                            hidden: false
+                        }]
+                    }, 
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        elements: {
+                            point: {
+                                radius: 0,
+                            },
+                        },
+                        scales: {
+                            x: {
+                                type: 'logarithmic',
+                                position: 'bottom',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: 'Frequency (kHz)',
+                                    color: 'black',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                ticks: {
+                                    autoSkip: false,
+                                }
+                            },
+                            'lID': {
+                                type: 'linear',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: '\u03bcH',
+                                    color: 'black',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                position: 'left',
+                            },
+                            'ohmsID': {
+                                type: 'logarithmic',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: '\u03A9',
+                                    color: 'black',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                position: 'left',
+                            },
+                            'qID' : {
+                                type: 'linear',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: 'Q',
+                                    color: 'purple',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                position: 'left',
+                            },
+                            'ccID' : {
+                                type: 'linear',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: 'mA',
+                                    color: 'rgb(0,128,128)',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                min: 0.0,
+                                position: 'right',
+                            },
+                            'muID' : {
+                                type: 'logarithmic',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: '\u03bc',
+                                    color: 'rgb(128,128,128)',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                min: 0.0,
+                                position: 'right',
+                            },
+                            'hID' : {
+                                type: 'linear',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: 'Oe',
+                                    color: 'rgb(0,128,0)',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                min: 0.0,
+                                position: 'right',
+                            },
+                            'bID' : {
+                                type: 'linear',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: 'G',
+                                    color: 'rgb(55,55,0)',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                min: 0.0,
+                                position: 'left',
+                            },
+                            'wattsID' : {
+                                type: 'linear',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: 'mW',
+                                    color: 'rgb(50,50,50)',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                min: 0.0,
+                                position: 'right',
+                            }
+                        },
+                        plugins : {
+                            //showLines: true,
+                            mode : 'nearest',
+                            title: {
+                                display: true,
+                                text: this.toroid.core.manufacturer + " " + this.t_size + "-" + this.t_material + " [" + this.toroid.core.PN + "]",
+                            },
+                            tooltip: {
+                                enabled: true,
+                                mode: 'index',
+                                intersect: false,
+                                position: 'nearest',
+                                callbacks: {
+                                    title: function(context) {
+                                        var value = context[0].parsed.x;
+                                        var postlabel = " kHz";
+                                        if(value >= 1e6) {
+                                            value *= 1e-6;
+                                            postlabel = " GHz";
+                                        } else 
+                                        if(value >= 1e3) {
+                                            value *= 1e-3;
+                                            postlabel = " MHz";
+                                        } 
+                                        var label = 'Freq = ' + value.toPrecision(3).toString() + postlabel;
+                                        return label;
+                                    },
+                                    label: function(context) {
+                                        var label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ' = ';
+                                        }
+                                        if((label[0] == 'R') || (label[0] == 'X')) {
+                                            if(label[1] != ' ') {
+                                                label = label[0] + label[1] + ' = ';
+                                            } else {
+                                                label = label[0] + ' = ';
+                                            }
+                                            var num = getMetricPrefix(context.element.parsed.y);
+                                            if(num[0] < 1e-15) {
+                                                label += '0.0' + ' ' + num[1] + '\u03A9';
+                                            } else {
+                                                label += num[0].toPrecision(3).toString() + ' ' + num[1] + '\u03A9';
+                                            }
+                                        } else if(label[1] == 'Z') {
+                                            label = '|Z| = ';
+                                            var num = getMetricPrefix(context.element.parsed.y);
+                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + '\u03A9';
+                                        } else if(label[0] == 'L') {
+                                            label = 'L = ';
+                                            var num = getMetricPrefix(context.element.parsed.y * 1e-6);
+                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'H';
+                                        } else if(label[0] == 'I') {
+                                            label = 'I = ';
+                                            var num = getMetricPrefix(context.element.parsed.y * 1e-3);
+                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'A';
+                                        } else if(label[0] == 'B') {
+                                            label = 'B = ';
+                                            var num = getMetricPrefix(context.element.parsed.y);
+                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'G';
+                                        } else if(label[0] == 'H') {
+                                            label = 'H = ';
+                                            var num = getMetricPrefix(context.element.parsed.y);
+                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'Oe';
+                                        } else if(label[0] == 'P') {
+                                            label = 'Pd = ';
+                                            var num = getMetricPrefix(context.element.parsed.y * 1e-3);
+                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'W';
+                                        } else if(label[0] == 'Q') {
+                                            label = 'Q = ';
+                                            var num = getMetricPrefix(context.element.parsed.y);
+                                            label += num[0].toPrecision(3).toString() + ' ' + num[1];
+                                        } else {
+                                            label += context.element.parsed.y.toPrecision(3).toString();
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                    }
+                });
+            };
+            
+            var controller = new Controller();
             
             function acResistance(frequency_hz) {
                 return (toroid.cond_length_meters / (Math.PI * toroid.cond_diameter_meters * cu_sigma * skinDepth(frequency_hz)));
-            }
-
-            function getComplexPermeability(frequency) {
-                // Use the proximityResistance look-up table and interpolate values depending on the spacing ratio and the number of turns.
-                var mu_1 = 0.0;
-                var mu_2 = 0.0;
-
-                var i_before = 0;
-                var i_after = cores[material].complex_mu.freq.length-1;
-                var i = Math.floor((i_after + i_before)/2);
-                
-                while((i_before+1) < i_after) {
-                    if(frequency >= cores[material].complex_mu.freq[i]) {
-                        i_before = i;
-                    } else {
-                        i_after = i;
-                    }
-                    i = Math.floor((i_after + i_before)/2);
-                }
-                
-                // Linear interpolation between empirical proximity resistance values:
-                mu_1 = (((frequency - cores[material].complex_mu.freq[i]) / (cores[material].complex_mu.freq[i+1] - cores[material].complex_mu.freq[i]) 
-                    * (cores[material].complex_mu.mu_1[i+1] - cores[material].complex_mu.mu_1[i])) + cores[material].complex_mu.mu_1[i]);
-                mu_2 = (((frequency - cores[material].complex_mu.freq[i]) / (cores[material].complex_mu.freq[i+1] - cores[material].complex_mu.freq[i]) 
-                    * (cores[material].complex_mu.mu_2[i+1] - cores[material].complex_mu.mu_2[i])) + cores[material].complex_mu.mu_2[i]);
-                
-                return [mu_1, mu_2];
-            }
-            
-            function getImpedance(frequency) {
-                const mu = getComplexPermeability(frequency);
-                //console.log(mu);
-                const Lo = 4.0 * Math.PI * toroid.N**2 * 1e-9 / toroid.core.CC;
-                const Rs = 2.0 * Math.PI * frequency * Lo * mu[1];
-                const Xs = 2.0 * Math.PI * frequency * Lo * mu[0];
-                
-                return { real:Rs , imag:Xs };
             }
 
             function getSRF() {
@@ -592,133 +1759,21 @@
                 return srf;
             }
             
+            function getMaxTurnsFrom() {
+                var cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
+                var N_max  = Math.PI / (Math.atan2(0.5e3 * cond_diameter_meters, (0.5 * toroid.core.B - 0.5e3 * cond_diameter_meters)));
+                return N_max;
+            }
 
-            // Solve all the parameters, and re-draw the canvas:
-            function recalculate() {
-                // Input variables:
-                toroid.core = cores[material].size[t_size];
-                toroid.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
-                toroid.frequency_hz = 10.0**frequency_slider.value;
-                toroid.Vrms = 10.0 ** voltage_slider.value;
-
-                // Frequency independent characteristics:
-                toroid.N_max = Math.PI / (Math.atan2(0.5e3 * toroid.cond_diameter_meters, (0.5 * toroid.core.B - 0.5e3 * toroid.cond_diameter_meters)));
-                toroid.N = 1 + Math.floor(loop_turns_slider.value * toroid.N_max / 100);
-                toroid.L = (toroid.N**2) * toroid.core.Al * 1.0e-9;      // In Henries
-                toroid.B_peak = (toroid.Vrms * 1e8) / (4.44 * toroid.frequency_hz * toroid.N); // 
-                
-                //toroid.cond_length_meters = toroid.N * (2*toroid.core.C + toroid.core.A - toroid.core.B) * 1e-3;
-                toroid.cond_length_meters = 2e-3 * Math.sqrt ( (Math.PI * 0.5 * (toroid.core.A + toroid.core.B))**2 + (toroid.N * (2*toroid.core.C + toroid.core.A - toroid.core.B))**2 ); 
-                toroid.cond_length_meters = 2e-3 * Math.sqrt ( (Math.PI * 0.5 * (toroid.core.A + toroid.core.B))**2 + (toroid.N * (2*(toroid.cond_diameter_meters*1e3) + 2*toroid.core.C + toroid.core.A - toroid.core.B))**2 ); 
-                
-                //toroid.cond_length_meters2 = 2 * Math.PI * M ((2*(h+w)+8*rcw*M)*(L-0.5*M)+ 1.333 * rcw*(1-M**2));
-                
-                toroid.Rdc = 1.68e-8 * toroid.cond_length_meters / (Math.PI * ((toroid.cond_diameter_meters*0.5)**2.0));
-                
-                //const Cpmult = 12.9*()
-                //toroid.C = (0.9 + (78.1/toroid.N**2))*1e-12;                  // In Farads
-                
-                // Based on David Knight's equation:
-                toroid.C = (0.9 + (78.1/toroid.N**2))*1e-12;                  // In Farads
-                toroid.SRF = 1.0/(2.0*Math.PI* Math.sqrt(toroid.L*toroid.C));
-                
-                // Frequency dependent characteristics:
-                toroid.L_vs_f = [];
-                toroid.Z_vs_f = [];
-                toroid.R_vs_f = [];
-                toroid.X_vs_f = [];
-                toroid.Q_vs_f = [];
-                toroid.i_vs_f = [];
-                toroid.P_vs_f = [];
-                toroid.mu1_vs_f = [];
-                toroid.mu2_vs_f = [];
-                toroid.H_vs_f = [];
-                toroid.B_vs_f = [];
-
-                frequencies.forEach(freq => {
-                    const mu = getComplexPermeability(freq);
-                    const Z = getImpedance(freq);
-
-                    // Make freq in kHz from Hz:
-                    freq *= 1e-3;
-                    
-                    toroid.mu1_vs_f.push({x:freq, y:mu[0]});
-                    toroid.mu2_vs_f.push({x:freq, y:mu[1]});
-                    
-                    //toroid.L_vs_f.push({x:freq, y:(Math.sqrt(mu[0]**2 + mu[1]**2) * 4.0 * Math.PI * toroid.N**2 * 1e-3 / toroid.core.CC)});
-                    toroid.L_vs_f.push({x:freq, y:(mu[0] * 4.0 * Math.PI * toroid.N**2 * 1e-3 / toroid.core.CC)});
-                    
-                    toroid.R_vs_f.push({x:freq, y:Z.real});
-                    toroid.X_vs_f.push({x:freq, y:Z.imag});
-                    toroid.Q_vs_f.push({x:freq, y:(Z.imag/Z.real)});
-                    
-                    const ZZ = math.complex(Z.real, Z.imag);
-                    const II = math.divide(toroid.Vrms, ZZ).toPolar();
-                    
-                    toroid.i_vs_f.push({x:freq, y:(II.r*1e3)});  // in mA
-                    //toroid.P_vs_f.push({x:freq, y:((toroid.Vrms**2 / Z.real)*1e3)});
-                    toroid.P_vs_f.push({x:freq, y:((Z.real * II.r**2)*1e3)});  // in mW
-                    toroid.Z_vs_f.push({x:freq, y:(ZZ.toPolar().r)});
-                    
-                    const H = ((0.4 * Math.PI * toroid.N * 1.414 * II.r) / toroid.core.le);
-                    const B = ((toroid.Vrms * 1e8) / (4.44e3 * freq * toroid.N * toroid.core.Ae));
-                    //const B = Math.sqrt(mu[0]**2 + mu[1]**2) * H;
-                    toroid.H_vs_f.push({x:freq, y:H});
-                    toroid.B_vs_f.push({x:freq, y:B});
-                });
-                drawDesign();
-            }
-            
-            function calculateInductance() {
-                return toroid.L_vs_f;
-            }
-            
-            function calculateImpedance() {
-                return toroid.Z_vs_f;
-            }
-            
-            function calculatePermeability1() {
-                return toroid.mu1_vs_f;
-            }
-            
-            function calculatePermeability2() {
-                return toroid.mu2_vs_f;
-            }
-            
-            function calculateResistance() {
-                return toroid.R_vs_f;
-            }
-            
-            function calculateReactance() {
-                return toroid.X_vs_f;
-            }
-            
-            function calculateQualityFactor() {
-                return toroid.Q_vs_f;
-            }
-            
-            function calculateCurrent() {
-                return toroid.i_vs_f;
-            }
-            
-            function calculatePowerLoss() {
-                return toroid.P_vs_f;
-            }
-            
-            function calculateH() {
-                return toroid.H_vs_f;
-            }
-            
-            function calculateB() {
-                return toroid.B_vs_f;
-            }
-            
             function setMode() {
                 var modes = document.getElementsByName("modes");
                 t_mode = modes[0].value;
                 
                 l_inductors = {
-                    sort_order : ["75", "78", "77", "79", "43", "43_old", "80", "52", "61", "67"],
+                    sort_order : {
+                        "Ferrites" : ["75", "78", "77", "79", "43", "43_old", "80", "52", "61", "67"],
+                        "Powdered Iron" : ["2", "6", "10", "0"]
+                    },
                     "75":"75 [\u03bci=5000]",
                     "78":"78 [\u03bci=2300]",
                     "77":"77 [\u03bci=2000]",
@@ -728,10 +1783,16 @@
                     "80":"80 [\u03bci=600]",
                     "52":"52 [\u03bci=250]",
                     "61":"61 [\u03bci=125]",
-                    "67":"67 [\u03bci=40]"};
+                    "67":"67 [\u03bci=40]",
+                     "2":"2  [\u03bci=10]",
+                     "6":"6  [\u03bci=8.5]",
+                    "10":"10 [\u03bci=6]",
+                     "0":"0 [\u03bci=1]"};
                 
                 l_suppressors = {
-                    sort_order : ["61", "46", "43", "31", "75"],
+                    sort_order : {
+                        "Ferrites" : ["61", "46", "43", "31", "75"],
+                    }, 
                     "61":"61 [200 MHz - 1 GHz]",
                     "46":"46 [25 MHz - 300 MHz]",
                     "43":"43 [25 MHz - 300 MHz]",
@@ -751,46 +1812,39 @@
                     l_mat_selected = l_inductors;
                 } 
                 
-                // Now insert only the sizes that exist for this material:
-                l_mat_selected.sort_order.forEach(function (key){
-                    // Create an option tag:
-                    if(material == key) {
-                        // This is so that if the size was selected and still exists, then maintain the setting:
-                        l_materials.appendChild(new Option(l_mat_selected[key], key, false, true));
-                    } else {
-                        l_materials.appendChild(new Option(l_mat_selected[key], key));
-                    }
+                // Create the optgroup:
+                Object.keys(l_mat_selected.sort_order).forEach(function (kk) {
+                    var optgroup = document.createElement("OPTGROUP");
+                    optgroup.setAttribute("label", kk)
+                
+                    // Now insert only the sizes that exist for this material:
+                    l_mat_selected.sort_order[kk].forEach(function (key){
+                        // Create an option tag:
+                        if(controller.t_material == key) {
+                            // This is so that if the size was selected and still exists, then maintain the setting:
+                            optgroup.appendChild(new Option(l_mat_selected[key], key, false, true));
+                        } else {
+                            optgroup.appendChild(new Option(l_mat_selected[key], key));
+                        }
+                    });
+                    
+                    l_materials.appendChild(optgroup);
                 });
                 
-                if(!(material in l_mat_selected)) {
-                    material = Object.keys(l_mat_selected)[0];
+                if(!(controller.t_material in l_mat_selected)) {
+                    controller.t_material = Object.keys(l_mat_selected)[0];
                 }
                 // Now rebuild the size DOM for the selected material:
                 rebuildSizeDOM();
             }
             
-            function updateChart() {
-                myChart.options.plugins.title.text = cores[material].manufacturer + " " + t_size + "-" + material + " [" + toroid.core.PN + "]";
-                myChart.data.datasets[0].data = calculateInductance();
-                myChart.data.datasets[1].data = calculateImpedance();
-                myChart.data.datasets[2].data = calculateResistance();
-                myChart.data.datasets[3].data = calculateReactance();
-                myChart.data.datasets[4].data = calculateQualityFactor();
-                myChart.data.datasets[5].data = calculateCurrent();
-                myChart.data.datasets[6].data = calculatePermeability1();
-                myChart.data.datasets[7].data = calculatePermeability2();
-                myChart.data.datasets[8].data = calculateH();
-                myChart.data.datasets[9].data = calculateB();
-                myChart.data.datasets[10].data = calculatePowerLoss();
-                myChart.update();
-            }
-            
             function setToroid() {
                 //console.log("setToroid()")
                 var toroids = document.getElementsByName("toroids");
-                t_size = toroids[0].value;
-                recalculate()
-                updateChart();
+                //controller.t_size = toroids[0].value;
+                controller.setSize(toroids[0].value);
+                controller.recalculate();
+                controller.updateChart();
             }
             
             function rebuildSizeDOM() {
@@ -801,30 +1855,30 @@
                 }
                 
                 // Now insert only the sizes that exist for this material:
-                for(const key in cores[material].size) {
+                for(const key in controller.toroid.mat.size) {
                     // Create an option tag:
-                    if(t_size == key) {
+                    if(controller.t_size == key) {
                         // This is so that if the size was selected and still exists, then maintain the setting:
                         toroid_sizes.appendChild(new Option(key, key, false, true));
                     } else {
                         toroid_sizes.appendChild(new Option(key, key));
                     }
                 }
-                if(!(t_size in cores[material].size)) {
+                if(!(controller.t_size in controller.toroid.mat.size)) {
                     //console.log(t_size + " NOT exists!");
-                    t_size = Object.keys(cores[material].size)[0];
+                    controller.setSize(Object.keys(controller.toroid.mat.size)[0]);
                 }
             }
 
             function setMaterial() {
                 //console.log("setMaterial()")
                 var materials = document.getElementsByName("materials");
-                material = materials[0].value;
+                controller.setMaterial(materials[0].value);
                 
                 // Rebuild the list of available sizes for this material type:
                 rebuildSizeDOM();
-                recalculate()
-                updateChart();
+                controller.recalculate()
+                controller.updateChart();
             }
 
             // Limit how often we update the chart, as it is quite a slow operation. But updating the graphic
@@ -835,81 +1889,104 @@
             var conductor_diameter_timer_handler = 0;
             conductor_diameter_slider.oninput = function() {
                 // Check if we have exceeded the maximum turns:
-                //const max_N = getMaxTurnsFrom();
-                //if(max_N > toroid.N) {
-                //    loop_turns_slider.value = (toroid.N * 100.0) / max_N;
-                //}
+                /*
+                const max_N = getMaxTurnsFrom();
+                if(max_N > toroid.N) {
+                    var temp = loop_turns_slider.value;
+                    loop_turns_slider.value = (((1+(temp*(toroid.N_max-1)))-1) / (max_N-1));
+                }
+                */
                 
-                recalculate();
+                controller.recalculate();
                 
                 if(conductor_diameter_timer_handler != 0) {
                     clearTimeout(conductor_diameter_timer_handler);
                 } 
                 
                 conductor_diameter_timer_handler = setTimeout(function(){
-                    updateChart();
+                    controller.updateChart();
                     conductor_diameter_timer_handler = 0;
                 }, emphasis_delay);
             }
 
             var loop_turns_timer_handler = 0;
             loop_turns_slider.oninput = function() {
-                recalculate();
+                controller.recalculate();
 
                 if(loop_turns_timer_handler != 0) {
                     clearTimeout(loop_turns_timer_handler);
                 } 
                 
                 loop_turns_timer_handler = setTimeout(function(){
-                    updateChart();
+                    controller.updateChart();
                     loop_turns_timer_handler = 0;
                 }, emphasis_delay);
 
-                generateTurnsRatioLUT(loop_turns_slider.value);
+                //generateTurnsRatioLUT(loop_turns_slider.value);
             }
 
             var frequency_timer_handler = 0;
             frequency_slider.oninput = function() {
-                updateFrequencies();
-                recalculate();
+                controller.updateFrequencies(frequency_slider.value);
+                controller.recalculate();
 
                 if(frequency_timer_handler != 0) {
                     clearTimeout(frequency_timer_handler);
                 }
 
                 frequency_timer_handler = setTimeout(function(){
-                    updateChart();
+                    controller.updateChart();
                     frequency_timer_handler = 0;
                 }, emphasis_delay);
             }
 
             var voltage_timer_handler = 0;
             voltage_slider.oninput = function() {
-                recalculate();
+                controller.recalculate();
                 
                 if(voltage_timer_handler != 0) {
                     clearTimeout(voltage_timer_handler);
                 } 
                 
                 voltage_timer_handler = setTimeout(function(){
-                    updateChart();
+                    controller.updateChart();
                     voltage_timer_handler = 0;
                 }, emphasis_delay);
             }
 
             window.onresize = function() {
-                recalculate();
-                updateChart();
+                controller.recalculate();
+                controller.updateChart();
             }
 
             window.onorientationchange = function() {
-                recalculate();
-                updateChart();
+                controller.recalculate();
+                controller.updateChart();
             }
 
             window.onbeforeprint = function() {
                 console.log("onbeforeprint");
-                drawDesign();
+                controller.drawDesign();
+            }
+            
+            // 
+            function generateTurnsRatioLUT(max_turns) {
+                var res = {};
+                var ss = [];
+                
+                for(var i=1; i<=max_turns; i++) {
+                    for(var j=i; j<=max_turns; j++) {
+                        res[j/i] = [i,j];
+                        ss.push(j/i);
+                    }
+                }
+                var kk = Object.keys(res).sort();
+                var jj = [];
+                kk.forEach(element => {
+                    jj.push([element, res[element][0], res[element][1]]);
+                });
+                console.log(ss.sort());
+                return res;
             }
 
             const afront_canvas = document.getElementById("inductor2D");
@@ -964,8 +2041,8 @@
                 fctx.font = "12px arial";
                 fctx.fillStyle = "black"; 
                 fctx.textAlign = "center";
-                fctx.fillText((toroid.core.C).toFixed(1) + " mm", side_originX + 0.5*width, originY + outerRadius + 20);
-                fctx.fillText("(" + (toroid.core.C*0.03937).toFixed(3) + "\")", side_originX + 0.5*width, originY + outerRadius + 34);
+                fctx.fillText((controller.toroid.core.C).toFixed(1) + " mm", side_originX + 0.5*width, originY + outerRadius + 20);
+                fctx.fillText("(" + (controller.toroid.core.C*0.03937).toFixed(3) + "\")", side_originX + 0.5*width, originY + outerRadius + 34);
                 
                 // Draw wire winding around top cross-section view: 
                 fctx.strokeStyle = "black"; 
@@ -1051,8 +2128,8 @@
                 
                 fctx.font = "12px arial";
                 fctx.textAlign = "right";
-                fctx.fillText((toroid.core.A).toFixed(1) + " mm", front_originX - outerRadius - 24, originY - 6);
-                fctx.fillText("(" + (toroid.core.A*0.03937).toFixed(3) + "\")", front_originX - outerRadius - 24, originY + 6);
+                fctx.fillText((controller.toroid.core.A).toFixed(1) + " mm", front_originX - outerRadius - 24, originY - 6);
+                fctx.fillText("(" + (controller.toroid.core.A*0.03937).toFixed(3) + "\")", front_originX - outerRadius - 24, originY + 6);
             }
 
             function drawTransformer(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
@@ -1143,18 +2220,18 @@
 
                 fctx.clearRect(0, 0, win_width, win_height);
                 const outer_radius = 0.15 * win_height; 
-                var cond_radius = outer_radius * toroid.cond_diameter_meters * 1e3 / toroid.core.A;
+                var cond_radius = outer_radius * controller.toroid.cond_diameter_meters * 1e3 / controller.toroid.core.A;
                 const loopx = win_width/2; 
                 const loopy = win_height/2;
 
-                const loop_diameter_mm = toroid.core.A;
-                const cond_diameter_mm = toroid.cond_diameter_meters * 1000.0;
+                const loop_diameter_mm = controller.toroid.core.A;
+                const cond_diameter_mm = controller.toroid.cond_diameter_meters * 1000.0;
                 const loop_diameter_inches = loop_diameter_mm / 25.4;
                 const cond_diameter_inches = cond_diameter_mm / 25.4;
 
-                let inner_radius = outer_radius * toroid.core.B / toroid.core.A;
-                let thickness = 2.0 * outer_radius * toroid.core.C / toroid.core.A;
-                drawInductor(fctx, loopx, loopy, outer_radius, inner_radius, cond_radius, toroid.N, thickness);
+                let inner_radius = outer_radius * controller.toroid.core.B / controller.toroid.core.A;
+                let thickness = 2.0 * outer_radius * controller.toroid.core.C / controller.toroid.core.A;
+                drawInductor(fctx, loopx, loopy, outer_radius, inner_radius, cond_radius, controller.toroid.N, thickness);
                 //drawTransformer(fctx, loopx, loopy, outer_radius, inner_radius, cond_radius, toroid.N);
 
                 const y_offset = loopy + outer_radius + 20;
@@ -1169,51 +2246,52 @@
                 // Write loop inductance:
                 fctx.font = "12px arial";
                 fctx.textAlign = "left";
-                const L = toroid.L * 1.0e+6;
+                const L = controller.toroid.L * 1.0e+6;
                 fctx.fillText("L\u1d62 = " + L.toFixed(0).toString() + " \u03bcH", 8, 18);
-                fctx.fillText("Rdc = " + toroid.Rdc.toFixed(3) + " \u03A9", 8, 32);
-                fctx.fillText("Vrms = " + toroid.Vrms.toFixed(2) + " V", 8, 46);
+                fctx.fillText("Rdc = " + controller.toroid.Rdc.toFixed(3) + " \u03A9", 8, 32);
+                fctx.fillText("Vrms = " + controller.toroid.Vrms.toFixed(2) + " V", 8, 46);
                 
                 //fctx.fillStyle = "lightgrey";
                 //fctx.fillText("Ceff = " + (toroid.C*1e12).toFixed(1) + " pF", 8, win_height - 28);
                 //fctx.fillText("SRF = " + (toroid.SRF*1e-6).toFixed(2) + " MHz", 8, win_height - 14);
-                //fctx.fillStyle = "lightgrey";
-                fctx.fillStyle = "grey";
-                fctx.fillText("Ceff \u2248 " + (toroid.C*1e12).toFixed(1) + " pF", 8, win_height - 28);
-                fctx.fillText("SRF \u2248 " + (toroid.SRF*1e-6).toFixed(2) + " MHz", 8, win_height - 14);
+                fctx.fillStyle = "lightgrey";
+                //fctx.fillStyle = "grey";
+                fctx.fillText("Ceff \u2248 " + (controller.toroid.C*1e12).toFixed(1) + " pF", 8, win_height - 28);
+                fctx.fillText("SRF \u2248 " + (controller.toroid.SRF*1e-6).toFixed(2) + " MHz", 8, win_height - 14);
                 //fctx.fillText("SRF = " + (getSRF()*1e-6).toFixed(1) + " MHz", 8, win_height - 14);
                 fctx.fillStyle = "black";
                 
                 fctx.textAlign = "center";
                 fctx.font = "bold 16px courier";
                 fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, 20);
-                fctx.fillText("N = " + toroid.N.toString(), loopx, win_height - 28);
+                fctx.fillText("N = " + controller.toroid.N.toString(), loopx, win_height - 28);
                 
                 fctx.font = "12px arial";
-                fctx.fillText("wire = " + (toroid.cond_length_meters*100.0).toFixed(1)+ " cm (" + (3.2808399*toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
+                fctx.fillText("wire = " + (controller.toroid.cond_length_meters*100.0).toFixed(1)+ " cm (" + (3.2808399*controller.toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
                 //fctx.fillText("(" + (3.2808399*toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
                 
-                fctx.fillText("\u2300 = " + (1e3 * toroid.cond_diameter_meters).toFixed(3) + " mm" , loopx, 34);
-                fctx.fillText("(" + (39.37007874 * toroid.cond_diameter_meters).toFixed(3) + "\")", loopx, 48);
+                fctx.fillText("\u2300 = " + (1e3 * controller.toroid.cond_diameter_meters).toFixed(3) + " mm" , loopx, 34);
+                fctx.fillText("(" + (39.37007874 * controller.toroid.cond_diameter_meters).toFixed(3) + "\")", loopx, 48);
                 
                 // Top right text:
                 fctx.textAlign = "right";
-                fctx.fillText(material + " Material", win_width-18, 18);
-                fctx.fillText("\u03bci  = " + cores[material].mu_i, win_width-18, 32);
-                fctx.fillText("B  = " + cores[material].B + " G",   win_width-18, 46);
-                fctx.fillText("H  = " + cores[material].H + " Oe",  win_width-18, 60);
-                fctx.fillText("Br = " + cores[material].Br + " G",  win_width-18, 74);
-                fctx.fillText("Hc = " + cores[material].Hc + " Oe", win_width-18, 88);
-                fctx.fillText("Tc >= " + cores[material].Tc + " C",  win_width-18, 102);
-                fctx.fillText("\u03C1 = " + cores[material].R.toPrecision(2) + " \u03A9", win_width-18, 116);
-                fctx.fillText("[" + cores[material].mat + "]", win_width-18, 130);
-                fctx.fillText("[" + toroid.core.PN + "]", win_width-18, 144);
+                fctx.fillText(controller.t_material + " Material", win_width-18, 18);
+                fctx.fillText("\u03bci  = " + controller.toroid.mat.mu_i, win_width-18, 32);
+                fctx.fillText("B  = " + controller.toroid.mat.B + " G",   win_width-18, 46);
+                fctx.fillText("H  = " + controller.toroid.mat.H + " Oe",  win_width-18, 60);
+                fctx.fillText("Br = " + controller.toroid.mat.Br + " G",  win_width-18, 74);
+                fctx.fillText("Hc = " + controller.toroid.mat.Hc + " Oe", win_width-18, 88);
+                fctx.fillText("Tc >= " + controller.toroid.mat.Tc + " C",  win_width-18, 102);
+                //fctx.fillText("\u03C1 = " + controller.toroid.mat.R.toPrecision(2) + " \u03A9", win_width-18, 116);
+                fctx.fillText("[" + controller.toroid.mat.mat + "]", win_width-18, 130);
+                fctx.fillText("[" + controller.toroid.core.PN + "]", win_width-18, 144);
             }
             
             function getMetricPrefix(num) {
                 if(num >= 1e9) return [num*1e-9, 'G'];
                 if(num >= 1e6) return [num*1e-6, 'M'];
                 if(num >= 1e3) return [num*1e-3, 'k'];
+                if(num < 1e-12) return [num*1e15, 'f'];
                 if(num < 1e-9) return [num*1e12, 'p'];
                 if(num < 1e-6) return [num*1e9, 'n'];
                 if(num < 1e-3) return [num*1e6, '\u03bc'];
@@ -1221,329 +2299,9 @@
                 return [num, ''];
             }
             
-            const chartCanvas = document.getElementById("chartCanvas");
-            const chartCanvasContext = chartCanvas.getContext('2d');
-            
-            updateFrequencies();
-            //rebuildSizeDOM();
             setMode();
-            recalculate();
-            
-            var myChart = new Chart(chartCanvasContext, {
-                type: 'line',
-                data: {
-                    datasets: [ 
-                    {
-                        label: 'L (\u03bcH)',
-                        fill: false,
-                        borderColor: 'orange',
-                        backgroundColor: 'orange',
-                        data: calculateInductance(),
-                        borderWidth: 1,
-                        yAxisID: 'lID'
-                    },
-                    {
-                        label: '|Z| (\u03A9)',
-                        fill: false,
-                        borderColor: 'black',
-                        backgroundColor: 'black',
-                        data: calculateImpedance(),
-                        borderWidth: 1,
-                        yAxisID: 'ohmsID'
-                    },
-                    {
-                        label: 'R (\u03A9)',
-                        fill: false,
-                        borderColor: 'red',
-                        backgroundColor: 'red',
-                        data: calculateResistance(),
-                        borderWidth: 1,
-                        yAxisID: 'ohmsID'
-                    },
-                    {
-                        label: 'X (j\u03A9)',
-                        fill: false,
-                        borderColor: 'blue',
-                        backgroundColor: 'blue',
-                        data: calculateReactance(),
-                        borderWidth: 1,
-                        yAxisID: 'ohmsID'
-                    },
-                    {
-                        label: 'Q',
-                        fill: false,
-                        borderColor: '#69359C',
-                        backgroundColor: '#9A4EAE',
-                        data: calculateQualityFactor(),
-                        borderWidth: 1,
-                        yAxisID: 'qID'
-                    },
-                    {
-                        label: 'I (mA)',
-                        fill: false,
-                        borderColor: 'rgb(0,128,128)',
-                        backgroundColor: 'rgb(0,118,118)',
-                        data: calculateCurrent(),
-                        borderWidth: 1,
-                        yAxisID: 'ccID'
-                    },
-                    {
-                        label: '\u03bc\'',
-                        fill: false,
-                        borderColor: '#0070FF',
-                        backgroundColor: '#1974D2',
-                        data: calculatePermeability1(),
-                        borderWidth: 1,
-                        yAxisID: 'muID',
-                        hidden: true
-                    },
-                    {
-                        label: '\u03bc\'\'',
-                        fill: false,
-                        borderColor: '#F78FA7',
-                        backgroundColor: '#FFC0CB',
-                        data: calculatePermeability2(),
-                        borderWidth: 1,
-                        yAxisID: 'muID',
-                        hidden: true
-                    },
-                    {
-                        label: 'H(Oe)',
-                        fill: false,
-                        borderColor: '#654321',
-                        backgroundColor: '#986960',
-                        data: calculateH(),
-                        borderWidth: 1,
-                        yAxisID: 'hID',
-                        hidden: true
-                    },
-                    {
-                        label: 'B(G)',
-                        fill: false,
-                        borderColor: '#FFD300',
-                        backgroundColor: '#F0E130',
-                        data: calculateB(),
-                        borderWidth: 1,
-                        yAxisID: 'bID',
-                        hidden: true
-                    },
-                    {
-                        label: 'Pd(mW)',
-                        fill: false,
-                        borderColor: 'rgb(50,50,50)',
-                        backgroundColor: 'rgb(100,100,100)',
-                        data: calculatePowerLoss(),
-                        borderWidth: 1,
-                        yAxisID: 'wattsID',
-                        hidden: false
-                    }]
-                }, 
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    elements: {
-                        point: {
-                            radius: 0,
-                        },
-                    },
-                    scales: {
-                        x: {
-                            type: 'logarithmic',
-                            position: 'bottom',
-                            display: 'auto',
-                            title: {
-                                display: true,
-                                text: 'Frequency (kHz)',
-                                color: 'black',
-                                font: {
-                                    weight : 'bold'
-                                }
-                            },
-                            ticks: {
-                                autoSkip: false,
-                            }
-                        },
-                        'lID': {
-                            type: 'linear',
-                            display: 'auto',
-                            title: {
-                                display: true,
-                                text: '\u03bcH',
-                                color: 'black',
-                                font: {
-                                    weight : 'bold'
-                                }
-                            },
-                            position: 'left',
-                        },
-                        'ohmsID': {
-                            type: 'logarithmic',
-                            display: 'auto',
-                            title: {
-                                display: true,
-                                text: '\u03A9',
-                                color: 'black',
-                                font: {
-                                    weight : 'bold'
-                                }
-                            },
-                            position: 'left',
-                        },
-                        'qID' : {
-                            type: 'linear',
-                            display: 'auto',
-                            title: {
-                                display: true,
-                                text: 'Q',
-                                color: 'purple',
-                                font: {
-                                    weight : 'bold'
-                                }
-                            },
-                            position: 'left',
-                        },
-                        'ccID' : {
-                            type: 'linear',
-                            display: 'auto',
-                            title: {
-                                display: true,
-                                text: 'mA',
-                                color: 'rgb(0,128,128)',
-                                font: {
-                                    weight : 'bold'
-                                }
-                            },
-                            min: 0.0,
-                            position: 'right',
-                        },
-                        'muID' : {
-                            type: 'logarithmic',
-                            display: 'auto',
-                            title: {
-                                display: true,
-                                text: '\u03bc',
-                                color: 'rgb(128,128,128)',
-                                font: {
-                                    weight : 'bold'
-                                }
-                            },
-                            min: 0.0,
-                            position: 'right',
-                        },
-                        'hID' : {
-                            type: 'linear',
-                            display: 'auto',
-                            title: {
-                                display: true,
-                                text: 'Oe',
-                                color: 'rgb(0,128,0)',
-                                font: {
-                                    weight : 'bold'
-                                }
-                            },
-                            min: 0.0,
-                            position: 'right',
-                        },
-                        'bID' : {
-                            type: 'linear',
-                            display: 'auto',
-                            title: {
-                                display: true,
-                                text: 'G',
-                                color: 'rgb(55,55,0)',
-                                font: {
-                                    weight : 'bold'
-                                }
-                            },
-                            min: 0.0,
-                            position: 'left',
-                        },
-                        'wattsID' : {
-                            type: 'linear',
-                            display: 'auto',
-                            title: {
-                                display: true,
-                                text: 'mW',
-                                color: 'rgb(50,50,50)',
-                                font: {
-                                    weight : 'bold'
-                                }
-                            },
-                            min: 0.0,
-                            position: 'right',
-                        }
-                    },
-                    plugins : {
-                        //showLines: true,
-                        mode : 'nearest',
-                        title: {
-                            display: true,
-                            text: "Fair-Rite " + t_size + "-" + material + " [" + toroid.core.PN + "]",
-                            text: cores[material].manufacturer + " " + t_size + "-" + material + " [" + toroid.core.PN + "]",
-                        },
-                        tooltip: {
-                            enabled: true,
-                            mode: 'index',
-                            intersect: false,
-                            position: 'nearest',
-                            callbacks: {
-                                title: function(context) {
-                                    var value = context[0].parsed.x;
-                                    var postlabel = " kHz";
-                                    if(value >= 1e6) {
-                                        value *= 1e-6;
-                                        postlabel = " GHz";
-                                    } else 
-                                    if(value >= 1e3) {
-                                        value *= 1e-3;
-                                        postlabel = " MHz";
-                                    } 
-                                    var label = 'Freq = ' + value.toPrecision(3).toString() + postlabel;
-                                    return label;
-                                },
-                                label: function(context) {
-                                    var label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ' = ';
-                                    }
-                                    if((label[0] == 'R') || (label[0] == 'X')) {
-                                        label = label[0] + ' = ';
-                                        var num = getMetricPrefix(context.element.parsed.y);
-                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + '\u03A9';
-                                    } else if(label[1] == 'Z') {
-                                        label = '|Z| = ';
-                                        var num = getMetricPrefix(context.element.parsed.y);
-                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + '\u03A9';
-                                    } else if(label[0] == 'L') {
-                                        label = 'L = ';
-                                        var num = getMetricPrefix(context.element.parsed.y * 1e-6);
-                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'H';
-                                    } else if(label[0] == 'I') {
-                                        label = 'I = ';
-                                        var num = getMetricPrefix(context.element.parsed.y * 1e-3);
-                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'A';
-                                    } else if(label[0] == 'B') {
-                                        label = 'B = ';
-                                        var num = getMetricPrefix(context.element.parsed.y);
-                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'G';
-                                    } else if(label[0] == 'H') {
-                                        label = 'H = ';
-                                        var num = getMetricPrefix(context.element.parsed.y);
-                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'Oe';
-                                    } else if(label[0] == 'P') {
-                                        label = 'Pd = ';
-                                        var num = getMetricPrefix(context.element.parsed.y * 1e-3);
-                                        label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'W';
-                                    } else {
-                                        label += context.element.parsed.y.toPrecision(3).toString();
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                }
-            });
+            controller.recalculate();
+            controller.updateChart();
         </script>
     </body>
 </html>
