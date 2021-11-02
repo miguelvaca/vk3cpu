@@ -758,8 +758,7 @@
                         manufacturer : "Micrometals",
                         mat     : "Phenolic",
                         mu_i    : 1,
-                        B       : 14800.0,
-                        H       : 1480.0,
+                        Bsat    : 14800.0,
                         Br      : 0.0,
                         Hc      : 0.0,
                         mu_vs_f : { a:1.0e1, b:1.0e-90, c:1.00e1, d:1.0e-90 }, 
@@ -785,10 +784,9 @@
                             'T25'  : { PN:'T25-2',  A:6.48,  B:3.05,  C:2.44,  W:0.275, CC:0.0, le:1.50, Ae:0.037, Ve:0.055, Al:3.4 },
                         },
                         manufacturer : "Micrometals",
-                        mat     : "Carbonyl E",
+                        mat     : "Carbonyl Iron",
                         mu_i    : 10,
-                        B       : 14800.0,
-                        H       : 1480.0,
+                        Bsat    : 14800.0,
                         Br      : 30.0,
                         Hc      : 3.0,
                         mu_vs_f : { a:1.11e-1, b:7.01e-11, c:9.00e-1, d:1.0e0 },
@@ -812,10 +810,9 @@
                             'T25'  : { PN:'T25-6',  A:6.48,  B:3.05,  C:2.44,  W:0.275, CC:0.0, le:1.50, Ae:0.037, Ve:0.055, Al:2.7 },
                         },
                         manufacturer : "Micrometals",
-                        mat     : "Carbonyl E",
+                        mat     : "Carbonyl Iron",
                         mu_i    : 8.5,
-                        B       : 14800.0,
-                        H       : 1740.0,
+                        Bsat    : 14800.0,
                         Br      : 26.0,
                         Hc      : 3.0,
                         mu_vs_f : { a:1.33e-1, b:7.01e-11, c:9.00e-1, d:1.0e0 },
@@ -835,10 +832,9 @@
                             'T37'  : { PN:'T37-10',  A:9.53,  B:5.21,  C:3.25,  W:0.72,  CC:0.0, le:2.31, Ae:0.064, Ve:0.147, Al:2.5 },
                         },
                         manufacturer : "Micrometals",
-                        mat     : "Carbonyl E",
+                        mat     : "Carbonyl Iron",
                         mu_i    : 6,
-                        B       : 14600.0,
-                        H       : 2430.0,
+                        Bsat    : 14600.0,
                         Br      : 18.0,
                         Hc      : 3.0,
                         mu_vs_f : { a:2.00e-1, b:7.01e-11, c:9.00e-1, d:1.0e0 },
@@ -1364,9 +1360,6 @@
                         this.frequencies.push(10.0**i);
                     }
                 }
-                
-                this.buildSelectors = function () {
-                };
                 
                 this.updateChart = function () {
                     if(this.t_type == 'ferrite') {
@@ -2277,16 +2270,25 @@
                 
                 // Top right text:
                 fctx.textAlign = "right";
-                fctx.fillText(controller.t_material + " Material", win_width-18, 18);
-                fctx.fillText("\u03bci  = " + controller.toroid.mat.mu_i, win_width-18, 32);
-                fctx.fillText("B  = " + controller.toroid.mat.B + " G",   win_width-18, 46);
-                fctx.fillText("H  = " + controller.toroid.mat.H + " Oe",  win_width-18, 60);
-                fctx.fillText("Br = " + controller.toroid.mat.Br + " G",  win_width-18, 74);
-                fctx.fillText("Hc = " + controller.toroid.mat.Hc + " Oe", win_width-18, 88);
-                fctx.fillText("Tc >= " + controller.toroid.mat.Tc + " C",  win_width-18, 102);
-                //fctx.fillText("\u03C1 = " + controller.toroid.mat.R.toPrecision(2) + " \u03A9", win_width-18, 116);
-                fctx.fillText("[" + controller.toroid.mat.mat + "]", win_width-18, 130);
-                fctx.fillText("[" + controller.toroid.core.PN + "]", win_width-18, 144);
+                fctx.fillText("Size " + controller.t_size, win_width-18, 18);
+                fctx.fillText("Material " + controller.t_material, win_width-18, 32);
+                fctx.fillText("\u03bci  = " + controller.toroid.mat.mu_i, win_width-18, 46);
+                if(controller.toroid.mat.B) {
+                    fctx.fillText("B  = " + controller.toroid.mat.B + " G",   win_width-18, 60);
+                    fctx.fillText("H  = " + controller.toroid.mat.H + " Oe",  win_width-18, 74);
+                    fctx.fillText("Br = " + controller.toroid.mat.Br + " G",  win_width-18, 88);
+                    fctx.fillText("Hc = " + controller.toroid.mat.Hc + " Oe", win_width-18, 102);
+                    fctx.fillText("Tc >= " + controller.toroid.mat.Tc + " C",  win_width-18, 116);
+                    fctx.fillText("Type = " + controller.toroid.mat.mat, win_width-18, 130);
+                    fctx.fillText("[" + controller.toroid.core.PN + "]", win_width-18, 144);
+                } else {
+                    fctx.fillText("Bsat  = " + controller.toroid.mat.Bsat + " G",   win_width-18, 60);
+                    fctx.fillText("Br = " + controller.toroid.mat.Br + " G",  win_width-18, 74);
+                    fctx.fillText("Hc = " + controller.toroid.mat.Hc + " Oe", win_width-18, 88);
+                    fctx.fillText("Mass = " + controller.toroid.core.W + " g", win_width-18, 102);
+                    fctx.fillText("Type = " + controller.toroid.mat.mat, win_width-18, 116);
+                    fctx.fillText("[" + controller.toroid.core.PN + "]", win_width-18, 130);
+                }
             }
             
             function getMetricPrefix(num) {
