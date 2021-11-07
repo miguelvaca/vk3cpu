@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="toroid.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.9b<br></header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.9c<br></header>
         <section class="gridLayoutClass">
             <div id="chart-container" class="chart-container">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -144,6 +144,13 @@
             Inductance and reactance values correspond well with those predicted by online calculators such as toroids.info.
             However, predictions for Q have mixed results when compared to the Micrometals Q-Curve Catalog found <a href="https://s3.amazonaws.com/micrometals-production/filer_public/7e/d0/7ed096a0-fe6e-4df1-9da9-e129c1ee73d2/q_curve_catalog_issue_h.pdf">HERE</a>.
             I suggest using their catalog for accurate Q prediction. It has been previously identified that Q values predicted using Micrometal's curve-fit equations do not reconcile with measured Q as discussed <a href="https://owenduffy.net/calc/toroid.htm">here</a>.
+            <br><br>
+            <b><u>TODO:</u></b><br>
+            <ul>
+                <li> Add a DC current bias slider.</li>
+                <li> Consider adding temperature slider.</li>
+                <li> Add support for transformers (Auto-transformer, dual-winding, isolation, step-up, step-down, etc...).</li>
+            </ul>
             <br><br>
             <b><u>Change history:</u></b><br>
             <b>[6-Nov-21]</b> <br>
@@ -320,10 +327,11 @@
                 '77' : {
                     size : {
                         'FT240' : { PN:'5977003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8,  Al:3155.0 },
-                        'FT140' : { PN:'5977002701', A:35.55, B:23.00, C:12.7, W:33.00,  CC:11.20, le:8.90, Ae:0.79, Ve:7.00, Al:2545.0 },
+                        'FT140' : { PN:'5977002701', A:35.55, B:23.00, C:12.7, W:33.00, CC:11.20, le:8.90, Ae:0.79, Ve:7.00, Al:2545.0 },
                         'FT114' : { PN:'5977001001', A:29.00, B:19.00, C:7.5,  W:13.0,  CC:19.80, le:7.30, Ae:0.37,  Ve:2.70, Al:1365.0 },
-                        'FT50'  : { PN:'5977000301', A:12.70, B:7.15,   C:4.90, W:2.00,   CC:22.90, le:2.95, Ae:0.129, Ve:0.38, Al:1180.0 }, 
-                        'FT37'  : { PN:'5977000201', A:9.50,  B:4.75,  C:3.30, W:0.83,   CC:28.60, le:2.07, Ae:0.072, Ve:0.15, Al:945.0 }, 
+                        'FT100' : { PN:'5977006401', A:25.40, B:15.50, C:12.7, W:19.0,  CC:10.00, le:6.20, Ae:0.62,  Ve:3.80, Al:2700.0 },
+                        'FT50'  : { PN:'5977000301', A:12.70, B:7.15,  C:4.90, W:2.00,  CC:22.90, le:2.95, Ae:0.129, Ve:0.38, Al:1180.0 }, 
+                        'FT37'  : { PN:'5977000201', A:9.50,  B:4.75,  C:3.30, W:0.83,  CC:28.60, le:2.07, Ae:0.072, Ve:0.15, Al:945.0 }, 
                     },
                     manufacturer : "Fair-Rite",
                     mat     : "MnZn",
@@ -523,10 +531,10 @@
                 '31' : {
                     size : {
                         'FT400' : { PN:'2631814002', A:101.6,  B:76.2, C:25.4, W:420.0, CC:8.5985, le:27.5, Ae:3.20,  Ve:882.5, Al:1461.0 },
-                        'FT240' : { PN:'2631803802', A:61.0,  B:35.55, C:12.7, W:118.0, CC:9.1627, le:14.5, Ae:1.58,  Ve:22.8, Al:1371.0 },
+                        'FT240' : { PN:'2631803802', A:61.0,  B:35.55, C:12.7, W:118.0, CC:9.1627, le:14.5, Ae:1.58,  Ve:22.8,  Al:1371.0 },
                         'FT200' : { PN:'2631626202', A:50.80, B:25.40, C:38.1, W:278.0, CC:2.3791, le:11.1, Ae:4.65,  Ve:51.432, Al:5282.0 },
                         'FT114' : { PN:'2631801202', A:29.00, B:19.00, C:13.85, W:25.0, CC:1.0795, le:7.33, Ae:0.679, Ve:4.977, Al:1164.0 },
-                         'FT74' : { PN:'2631626302', A:18.70, B:10.15, C:14.65, W:13.3, CC:7.2188, le:4.26, Ae:0.59, Ve:2.513, Al:1741.0 },
+                         'FT74' : { PN:'2631626302', A:18.70, B:10.15, C:14.65, W:13.3, CC:7.2188, le:4.26, Ae:0.59,  Ve:2.513, Al:1741.0 },
                     },
                     manufacturer : "Fair-Rite",
                     mat     : "MnZn",
@@ -1004,7 +1012,7 @@
                     const Xs = 2.0 * Math.PI * frequency * this.getInductance(frequency, Bpk);
                     return Xs;
                 };
-                
+                /*
                 this.getWireResistance = function(frequency) {
                     // Calculate AC wire-resistance, using IEC 60287-1-1: - this seemed really hopeless for high-frequencies:
                     const Ks = 1.0; // Solid core conductor
@@ -1013,8 +1021,8 @@
                     const Rac = this.Rdc * (1 + Ys);
                     return Rac;
                 };
-                
-                this.getWireResistance2 = function(frequency, wire_radius_meter) {
+                */
+                this.getWireResistance = function(frequency, wire_radius_meter) {
                     // Al-Asadi equation for AC resistance in Ohms/meter:
                     const mu0 = Math.PI * 4e-7;
                     const cu_sigma = 58e6;
@@ -1023,24 +1031,7 @@
                     const Rac = 1/(Math.PI * cu_sigma * k * (2*wire_radius_meter - k));
                     return Rac;
                 };
-                /*
-                this.CC = function(N, Ctt) {
-                    if(N)
-                }
                 
-                this.getEquivalentCapacitance = function() {
-                    const d0 = 1e3 * this.coated_cond_diameter_meters ;   // wire diameter including resin coating
-                    const dc = 1e3 * this.cond_diameter_meters;           // wire diameter without coating (core diameter)
-                    const er = 3.0; // resin relative permittivity
-                    const p = 17.24e-6;
-                    const e0 = 8.85418782e-12;
-                    const lt = this.cond_length_meters / this.N;
-                    const q = Math.acos(1 - Math.log(d0/dc)/er);
-                    const Ctt = e0 * lt * ((er*q/Math.log(d0/dc)) + (1/Math.tan(q*0.5)) - (1/Math.tan(p/12)));
-                    const cN = (Ctt / (2 + (Ctt / (C*(N-2))))) + Ctt;
-                    return cN;
-                }
-                */
                 this.I_inductor = function (frequency, voltage) {
                     const K1 = 4.44 * frequency * this.N * this.core.Ae * 1e-8;
                     const K2 = 0.4 * Math.PI * this.N / this.core.le;
@@ -1086,13 +1077,12 @@
                             continue;
                         }
                         
-                        // Current's are within 1% of each other, which is good-enough for now.
+                        // Current's match within 1% of each other, which is good-enough for now.
                         break;
                     }
                     //console.log(count, frequency, i_inductor, i_wire);
-                    const Rac = this.cond_length_meters * this.getWireResistance2(frequency, this.cond_diameter_meters*0.5);
-                    const V = (voltage - voltage_fraction);
-                    //console.log(count, frequency, V, i_wire);
+                    const Rac = this.cond_length_meters * this.getWireResistance(frequency, this.cond_diameter_meters*0.5);
+                    const V = (voltage - voltage_fraction);             // Across the inductor.
                     const B = V * 1.0e8 / (4.44 * frequency * this.N * this.core.Ae);
                     const Pd = this.getPdFromfB(frequency, B);
                     const Pw = (i_wire**2 * Rac);
@@ -2123,7 +2113,7 @@
             function drawInductor(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns, width, toroid_colour) {
                 let theta = Math.PI/(turns);
 
-                var front_originX = originX - 0.5*(1*outerRadius + 20 + width);
+                var front_originX = originX - 0.5*(1*outerRadius + 20 + width) - 10;
                 originY -= 12;
                 
                 var x1 = 0;
@@ -2248,18 +2238,40 @@
                 }
                 
                 // Draw the Dimensions:
+                var localx = front_originX - outerRadius - 10;
                 fctx.beginPath();
-                fctx.moveTo(front_originX - outerRadius, originY - outerRadius);
-                fctx.lineTo(front_originX - outerRadius - 20, originY - outerRadius);
-                fctx.moveTo(front_originX - outerRadius, originY + outerRadius);
-                fctx.lineTo(front_originX - outerRadius - 20, originY + outerRadius);
-                fctx.lineTo(front_originX - outerRadius - 20, originY - outerRadius);
+                fctx.moveTo(localx + 10, originY - outerRadius);
+                fctx.lineTo(localx, originY - outerRadius);
+                fctx.moveTo(localx + 10, originY + outerRadius);
+                fctx.lineTo(localx, originY + outerRadius);
+                fctx.lineTo(localx, originY - outerRadius);
                 fctx.stroke();
                 
                 fctx.font = "12px arial";
-                fctx.textAlign = "right";
-                fctx.fillText((controller.toroid.core.A).toFixed(1) + " mm", front_originX - outerRadius - 24, originY - 6);
-                fctx.fillText("(" + (controller.toroid.core.A*0.03937).toFixed(3) + "\")", front_originX - outerRadius - 24, originY + 6);
+                
+                fctx.save();
+                fctx.translate(localx, originY);
+                fctx.rotate(-Math.PI * 0.5);
+                fctx.textAlign = "center";
+                fctx.fillText((controller.toroid.core.A).toFixed(1) + " mm", 0, -20);
+                fctx.fillText("(" + (controller.toroid.core.A*0.03937).toFixed(3) + "\")", 0, -6);
+                fctx.restore();
+                
+                localx = front_originX + outerRadius + 20 + width + 15;
+                fctx.beginPath();
+                fctx.moveTo(localx - 5, originY - innerRadius);
+                fctx.lineTo(localx, originY - innerRadius);
+                fctx.lineTo(localx, originY + innerRadius);
+                fctx.lineTo(localx - 5, originY + innerRadius);
+                fctx.stroke();
+                
+                fctx.save();
+                fctx.translate(localx, originY);
+                fctx.rotate(-Math.PI * 0.5);
+                fctx.textAlign = "center";
+                fctx.fillText((controller.toroid.core.B).toFixed(1) + " mm", 0, 12);
+                fctx.fillText("(" + (controller.toroid.core.B*0.03937).toFixed(3) + "\")", 0, 26);
+                fctx.restore();
             }
 
             function drawTransformer(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
