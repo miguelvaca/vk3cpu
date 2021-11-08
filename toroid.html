@@ -1043,7 +1043,7 @@
                 }
                 
                 this.I_wire = function (frequency, voltage) {
-                    const Rac = this.getWireResistance(frequency);
+                    const Rac = this.getWireResistance(frequency, this.cond_diameter_meters * 0.5);
                     return (voltage / Rac);
                 }
                 
