@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="toroid.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.9c<br></header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.9d<br></header>
         <section class="gridLayoutClass">
             <div id="chart-container" class="chart-container">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -134,9 +134,9 @@
                 <li>Br : Residual flux density in gauss.</li>
                 <li>Hc : Coercive force at 0 gauss.</li>
                 <li>Tc : Curie temperature in Celsius.</li>
-                <li>&#961; : Resistivity in &#937;-cm.</li>
+                <li>ρ: Resistivity in &#937;-cm.</li>
                 <li>Type : Material composition. (NiZn, MnZn, Phenolic, Carbonyl)</li>
-                <li>[nnnn] : Manufacturer's part number.</li>
+                <li>P/N : Manufacturer's part number.</li>
             </ul>
             <br>
             <b><u>Observations:</u></b><br>
@@ -153,12 +153,14 @@
             </ul>
             <br>
             <b><u>Change history:</u></b><br>
-            <b>[6-Nov-21]</b> <br>
+            <b>[14-Nov-21] - v0.9d</b> <br>
+            * Updated manufacturers data section to more-closely match datasheets. Also justify to appear like tabular data.<br>
+            <b>[6-Nov-21] - v0.9c</b> <br>
             * Re-enabled PI support.<br>
             * Added support for PI Material 17.<br>
-            <b>[3-Nov-21]</b> <br>
+            <b>[3-Nov-21] - v0.9b</b> <br>
             * Disabled PI support due to bugs that need to be fixed.<br>
-            <b>[2-Nov-21]</b> <br>
+            <b>[2-Nov-21] - v0.9a</b> <br>
             * Release 0.9a - Major code refactor to support Powdered Iron toroids.<br>
             <b>[26-Oct-21]</b> <br>
             * Increased resolution of the f-slider, making it smoothly regenerate the dataset.<br>
@@ -557,6 +559,22 @@
                 this.mat = this.cores[this.material];
                 this.core = this.mat.size[this.size];
                 
+                this.getMaterialDataStrings = function () {
+                    retval = [];
+                    retval.push(["Size", this.size]);
+                    retval.push(["Material", this.material.toString()]);
+                    retval.push(["Type", this.mat.mat]);
+                    retval.push(["μi", this.mat.mu_i.toString()]);
+                    retval.push(["B", this.mat.B.toString() + " G"]);
+                    retval.push(["H", this.mat.H.toString() + " Oe"]);
+                    retval.push(["Br", this.mat.Br.toString() + " G"]);
+                    retval.push(["Hc", this.mat.Hc.toString() + " Oe"]);
+                    retval.push(["Tc", this.mat.Tc.toString() + " C"]);
+                    retval.push(["ρ", this.mat.R.toPrecision(2).toString() + " Ω cm"]);
+                    retval.push(["P/N", this.core.PN]);
+                    return retval;
+                };
+                
                 this.setMaterial = function (material) {
                     this.material = material;
                     this.mat = this.cores[this.material];
@@ -815,11 +833,11 @@
                         Br      : 0.0,
                         Hc      : 0.0,
                         mu_vs_f : { a:1.0e50, b:1.0, c:1.0, d:1.0 }, 
-                        //mu_vs_B : { a:1.00e4, b:1.0e-90, c:1.0e-90, d:1.0e-90, e:1.0e-90 }, 
                         mu_vs_B : { a:1.00e2, b:0.0, c:1.0, d:1.0e80, e:1.0, f:1e80 }, 
                         mu_vs_H : { a:1.00e90, b:1.0e90, c:1.0e90, d:1.0e90, e:1.0 }, 
                         CL_vs_f_B : { a:1.0e90, b:1.0e90, c:1.0e90, d:1.0e-90 }, 
                         color   : '#EECFA1', // a dark tan
+                        color_code : "Tan",
                     },
                     '2' : {
                         size : {
@@ -854,6 +872,7 @@
                         B_vs_H : { a:1.50e-3, b:1.96e0, c:1.97e4, d:9.18e-4, e:1.48e3 },
                         CL_vs_f_B : { a:4.0e9, b:3.0e8, c:2.7e6, d:9.6e-16 },
                         color   : '#CD0000', // a dark red
+                        color_code : "Red/Clear",
                     },
                     '17' : {
                         size : {
@@ -884,6 +903,7 @@
                         B_vs_H : { a:6.20e-4, b:1.96e0, c:7.71e4, d:9.31e-4, e:3.60e3 },
                         CL_vs_f_B : { a:4.0e9, b:3.0e8, c:2.7e6, d:4.40e-16 },
                         color   : '#007FFF', // azure blue
+                        color_code : "Blue/Yellow",
                     },
                     '6' : {
                         size : {
@@ -914,6 +934,7 @@
                         B_vs_H : { a:1.28e-3, b:1.96e0, c:2.30e4, d:9.19e-4, e:1.74e3 },
                         CL_vs_f_B : { a:4.0e9, b:3.0e8, c:2.7e6, d:8.9e-16 },
                         color   : '#ECD540', // a darker yellow
+                        color_code : "Yellow/Clear",
                     },
                     '10' : {
                         size : {
@@ -939,11 +960,25 @@
                         B_vs_H : { a:9.13e-4, b:1.96e0, c:3.83e4, d:9.23e-4, e:2.43e3 },
                         CL_vs_f_B : { a:4.0e9, b:3.0e8, c:2.7e6, d:8.0e-16 },
                         color   : '#4F4F4F', 
+                        color_code : "Black/Clear",
                     },
                 };
                 
                 this.mat = this.cores[this.material];
                 this.core = this.mat.size[this.size];
+                
+                this.getMaterialDataStrings = function () {
+                    retval = [];
+                    retval.push(["Size", this.size]);
+                    retval.push(["Material", this.material.toString()]);
+                    retval.push(["Type", this.mat.mat]);
+                    retval.push(["\u03bci", this.mat.mu_i.toString()]);
+                    retval.push(["Color", this.mat.color_code]);
+                    retval.push(["Bsat", this.mat.Bsat.toString() + " G"]);
+                    retval.push(["Mass", this.core.W.toString() + " g"]);
+                    retval.push(["P/N", this.core.PN]);
+                    return retval;
+                };
                 
                 this.setMaterial = function (material) {
                     this.material = material;
@@ -2418,25 +2453,23 @@
                 
                 // Top right text:
                 fctx.textAlign = "right";
-                fctx.fillText("Size " + controller.t_size, win_width-18, 18);
-                fctx.fillText("Material " + controller.t_material, win_width-18, 32);
-                fctx.fillText("\u03bci: " + controller.toroid.mat.mu_i, win_width-18, 46);
-                if(controller.toroid.mat.B) {
-                    fctx.fillText("B: " + controller.toroid.mat.B + " G",   win_width-18, 60);
-                    fctx.fillText("H: " + controller.toroid.mat.H + " Oe",  win_width-18, 74);
-                    fctx.fillText("Br: " + controller.toroid.mat.Br + " G",  win_width-18, 88);
-                    fctx.fillText("Hc: " + controller.toroid.mat.Hc + " Oe", win_width-18, 102);
-                    fctx.fillText("Tc >= " + controller.toroid.mat.Tc + " C",  win_width-18, 116);
-                    fctx.fillText("Type: " + controller.toroid.mat.mat, win_width-18, 130);
-                    fctx.fillText("[" + controller.toroid.core.PN + "]", win_width-18, 144);
-                } else {
-                    fctx.fillText("Bsat: " + controller.toroid.mat.Bsat + " G",   win_width-18, 60);
-                    fctx.fillText("Br: " + controller.toroid.mat.Br + " G",  win_width-18, 74);
-                    fctx.fillText("Hc: " + controller.toroid.mat.Hc + " Oe", win_width-18, 88);
-                    fctx.fillText("Mass: " + controller.toroid.core.W + " g", win_width-18, 102);
-                    fctx.fillText("Type: " + controller.toroid.mat.mat, win_width-18, 116);
-                    fctx.fillText("[" + controller.toroid.core.PN + "]", win_width-18, 130);
-                }
+                
+                var datasheet = controller.toroid.getMaterialDataStrings();
+                
+                var max_width = 0;
+                datasheet.forEach((element, index) => {
+                    let text = fctx.measureText(element[0] + ": " + element[1]);
+                    if(text.width > max_width) {
+                        max_width = text.width;
+                    }
+                });
+                
+                datasheet.forEach((element, index) => {
+                    fctx.textAlign = "left";
+                    fctx.fillText(element[0] + ": ", win_width-18-max_width, 18+(index*14));
+                    fctx.textAlign = "right";
+                    fctx.fillText(element[1], win_width-18, 18+(index*14));
+                });
             }
             
             function getMetricPrefix(num) {
