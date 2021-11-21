@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V6</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V7</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -170,8 +170,7 @@
             <br>
             </div>
         </section>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@1.1.2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
         <script>
             // GUI control widgets:
             var loop_diameter_slider = document.getElementById("loop_diameter_slider");
@@ -1435,6 +1434,23 @@
             const chartCanvas = document.getElementById("chartCanvas");
             const chartCanvasContext = chartCanvas.getContext('2d');
 
+            function getMetricPrefix(num) {
+                if(num >= 1e9) return  {val: num*1e-9, pfx:'G'};
+                if(num >= 1e6) return  {val: num*1e-6, pfx:'M'};
+                if(num >= 1e3) return  {val: num*1e-3, pfx:'k'};
+                if(num < 1e-12) return {val: num*1e15, pfx:'f'};
+                if(num < 1e-9) return  {val: num*1e12, pfx:'p'};
+                if(num < 1e-6) return  {val: num*1e9,  pfx:'n'};
+                if(num < 1e-3) return  {val: num*1e6,  pfx:'\u03bc'};
+                if(num < 1.0) return   {val: num*1e3,  pfx:'m'};
+                return {val:num, pfx:' '};
+            }
+            
+            function justifyText(pre, post) {
+                var whitespace = 20 - pre.length - post.length;
+                return pre + ' '.repeat(whitespace) + post;
+            }
+            
             var myChart = new Chart(chartCanvasContext, {
                 type: 'line',
                 data: {
@@ -1446,7 +1462,8 @@
                         backgroundColor: 'green',
                         data: calculateTuningCapacitor(),
                         borderWidth: 1,
-                        yAxisID: 'pfID'
+                        yAxisID: 'pfID',
+                        tension: 0.3,
                     },
                     {
                         label: 'Vcap (kV)',
@@ -1455,7 +1472,8 @@
                         backgroundColor: 'rgb(200, 200, 0)',
                         data: calculateCapacitorVoltage(),
                         borderWidth: 1,
-                        yAxisID: 'vID'
+                        yAxisID: 'vID',
+                        tension: 0.3,
                     },
                     {
                         label: 'BW (kHz)',
@@ -1464,7 +1482,8 @@
                         backgroundColor: 'brown',
                         data: calculateBandwidth(),
                         borderWidth: 1,
-                        yAxisID: 'bwID'
+                        yAxisID: 'bwID',
+                        tension: 0.3,
                     },
                     {
                         label: 'Efficiency (%)',
@@ -1473,7 +1492,8 @@
                         backgroundColor: 'black',
                         data: calculateEfficiencyFactor(),
                         borderWidth: 1,
-                        yAxisID: 'effID'
+                        yAxisID: 'effID',
+                        tension: 0.3,
                     },
                     {
                         label: 'R-radiation (\u03A9)',
@@ -1482,7 +1502,8 @@
                         backgroundColor: 'red',
                         data: calculateRadiationResistance(),
                         borderWidth: 1,
-                        yAxisID: 'mohmsID'
+                        yAxisID: 'mohmsID',
+                        tension: 0.3,
                     },
                     {
                         label: 'R-loop (\u03A9)',
@@ -1491,7 +1512,8 @@
                         backgroundColor: 'orange',
                         data: calculateLossResistance(),
                         borderWidth: 1,
-                        yAxisID: 'mohmsID'
+                        yAxisID: 'mohmsID',
+                        tension: 0.3,
                     },
                     {
                         label: 'Reactance (j\u03A9)',
@@ -1500,7 +1522,8 @@
                         backgroundColor: 'blue',
                         data: calculateInductiveReactance(),
                         borderWidth: 1,
-                        yAxisID: 'ohmsID'
+                        yAxisID: 'ohmsID',
+                        tension: 0.3,
                     },
                     {
                         label: 'Q',
@@ -1509,7 +1532,8 @@
                         backgroundColor: 'purple',
                         data: calculateQualityFactor(),
                         borderWidth: 1,
-                        yAxisID: 'qID'
+                        yAxisID: 'qID',
+                        tension: 0.3,
                     },
                     {
                         label: 'I\u2092 (A)',
@@ -1518,7 +1542,8 @@
                         backgroundColor: 'rgb(0,128,128)',
                         data: calculateCirculatingCurrent(),
                         borderWidth: 1,
-                        yAxisID: 'ccID'
+                        yAxisID: 'ccID',
+                        tension: 0.3,
                     },
                     {
                         label: 'Perimeter (\u03BB)',
@@ -1527,59 +1552,73 @@
                         backgroundColor: 'rgb(130,130,130)',
                         data: calculateAntennaSize(),
                         borderWidth: 1,
-                        yAxisID: 'sizeID'
+                        yAxisID: 'sizeID',
+                        tension: 0.3,
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        xAxes: [{
+                        x: {
                             type: 'linear',
                             position: 'bottom',
-                            display: true,
-                            scaleLabel: {
+                            display: 'auto',
+                            title: {
                                 display: true,
-                                labelString: 'Frequency (MHz)'
+                                text: 'Frequency (MHz)',
+                                color: 'black',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                autoSkip: false,
                             }
-                        }],
-                        yAxes: [{
+                        },
+                        'effID' : {
                             type: 'linear',
                             display: 'auto',
-                            scaleLabel: {
+                            title: {
                                 display: true,
-                                labelString: 'Efficiency %',
-                                fontColor: 'black',
-                                fontStyle: 'bold'
+                                text: 'Efficiency %',
+                                color: 'black',
+                                font: {
+                                        weight : 'bold'
+                                }
                             },
                             ticks: {
                                 min: 0,
                                 max: 100,
                             },
                             position: 'left',
-                            id: 'effID'
-                        },{
+                        },
+                        'bwID' : {
                             type: 'linear',
                             display: 'auto',
-                            scaleLabel: {
+                            title: {
                                 display: true,
-                                labelString: 'BW kHz',
-                                fontColor: 'brown',
-                                fontStyle: 'bold'
+                                text: 'BW kHz',
+                                color: 'brown',
+                                font: {
+                                        weight : 'bold'
+                                }
                             },
                             ticks: {
                                 beginAtZero: true,
                             },
                             position: 'left',
-                            id: 'bwID'
-                        },{
+                        },
+                        'vID' : {
                             type: 'linear',
                             display: 'auto',
-                            scaleLabel: {
+                            title: {
                                 display: true,
-                                labelString: 'kV',
-                                fontColor: 'rgb(150, 150, 0)',
-                                fontStyle: 'bold'
+                                text: 'kV',
+                                color: 'rgb(150, 150, 0)',
+                                font: {
+                                        weight : 'bold'
+                                }
                             },
                             ticks: {
                                 beginAtZero: true,
@@ -1587,69 +1626,79 @@
                             },
                             min: 0.0,
                             position: 'left',
-                            id: 'vID'
-                        },{
+                        },
+                        'mohmsID' : {
                             type: 'linear',
                             display: 'auto',
-                            scaleLabel: {
+                            title: {
                                 display: true,
-                                labelString: '\u03A9',
-                                fontColor: 'red',
-                                fontStyle: 'bold'
+                                text: '\u03A9',
+                                color: 'red',
+                                font: {
+                                        weight : 'bold'
+                                }
                             },
                             position: 'right',
-                            id: 'mohmsID',
-                        },{
+                        },
+                        'pfID' : {
                             type: 'linear',
                             display: 'auto',
-                            scaleLabel: {
+                            title: {
                                 display: true,
-                                labelString: 'pF',
-                                fontColor: 'green',
-                                fontStyle: 'bold'
+                                text: 'pF',
+                                color: 'green',
+                                font: {
+                                        weight : 'bold'
+                                }
                             },
                             ticks: {
                                 max: 1000.0,
                             },
                             position: 'left',
-                            id: 'pfID'
-                        },{
+                        },
+                        'ohmsID' : {
                             type: 'linear',
                             display: 'auto',
-                            scaleLabel: {
+                            title: {
                                 display: true,
-                                labelString: 'j\u03A9',
-                                fontColor: 'blue',
-                                fontStyle: 'bold'
+                                text: 'j\u03A9',
+                                color: 'blue',
+                                font: {
+                                        weight : 'bold'
+                                }
                             },
                             ticks: {
                                 beginAtZero: true,
                             },
                             position: 'right',
-                            id: 'ohmsID'
-                        },{
+                        },
+                        'qID' : {
                             type: 'linear',
                             display: 'auto',
-                            scaleLabel: {
+                            title: {
                                 display: true,
-                                labelString: 'Q',
-                                fontColor: 'purple',
-                                fontStyle: 'bold'
+                                text: 'Q',
+                                color: 'purple',
+                                font: {
+                                        weight : 'bold'
+                                }
                             },
                             ticks: {
                                 beginAtZero: true,
                                 max: 4000.0,
                             },
                             position: 'right',
-                            id: 'qID'
-                        },{
+                        },
+                        'ccID' : {
                             type: 'linear',
                             display: 'auto',
-                            scaleLabel: {
+                            title: {
                                 display: true,
-                                labelString: 'A',
-                                fontColor: 'rgb(0,128,128)',
-                                fontStyle: 'bold'
+                                text: 'A',
+                                color: 'rgb(0,128,128)',
+                                font: {
+                                        weight : 'bold'
+                                }
                             },
                             ticks: {
                                 beginAtZero: true,
@@ -1657,15 +1706,17 @@
                             },
                             min: 0.0,
                             position: 'right',
-                            id: 'ccID'
-                        },{
+                        },
+                        'sizeID' : {
                             type: 'linear',
                             display: 'auto',
-                            scaleLabel: {
+                            title: {
                                 display: true,
-                                labelString: '\u03BB',
-                                fontColor: 'rgb(90,90,90)',
-                                fontStyle: 'bold'
+                                text: '\u03BB',
+                                color: 'rgb(90,90,90)',
+                                font: {
+                                        weight : 'bold'
+                                }
                             },
                             ticks: {
                                 beginAtZero: true,
@@ -1673,66 +1724,81 @@
                             },
                             min: 0.0,
                             position: 'right',
-                            id: 'sizeID'
-                        }]
-                    },
-                    showLines: true,
-                    tooltips: {
-                        mode: 'interpolate',
-                        intersect: false,
-                        position: 'nearest',
-                        callbacks: {
-                            title: function(tooltipItem, data) {
-                                var lut = {0.1365:'2200', 0.475:'600', 1.8:'160', 3.5:'80', 5.3:'60', 7.0:'40', 10.1:'30', 14.0:'20', 18.068:'18', 21.0:'15', 24.89:'12', 28.0:'10', 29.7:'10', 35.0:'', 40.0:'', 45.0:'', 50.0:'6', 52.0:'6', 54.0:'6'};
-                                var label = '' + tooltipItem[0].xLabel.toPrecision(3).toString() + ' MHz';
-                                if(lut[tooltipItem[0].xLabel]) {
-                                    label += ' (';
-                                    label += lut[tooltipItem[0].xLabel] + ' m)';
-                                }
-                                return label;
-                            },
-                            label: function(tooltipItem, data) {
-                                var label = data.datasets[tooltipItem.datasetIndex].label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if(data.datasets[tooltipItem.datasetIndex].label == "Tuning Cap (pF)" || data.datasets[tooltipItem.datasetIndex].label == "Q") {
-                                    label += Math.round(tooltipItem.yLabel);
-                                } else {
-                                    label += tooltipItem.yLabel.toFixed(3).toString();
-                                    //label += Math.round(tooltipItem.yLabel * 1000) / 1000;
-                                }
-                                return label;
-                            }
                         }
-                    } ,
+                    },
                     plugins: {
-                        crosshair: {
-                            line: {
-                                color: 'grey',   // crosshair line color
-                                width: 1,       // crosshair line width
-                                dashPattern: [100, 100]
-                            },
-                            sync: {
-                                enabled: false,            // enable trace line syncing with other charts
-                                group: 1,                 // chart group
-                                suppressTooltips: true   // suppress tooltips when showing a synced tracer
-                            },
-                            zoom: {
-                                enabled: false,                                      // enable zooming
-                                zoomboxBackgroundColor: 'rgba(66,133,244,0.2)',     // background color of zoom box 
-                                zoomboxBorderColor: '#48F',                         // border color of zoom box
-                                zoomButtonText: 'Reset Zoom',                       // reset zoom button text
-                                zoomButtonClass: 'reset-zoom',                      // reset zoom button class
+                        //showLines: true,
+                        mode: 'nearest',
+                        tooltip: {
+                            enabled: true,
+                            mode: 'index',
+                            intersect: false,
+                            position: 'nearest',
+                            bodyFont: {
+                                family: 'monospace',
+                                
                             },
                             callbacks: {
-                                beforeZoom: function(start, end) {                  // called before zoom, return false to prevent zoom
-                                    return false;                                   // return true to enable zooming
+                                title: function(context) {
+                                    var value = context[0].parsed.x;
+                                    var lut = {0.1365:'2200', 0.475:'600', 1.8:'160', 3.5:'80', 5.3:'60', 7.0:'40', 10.1:'30', 14.0:'20', 18.068:'18', 21.0:'15', 24.89:'12', 28.0:'10', 29.7:'10', 35.0:'', 40.0:'', 45.0:'', 50.0:'6', 52.0:'6', 54.0:'6'};
+                                    var label = '' + value.toPrecision(3).toString() + ' MHz';
+                                    if(lut[value]) {
+                                        label += ' (';
+                                        label += lut[value] + ' m)';
+                                    }
+                                    return label;
                                 },
-                                afterZoom: function(start, end) {                   // called after zoom
+                                label: function(context) {
+                                    var value = context.element.parsed.y;
+                                    var label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if(context.dataset.label == "Tuning Cap (pF)") { 
+                                        var num = getMetricPrefix(value * 1e-12);
+                                        label = justifyText("Tuning Cap: ", Math.round(num.val).toString() + ' ' + num.pfx + 'F');
+                                    } else 
+                                    if(label[0] == "Q"){
+                                        label = justifyText("Q: ", Math.round(value).toString() + "   ");
+                                    } else 
+                                    if(label[0] == 'V'){
+                                        var num = getMetricPrefix(value * 1e3);
+                                        label = justifyText("Vcap: ", num.val.toFixed(1).toString() + ' ' + num.pfx + 'V');
+                                    } else 
+                                    if(label[0] == 'B'){
+                                        var num = getMetricPrefix(value * 1e3);
+                                        label = justifyText("Bandwidth: ", num.val.toFixed(1).toString() + ' ' + num.pfx + 'Hz');
+                                    } else 
+                                    if(label[0] == 'E'){
+                                        var num = getMetricPrefix(value);
+                                        label = justifyText("Efficiency: ", num.val.toFixed(1).toString() + ' ' + ' %');
+                                    } else 
+                                    if((label[0] == 'R') && (label[2] == 'r')){
+                                        var num = getMetricPrefix(value);
+                                        label = justifyText("R-rad: ", num.val.toFixed(1).toString() + ' ' + num.pfx + '\u03A9');
+                                    } else 
+                                    if((label[0] == 'R') && (label[2] == 'l')){
+                                        var num = getMetricPrefix(value);
+                                        label = justifyText("R-loop: ", num.val.toFixed(1).toString() + ' ' + num.pfx + '\u03A9');
+                                    } else 
+                                    if((label[0] == 'R') && (label[1] == 'e')){
+                                        var num = getMetricPrefix(value);
+                                        label = justifyText("Reactance: ", 'j' + num.val.toFixed(1) + ' ' + num.pfx + '\u03A9');
+                                    } else 
+                                    if(label[0] == 'I'){
+                                        var num = getMetricPrefix(value);
+                                        label = justifyText("I\u2092: ", num.val.toFixed(1).toString() + ' ' + num.pfx + 'A');
+                                    } else 
+                                    if(label[0] == 'P'){
+                                        label = justifyText("Perimeter: ", value.toFixed(3).toString() + '  ' + '\u03BB');
+                                    } else {
+                                        label += value.toFixed(3).toString();
+                                    }
+                                    return label;
                                 }
                             }
-                        }
+                        },
                     }
                 }
             });
