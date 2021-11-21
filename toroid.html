@@ -1985,6 +1985,9 @@
                 }
                 // Now rebuild the size DOM for the selected material:
                 rebuildSizeDOM();
+                
+                // Re-set the material, as it *may* have changed:
+                setMaterial();
             }
             
             function setToroid() {
