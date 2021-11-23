@@ -1450,7 +1450,7 @@
             }
             
             function justifyText(pre, post) {
-                var whitespace = 20 - pre.length - post.length;
+                var whitespace = 22 - pre.length - post.length;
                 return pre + ' '.repeat(whitespace) + post;
             }
             
@@ -1760,41 +1760,40 @@
                                     }
                                     if(context.dataset.label == "Tuning Cap (pF)") { 
                                         var num = getMetricPrefix(value * 1e-12);
-                                        label = justifyText("Tuning Cap: ", Math.round(num.val).toString() + ' ' + num.pfx + 'F');
+                                        label = justifyText("Tuning Cap: ", Math.round(num.val).toString() + '  ' + num.pfx + 'F');
                                     } else 
                                     if(label[0] == "Q"){
-                                        label = justifyText("Q: ", Math.round(value).toString() + "   ");
+                                        label = justifyText("Q: ", Math.round(value).toString() + "    ");
                                     } else 
                                     if(label[0] == 'V'){
                                         var num = getMetricPrefix(value * 1e3);
-                                        label = justifyText("Vcap: ", num.val.toFixed(1).toString() + ' ' + num.pfx + 'V');
+                                        label = justifyText("Vcap: ", num.val.toFixed(1).toString() + '  ' + num.pfx + 'V');
                                     } else 
                                     if(label[0] == 'B'){
                                         var num = getMetricPrefix(value * 1e3);
                                         label = justifyText("Bandwidth: ", num.val.toFixed(1).toString() + ' ' + num.pfx + 'Hz');
                                     } else 
                                     if(label[0] == 'E'){
-                                        var num = getMetricPrefix(value);
-                                        label = justifyText("Efficiency: ", num.val.toFixed(1).toString() + ' ' + ' %');
+                                        label = justifyText("Efficiency: ", value.toFixed(2).toString() + '  ' + ' %');
                                     } else 
                                     if((label[0] == 'R') && (label[2] == 'r')){
                                         var num = getMetricPrefix(value);
-                                        label = justifyText("R-rad: ", num.val.toFixed(1).toString() + ' ' + num.pfx + '\u03A9');
+                                        label = justifyText("R-rad: ", num.val.toFixed(1).toString() + '  ' + num.pfx + '\u03A9');
                                     } else 
                                     if((label[0] == 'R') && (label[2] == 'l')){
                                         var num = getMetricPrefix(value);
-                                        label = justifyText("R-loop: ", num.val.toFixed(1).toString() + ' ' + num.pfx + '\u03A9');
+                                        label = justifyText("R-loop: ", num.val.toFixed(1).toString() + '  ' + num.pfx + '\u03A9');
                                     } else 
                                     if((label[0] == 'R') && (label[1] == 'e')){
                                         var num = getMetricPrefix(value);
-                                        label = justifyText("Reactance: ", 'j' + num.val.toFixed(1) + ' ' + num.pfx + '\u03A9');
+                                        label = justifyText("Reactance: ", 'j' + num.val.toFixed(1) + '  ' + num.pfx + '\u03A9');
                                     } else 
                                     if(label[0] == 'I'){
                                         var num = getMetricPrefix(value);
-                                        label = justifyText("I\u2092: ", num.val.toFixed(1).toString() + ' ' + num.pfx + 'A');
+                                        label = justifyText("I\u2092: ", num.val.toFixed(1).toString() + '  ' + num.pfx + 'A');
                                     } else 
                                     if(label[0] == 'P'){
-                                        label = justifyText("Perimeter: ", value.toFixed(3).toString() + '  ' + '\u03BB');
+                                        label = justifyText("Perimeter: ", value.toFixed(3).toString() + '   ' + '\u03BB');
                                     } else {
                                         label += value.toFixed(3).toString();
                                     }
