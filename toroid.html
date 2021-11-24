@@ -1557,6 +1557,12 @@
                     drawDesign();
                 };
                 
+                function justifyText(pre, post) {
+                    var whitespace = 14 - pre.length - post.length;
+                    return pre + ' '.repeat(whitespace) + post;
+                }
+            
+
                 // Startup methods:
                 this.updateFrequencies(frequency_slider.value);
                 
@@ -1819,6 +1825,9 @@
                                 mode: 'index',
                                 intersect: false,
                                 position: 'nearest',
+                            bodyFont: {
+                                family: 'monospace',
+                            },
                                 callbacks: {
                                     title: function(context) {
                                         var value = context[0].parsed.x;
@@ -1835,52 +1844,46 @@
                                         return label;
                                     },
                                     label: function(context) {
+                                        let value = context.element.parsed.y;
                                         var label = context.dataset.label || '';
                                         if (label) {
-                                            label += ' = ';
+                                            label += ' ';
                                         }
                                         if((label[0] == 'R') || (label[0] == 'X')) {
                                             if(label[1] != ' ') {
-                                                label = label[0] + label[1] + ' = ';
+                                                label = label[0] + label[1] + ' ';
                                             } else {
-                                                label = label[0] + ' = ';
+                                                label = label[0] + ' ';
                                             }
-                                            var num = getMetricPrefix(context.element.parsed.y);
-                                            if(num[0] < 1e-15) {
-                                                label += '0.0' + ' ' + num[1] + '\u03A9';
+                                            var num = getMetricPrefix(value);
+                                            if(num.val < 1e-15) {
+                                                label = justifyText(label, '0.0' + '  ' + num.pfx + '\u03A9');
                                             } else {
-                                                label += num[0].toPrecision(3).toString() + ' ' + num[1] + '\u03A9';
+                                                label = justifyText(label, num.val.toPrecision(3).toString() + '  ' + num.pfx + '\u03A9');
                                             }
                                         } else if(label[1] == 'Z') {
-                                            label = '|Z| = ';
-                                            var num = getMetricPrefix(context.element.parsed.y);
-                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + '\u03A9';
+                                            var num = getMetricPrefix(value);
+                                            label = justifyText('|Z| ', num.val.toPrecision(3).toString() + '  ' + num.pfx + '\u03A9');
                                         } else if(label[0] == 'L') {
-                                            label = 'L = ';
-                                            var num = getMetricPrefix(context.element.parsed.y * 1e-6);
-                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'H';
+                                            var num = getMetricPrefix(value * 1e-6);
+                                            label = justifyText('L ', num.val.toPrecision(3).toString() + '  ' + num.pfx + 'H');
                                         } else if(label[0] == 'I') {
-                                            label = 'I = ';
-                                            var num = getMetricPrefix(context.element.parsed.y * 1e-3);
-                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'A';
+                                            var num = getMetricPrefix(value * 1e-3);
+                                            label = justifyText('I ', num.val.toPrecision(3).toString() + '  ' + num.pfx + 'A');
                                         } else if(label[0] == 'B') {
-                                            label = 'B = ';
-                                            var num = getMetricPrefix(context.element.parsed.y);
-                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'G';
+                                            var num = getMetricPrefix(value);
+                                            label = justifyText('B ', num.val.toPrecision(3).toString() + '  ' + num.pfx + 'G');
                                         } else if(label[0] == 'H') {
-                                            label = 'H = ';
-                                            var num = getMetricPrefix(context.element.parsed.y);
-                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'Oe';
+                                            var num = getMetricPrefix(value);
+                                            label = justifyText('H ', num.val.toPrecision(3).toString() + ' ' + num.pfx + 'Oe');
                                         } else if(label[0] == 'P') {
-                                            label = 'Pd = ';
-                                            var num = getMetricPrefix(context.element.parsed.y * 1e-3);
-                                            label += num[0].toPrecision(3).toString() + ' ' + num[1] + 'W';
+                                            var num = getMetricPrefix(value * 1e-3);
+                                            label = justifyText('Pd ', num.val.toPrecision(3).toString() + '  ' + num.pfx + 'W');
                                         } else if(label[0] == 'Q') {
-                                            label = 'Q = ';
-                                            var num = getMetricPrefix(context.element.parsed.y);
-                                            label += num[0].toPrecision(3).toString() + ' ' + num[1];
+                                            var num = getMetricPrefix(value);
+                                            label = justifyText('Q ', num.val.toPrecision(3).toString() + '    ');
                                         } else {
-                                            label += context.element.parsed.y.toPrecision(3).toString();
+                                            label = justifyText(label, value.toPrecision(3).toString() + '    ');
                                         }
                                         return label;
                                     }
@@ -2472,15 +2475,15 @@
             }
             
             function getMetricPrefix(num) {
-                if(num >= 1e9) return [num*1e-9, 'G'];
-                if(num >= 1e6) return [num*1e-6, 'M'];
-                if(num >= 1e3) return [num*1e-3, 'k'];
-                if(num < 1e-12) return [num*1e15, 'f'];
-                if(num < 1e-9) return [num*1e12, 'p'];
-                if(num < 1e-6) return [num*1e9, 'n'];
-                if(num < 1e-3) return [num*1e6, '\u03bc'];
-                if(num < 1.0) return [num*1e3, 'm'];
-                return [num, ''];
+                if(num >= 1e9) return  {val: num*1e-9, pfx:'G'};
+                if(num >= 1e6) return  {val: num*1e-6, pfx:'M'};
+                if(num >= 1e3) return  {val: num*1e-3, pfx:'k'};
+                if(num < 1e-12) return {val: num*1e15, pfx:'f'};
+                if(num < 1e-9) return  {val: num*1e12, pfx:'p'};
+                if(num < 1e-6) return  {val: num*1e9,  pfx:'n'};
+                if(num < 1e-3) return  {val: num*1e6,  pfx:'\u03bc'};
+                if(num < 1.0) return   {val: num*1e3,  pfx:'m'};
+                return {val:num, pfx:' '};
             }
             
             setMode();
