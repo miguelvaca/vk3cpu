@@ -1882,8 +1882,7 @@
                                             var num = getMetricPrefix(value * 1e-3);
                                             label = justifyText('Pd ', num.val.toPrecision(3).toString() + '  ' + num.pfx + 'W');
                                         } else if(label[0] == 'Q') {
-                                            var num = getMetricPrefix(value);
-                                            label = justifyText('Q ', num.val.toPrecision(3).toString() + '    ');
+                                            label = justifyText('Q ', value.toPrecision(3).toString() + '    ');
                                         } else {
                                             label = justifyText(label, value.toPrecision(3).toString() + '    ');
                                         }
