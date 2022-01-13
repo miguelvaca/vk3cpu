@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V7</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V8</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -25,7 +25,7 @@
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
-                    <input type="range" id="loop_turns_slider" min="1" max="8" value="1.0" step="1.0">
+                    <input type="range" id="loop_turns_slider" min="0" max="8" value="1.0" step="1.0">
                 </div>
                 <div class="sliders">
                     <label for="loop_spacing_slider">c/a:</label>
@@ -85,7 +85,7 @@
             <ul> 
                 <li>&#8960a : Conductor diameter in millimeters (mm) or inches ("). (Measured between opposing conductor outer surfaces.)</li>
                 <li>&#8960b : Loop diameter in meters (m) or feet ('). (Measured between the conductor centers.)</li>
-                <li>N : Number of turns or loops.</li>
+                <li>N : Number of turns or loops. Sweeping left-to-right for parallel multiloop, then single loop, then series multiloop configurations. A "(P)" indicates a multiloop antenna configured with parallel main loops.</li>
                 <li>c/a : is the spacing ratio; based on 'c' being the inter-winding spacing for multi-turn loops measured between conductor centers, and 'a' is the conductor diameter. (Must be >= 1.1) 
                     A low-value will increase the resistance due to the proximity effect. (Ignore for single-turn loops.)</li>
                 <li>Tx : The transmit power in Watts. This affects the predicted voltage across the capacitor (Vcap), and the RMS loop current (Ia).</li>
@@ -126,6 +126,8 @@
             [2]: A. Boswell, A. J. Tyler and A. White, <b>"Performance of a Small Loop Antenna in the 3 - 10 MHz Band"</b> <i>, IEEE Antennas and Propagation Magazine, 47, 2, April 2005, pp. 5 1 -56.</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[13-Jan-22] - V8</b> <br>
+            * Added support for parallel conductor magloop antennas.<br>
             <b>[21-Nov-21] - V7</b> <br>
             * Upgrade Chart.js to the latest version, v3.5.1.<br>
             * Tooltips are now justified, (using monospace fonts) and support changing metric prefix.<br>
@@ -190,6 +192,8 @@
             var units = "metric";
             var conductivity = 58e6;            // Default is annealed copper
             var shape = "circle";               // Shape of the main loop
+            var loop_turns = 1;                 // 
+            var loop_mode = "series";           // Series or parallel. When loop_turns_slider.value == 0, loop_turns is 2 and loop_mode is "parallel"
             
             var inductance = 0.0;
             var area = 0.0;                     // Loop area in square meters. 
@@ -199,7 +203,7 @@
             var conductor_length = 0.0;         // Total conductor length
             var R_ext = 0.0;                    // External losses due to capacitor resistance and ground effects, in ohms
             var metal = "Cu";                   // Default metal is copper
-
+            
             const proximityResistance = {
                 // From G. S. Smith, "Radiation Efficiency of Electrically Small Multiturn Loop Antennas", IEEE Trans Antennas Propagation, September 1972
                 // 0 - this is the corresponding x-axis value. 1 - single loop adds zero to proximity resistance. Others measured empirically.
@@ -232,12 +236,14 @@
             }
             
             function setGlobals() {
+                loop_turns = loop_turns_slider.value >= 1 ? loop_turns_slider.value : 2;
+                loop_mode = loop_turns_slider.value >= 1 ? "series" : "parallel";
                 inductance = getInductance();
                 area = getArea();
                 perimeter = getPerimeter();
-                loop_capacitance = (loop_turns_slider.value > 1) ? multiloopCapacitance() : (2.69e-12 * perimeter);
+                loop_capacitance = ((loop_turns > 1) && (loop_mode == "series")) ? multiloopCapacitance() : (2.69e-12 * perimeter);
                 srf = calculateSRF();
-                conductor_length = ((((perimeter* loop_turns_slider.value) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns_slider.value) ** 2.0)) ** 0.5);
+                conductor_length = ((((perimeter* loop_turns) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns) ** 2.0)) ** 0.5);
                 R_ext = external_losses_slider.value * 0.001;
             }
             
@@ -290,7 +296,6 @@
                 const loop_diameter_meters = loop_diameter_slider.value;
                 const cond_diameter_meters = conductor_diameter_slider.value * 1e-3;
                 const spacing_ratio = loop_spacing_slider.value;
-                const loop_turns = loop_turns_slider.value;
                 
                 const a_coil_radius = loop_diameter_meters * 0.5;
                 const coil_length = cond_diameter_meters * spacing_ratio * loop_turns;
@@ -328,20 +333,26 @@
                     //retval = 1e-6 * 0.008 * (N**2) * s * ( Math.log((1.4142*s*N)/((N+1)*l)) + 0.37942 + ((0.3333*(N+1)*l)/(s*N)));
                     retval = 1e-6 * 0.008 * (N**2) * s * ( Math.log(1.0/bOn2r) + 0.37942 + 0.47140*bOn2r - 0.014298*bOn2r**2 - 0.02904*bOn2r**4);
                 }
+                if(loop_mode == "parallel") {
+                    // then N==2, so divide by 4 to go from serial to parallel inductance:
+                    retval *= 0.25;
+                }
                 return retval; // In Henries
             }
 
             function radiationResistance(frequency) {
-                const n_turns = loop_turns_slider.value;
                 const wavelength = 3e8 / frequency;
                 var retval = 0.0;
                 
                 if(shape == "circle") {
                     const k = 20.0 * (Math.PI ** 2.0);
                     const l = (Math.PI * loop_diameter_slider.value) / wavelength;
-                    retval = (n_turns ** 2.0) * k * (l ** 4.0);
+                    retval = (loop_turns ** 2.0) * k * (l ** 4.0);
                 } else {
-                    retval = (31171.0 * n_turns**2.0 * area**2.0) / (wavelength**4.0);
+                    retval = (31171.0 * loop_turns**2.0 * area**2.0) / (wavelength**4.0);
+                }
+                if(loop_mode == "parallel") {
+                    retval *= 0.25;
                 }
                 return retval;
             }
@@ -372,17 +383,14 @@
 
             function nagaokaCoefficient() {
                 // From Knight's 2016 paper on coil self-resonance, attributed to Wheeler's 1982 eqn as modified by Bob Weaver
-                var retval;
                 const c_spacing = 1e-3 * loop_spacing_slider.value * conductor_diameter_slider.value;
-                const x = loop_diameter_slider.value / (c_spacing * loop_turns_slider.value); 
+                const x = loop_diameter_slider.value / (c_spacing * loop_turns); 
                 const zk = 2.0 / (Math.PI * x);
                 const k0 = 1.0 / (Math.log(8.0 / Math.PI) - 0.5);
                 const k2 = 24.0 / (3.0 * Math.PI**2 - 16.0);
                 const w = -0.47 / (0.755 + x)**1.44;
                 const p = k0 + 3.437/x + k2/x**2 + w;
-                retval = zk * (Math.log(1 + 1/zk) + 1/p);
-                //console.log(retval);
-                return retval;
+                return zk * (Math.log(1 + 1/zk) + 1/p);
             }
 
             function ctdw(ff, ei, ex) {
@@ -403,7 +411,7 @@
                 const h = 1e-3 * loop_spacing_slider.value * conductor_diameter_slider.value;
                 const ei = 1.0; // Assume internal epsilon is air (or free-space)
                 const ex = 1.0; // Assume external epsilon is air (or free-space)
-                const solenoid_length = loop_turns_slider.value * h;
+                const solenoid_length = loop_turns * h;
                 const ff = solenoid_length / loop_diameter_slider.value;
                 
                 // How much longer is the perimeter compared to the circumference if it were circular:
@@ -438,13 +446,12 @@
             function getProximityResFromSpacing(spacing_ratio) {
                 // Use the proximityResistance look-up table and interpolate values depending on the spacing ratio and the number of turns.
                 var retval = 0.0;
-                var n_turns = 1 * loop_turns_slider.value;
                 var i = 0;
                 for (i = 0; i < (proximityResistance[0].length-1); i++) {
                     if(spacing_ratio <= proximityResistance[0][i+1]) {
                         // Linear interpolation between empirical proximity resistance values:
                         retval = (((spacing_ratio - proximityResistance[0][i]) / (proximityResistance[0][i+1] - proximityResistance[0][i]) 
-                            * (proximityResistance[n_turns][i+1] - proximityResistance[n_turns][i])) + proximityResistance[n_turns][i]);
+                            * (proximityResistance[loop_turns][i+1] - proximityResistance[loop_turns][i])) + proximityResistance[loop_turns][i]);
                         break;
                     }
                 }
@@ -455,18 +462,20 @@
                 // Frequency in Hertz
                 const a_coil_radius = loop_diameter_slider.value * 0.5;
                 const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
-                const n_turns = loop_turns_slider.value;
                 const loop_spacing_ratio = loop_spacing_slider.value;
                 const mu0 = 4.0 * Math.PI * 1e-7;
                 
                 // How much longer is the perimeter compared to the circumference if it were circular:
                 const shape_factor = perimeter / (Math.PI * loop_diameter_slider.value);
                 
-                const k = (n_turns * a_coil_radius / b_conductor_radius);
+                const k = (loop_turns * a_coil_radius / b_conductor_radius);
                 const Rp = getProximityResFromSpacing(loop_spacing_ratio);
                 const Rs = Math.sqrt(Math.PI * frequency * mu0 / conductivity);
-                //const R0 = (n_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
-                const R_ohmic = shape_factor * k * Rs * (Rp + 1.0);
+                //const R0 = (loop_turns * Rs) / (2.0 * Math.PI * b_conductor_radius);
+                var R_ohmic = shape_factor * k * Rs * (Rp + 1.0);
+                if(loop_mode == "parallel") {
+                    R_ohmic *= 0.25;
+                }
                 //const R_ohmic = k * Rs * (Rp / R0 + 1.0);
                 return R_ohmic;
             }
@@ -486,8 +495,6 @@
                     const R_ohmic = lossResistance(freq * 1e6);
                     const R_rad = radiationResistance(freq * 1e6);
                     const efficiency = 100.0 * R_rad / (R_rad + R_ohmic + R_ext);
-                    //const efficiency = 100.0 / (1.0 + (R_ohmic / R_rad));
-                    //const efficiency = 10.0 * Math.log10(1.0 / (1.0 + (R_ohmic / R_rad))); // for Efficiency in dB
                     retval.push({x:freq, y:efficiency});
                 });
                 return retval;
@@ -848,7 +855,7 @@
                 setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
-                if(loop_turns_slider.value > 1) {
+                if(loop_turns > 1) {
                     updateFrequencies();
                 }
                 myChart.data.datasets[0].data = calculateTuningCapacitor();
@@ -1354,48 +1361,76 @@
 
                 const cond_radius = conductor_diameter_slider.value / 12;
                 const cond_spacing = 2 * cond_radius * loop_spacing_slider.value;
-                const start_x = win_width/2 - loop_turns_slider.value * cond_spacing * 0.5;
+                const start_x = (loop_turns > 0) ? win_width/2 - loop_turns * cond_spacing * 0.5 : win_width/2;
                 const top_y = win_height * 0.2;
                 const bot_y = win_height * 0.7;
-                for (let i = 0; i < loop_turns_slider.value; i++) {
-                    sctx.beginPath();
-                    sctx.arc(start_x + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
-                    sctx.arc(start_x + cond_spacing * 0.5 + i * cond_spacing, top_y, cond_radius, Math.PI, 0);
-                    sctx.lineTo(start_x + i * cond_spacing + cond_radius, bot_y);
-                    sctx.fill();
+                
+                if(loop_mode == "series") {
+                    if(loop_turns > 1) {
+                        for (let i = 0; i < loop_turns; i++) {
+                            sctx.beginPath();
+                            sctx.arc(start_x + i * cond_spacing, top_y, cond_radius, Math.PI, 0);
+                            sctx.arc(start_x + cond_spacing * 0.5 + i * cond_spacing, bot_y, cond_radius, 0, Math.PI);
+                            //sctx.lineTo(start_x + i * cond_spacing + cond_radius, top_y);
+                            sctx.fill();
 
-                    sctx.beginPath();
-                    sctx.moveTo(start_x + cond_spacing * 0.5 + i * cond_spacing + cond_radius, top_y);
-                    sctx.lineTo(start_x + (i+1) * cond_spacing + cond_radius, bot_y);
-                    sctx.arc(start_x + (i+1) * cond_spacing, bot_y, cond_radius, 0, Math.PI, false);
-                    sctx.lineTo(start_x + cond_spacing * 0.5 + i * cond_spacing - cond_radius, top_y);
-                    sctx.stroke();
+                            sctx.beginPath();
+                            sctx.moveTo(start_x + cond_spacing * 0.5 + i * cond_spacing + cond_radius, bot_y);
+                            sctx.lineTo(start_x + (i+1) * cond_spacing + cond_radius, top_y);
+                            sctx.arc(start_x + (i+1) * cond_spacing, top_y, cond_radius, 0, Math.PI, true);
+                            sctx.lineTo(start_x + cond_spacing * 0.5 + i * cond_spacing - cond_radius, bot_y);
+                            sctx.stroke();
+                        }
+                    } else {
+                        sctx.beginPath();
+                        sctx.arc(start_x + cond_spacing, bot_y, cond_radius, 0, Math.PI);
+                        sctx.arc(start_x + cond_spacing, top_y, cond_radius, Math.PI, 0);
+                        sctx.lineTo(start_x + cond_spacing + cond_radius, bot_y);
+                        sctx.fill();
+                    }
+                } else {
+                    // "parallel" - means draw a two-arm parallel magloop:
+                        sctx.beginPath();
+                        sctx.arc(start_x + 0.5 * cond_spacing, bot_y, cond_radius, 0, Math.PI);
+                        sctx.arc(start_x + 0.5 * cond_spacing, top_y, cond_radius, Math.PI, 0);
+                        sctx.lineTo(start_x + 0.5 * cond_spacing + cond_radius, bot_y);
+                        sctx.fill();
+                        
+                        sctx.beginPath();
+                        sctx.arc(start_x + 1.5 * cond_spacing, bot_y, cond_radius, 0, Math.PI);
+                        sctx.arc(start_x + 1.5 * cond_spacing, top_y, cond_radius, Math.PI, 0);
+                        sctx.lineTo(start_x + 1.5 * cond_spacing + cond_radius, bot_y);
+                        sctx.fill();
                 }
+                
                 // Draw left spacing arrow:
                 const dim_y = win_height * 0.8;
-                sctx.beginPath();
-                sctx.moveTo(start_x - 20, dim_y);
-                sctx.lineTo(start_x, dim_y);
-                sctx.lineTo(start_x - 7, dim_y + 7)
-                sctx.lineTo(start_x - 7, dim_y - 7)
-                sctx.lineTo(start_x, dim_y);
-                sctx.moveTo(start_x, dim_y - 7);
-                sctx.lineTo(start_x, dim_y + 7);
-                sctx.stroke();
-                // Draw right spacing arrow:
-                sctx.beginPath();
-                sctx.moveTo(start_x + cond_spacing + 20, dim_y);
-                sctx.lineTo(start_x + cond_spacing, dim_y);
-                sctx.lineTo(start_x + cond_spacing + 7, dim_y + 7)
-                sctx.lineTo(start_x + cond_spacing + 7, dim_y - 7)
-                sctx.lineTo(start_x + cond_spacing, dim_y);
-                sctx.moveTo(start_x + cond_spacing, dim_y - 7);
-                sctx.lineTo(start_x + cond_spacing, dim_y + 7);
-                sctx.stroke();
+                if(loop_turns > 1) {
+                    sctx.beginPath();
+                    //sctx.moveTo(0.5 * win_width - 0.5 * cond_spacing + shift - 20, dim_y);
+                    sctx.moveTo(start_x + 0.5 * cond_spacing  - 20, dim_y);
+                    sctx.lineTo(start_x + 0.5 * cond_spacing , dim_y);
+                    sctx.lineTo(start_x + 0.5 * cond_spacing  - 7, dim_y + 7)
+                    sctx.lineTo(start_x + 0.5 * cond_spacing  - 7, dim_y - 7)
+                    sctx.lineTo(start_x + 0.5 * cond_spacing , dim_y);
+                    sctx.moveTo(start_x + 0.5 * cond_spacing , dim_y - 7);
+                    sctx.lineTo(start_x + 0.5 * cond_spacing , dim_y + 7);
+                    sctx.stroke();
+                    // Draw right spacing arrow:
+                    sctx.beginPath();
+                    sctx.moveTo(start_x + 1.5 * cond_spacing  + 20, dim_y);
+                    sctx.lineTo(start_x + 1.5 * cond_spacing , dim_y);
+                    sctx.lineTo(start_x + 1.5 * cond_spacing  + 7, dim_y + 7)
+                    sctx.lineTo(start_x + 1.5 * cond_spacing  + 7, dim_y - 7)
+                    sctx.lineTo(start_x + 1.5 * cond_spacing , dim_y);
+                    sctx.moveTo(start_x + 1.5 * cond_spacing , dim_y - 7);
+                    sctx.lineTo(start_x + 1.5 * cond_spacing , dim_y + 7);
+                    sctx.stroke();
+                }
 
                 sctx.textAlign = "left";
                 sctx.font = turns_font; 
-                sctx.fillText("N = " + loop_turns_slider.value.toString(), 8, win_height * 0.1 + 3);
+                sctx.fillText("N = " + loop_turns.toString() + ((loop_mode == "series") ? "" : " (P)"), 8, win_height * 0.1 + 3);
                 sctx.font = spacing_font;
                 sctx.fillText("c/a = ", 8, win_height * 0.1 + 18);
                 sctx.fillText((loop_spacing_slider.value*1.0).toPrecision(3).toString(), 8, win_height * 0.1 + 33);
@@ -1417,12 +1452,14 @@
                 }
                     
                 // Draw spacing text:
-                sctx.textAlign = "center";
-                const spc = (loop_turns_slider.value > 1) ? loop_spacing_slider.value * conductor_diameter_slider.value : 0.0;
-                if(units == "metric") {
-                    sctx.fillText("c = " + spc.toPrecision(3).toString() + " mm", start_x + cond_spacing, dim_y + 20);
-                } else {
-                    sctx.fillText("c = " + (spc/25.4).toPrecision(3).toString() + " in", start_x + cond_spacing, dim_y + 20);
+                if(loop_turns > 1) {
+                    sctx.textAlign = "center";
+                    const spc = (loop_turns > 1) ? loop_spacing_slider.value * conductor_diameter_slider.value : 0.0;
+                    if(units == "metric") {
+                        sctx.fillText("c = " + spc.toPrecision(3).toString() + " mm", start_x + cond_spacing, dim_y + 20);
+                    } else {
+                        sctx.fillText("c = " + (spc/25.4).toPrecision(3).toString() + " in", start_x + cond_spacing, dim_y + 20);
+                    }
                 }
             }
             
