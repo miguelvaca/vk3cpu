@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="toroid.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.9e<br></header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v0.9f<br></header>
         <section class="gridLayoutClass">
             <div id="chart-container" class="chart-container">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -23,7 +23,8 @@
                     <select name="modes" id="mode-select" onchange="setMode()">
                         <option value="Inductor">Inductor</option>
                         <option value="Suppressor">Suppressor</option>
-                        <option value="Transformer" disabled="true">Transformer</option>
+                        <option value="Transformer" >Transformer</option>
+                        <!--option value="Transformer" disabled="false">Transformer</option-->
                     </select>
                     <select name="toroids" id="toroid-select" onchange="setToroid()">
                         <!--option value="FT240">FT240</option>
@@ -153,6 +154,8 @@
             </ul>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[17-Jan-22] - v0.9f</b> <br>
+            * Added x2 and x3 stacking for 31, 43, 52 and 61 240-sized toroids.<br>
             <b>[24-Nov-21] - v0.9e</b> <br>
             * Justify tooltips.<br>
             <b>[14-Nov-21] - v0.9d</b> <br>
@@ -405,7 +408,9 @@
                 },
                 '61' : {
                     size : {
-                        'FT240' : { PN:'5961003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8,  Al:170.0 },
+                        'FT240x3' : { PN:'5961003801', A:61.0,  B:35.55, C:38.1, W:318.0, CC:3.07,  le:14.5, Ae:4.74,  Ve:68.4,  Al:510.0 },
+                        'FT240x2' : { PN:'5961003801', A:61.0,  B:35.55, C:25.4, W:212.0, CC:4.60,  le:14.5, Ae:3.16,  Ve:45.6,  Al:340.0 },
+                        'FT240'   : { PN:'5961003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8,  Al:170.0 },
                         'FT140' : { PN:'5961002701', A:35.55, B:23.00, C:12.7, W:33.00,  CC:11.20, le:8.90, Ae:0.79, Ve:7.00, Al:140.0 },
                         'FT114A': { PN:'5961001201', A:29.00, B:19.00, C:13.85, W:26.0,  CC:10.70, le:7.30, Ae:0.68,  Ve:5.0, Al:145.0 },
                         'FT114' : { PN:'5961001001', A:29.00, B:19.00, C:7.50, W:13.0,  CC:19.80, le:7.30, Ae:0.37,  Ve:2.70, Al:80.0 },
@@ -431,7 +436,9 @@
                 },
                 '52' : {
                     size : {
-                        'FT240' : { PN:'5952003801', A:60.0,  B:35.35, C:12.7, W:133.44, CC:9.14,  le:14.5, Ae:1.58,  Ve:22.8,  Al:325.0 },
+                        'FT240x3' : { PN:'5952003801', A:60.0,  B:35.35, C:38.1, W:400.32, CC:3.05,  le:14.5, Ae:4.74,  Ve:68.4,  Al:975.0 },
+                        'FT240x2' : { PN:'5952003801', A:60.0,  B:35.35, C:25.4, W:266.88, CC:4.57,  le:14.5, Ae:3.16,  Ve:45.6,  Al:650.0 },
+                        'FT240'   : { PN:'5952003801', A:60.0,  B:35.35, C:12.7, W:133.44, CC:9.14,  le:14.5, Ae:1.58,  Ve:22.8,  Al:325.0 },
                         'FT140' : { PN:'5952020801', A:35.25, B:22.60, C:12.7, W:38.26,  CC:11.10, le:8.79, Ae:0.792, Ve:6.959, Al:283.0 },
                         'FT114' : { PN:'5952020701', A:28.8,  B:18.70, C:7.50, W:14.81,  CC:19.34, le:7.23, Ae:0.374, Ve:2.702, Al:162.0 },
                         'FT82'  : { PN:'5952020601', A:21.70, B:13.50, C:6.35, W:7.54,   CC:20.80, le:5.33, Ae:0.256, Ve:1.368, Al:151.0 }, 
@@ -480,7 +487,9 @@
                 },
                 '43' : {
                     size : {
-                        'FT240' : { PN:'5943003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8, Al:1075.0 },
+                        'FT240x3' : { PN:'5943003801', A:61.0,  B:35.55, C:38.1, W:318.0, CC:3.06,  le:14.5, Ae:4.74,  Ve:68.4, Al:3225.0 },
+                        'FT240x2' : { PN:'5943003801', A:61.0,  B:35.55, C:25.4, W:212.0, CC:4.59,  le:14.5, Ae:3.16,  Ve:45.6, Al:2150.0 },
+                        'FT240'   : { PN:'5943003801', A:61.0,  B:35.55, C:12.7, W:106.0, CC:9.20,  le:14.5, Ae:1.58,  Ve:22.8, Al:1075.0 },
                         'FT140' : { PN:'5943002701', A:35.55, B:23.00, C:12.7, W:33.0,  CC:11.20, le:8.90, Ae:0.79,  Ve:7.00, Al:885.0 },
                         'FT125' : { PN:'5943001701', A:31.75, B:19.05, C:9.50, W:23.0,  CC:12.90, le:7.60, Ae:0.59,  Ve:4.50, Al:775.0 },
                         'FT114' : { PN:'5943001001', A:29.00, B:19.00, C:7.50, W:13.0,  CC:19.80, le:7.30, Ae:0.37,  Ve:2.70, Al:510.0 },
@@ -534,8 +543,11 @@
                 },
                 '31' : {
                     size : {
-                        'FT400' : { PN:'2631814002', A:101.6,  B:76.2, C:25.4, W:420.0, CC:8.5985, le:27.5, Ae:3.20,  Ve:882.5, Al:1461.0 },
-                        'FT240' : { PN:'2631803802', A:61.0,  B:35.55, C:12.7, W:118.0, CC:9.1627, le:14.5, Ae:1.58,  Ve:22.8,  Al:1371.0 },
+                        'FT400x2' : { PN:'2631814002', A:101.6,  B:76.2, C:50.8, W:840.0, CC:4.2992, le:27.5, Ae:6.40,  Ve:1765.0, Al:2922.0 },
+                        'FT400'   : { PN:'2631814002', A:101.6,  B:76.2, C:25.4, W:420.0, CC:8.5985, le:27.5, Ae:3.20,  Ve:882.5, Al:1461.0 },
+                        'FT240x3' : { PN:'2631803802', A:61.0,  B:35.55, C:38.1, W:354.0, CC:3.0542, le:14.5, Ae:4.74,  Ve:68.4,  Al:4113.0 },
+                        'FT240x2' : { PN:'2631803802', A:61.0,  B:35.55, C:25.4, W:236.0, CC:4.5813, le:14.5, Ae:3.16,  Ve:45.6,  Al:2742.0 },
+                        'FT240'   : { PN:'2631803802', A:61.0,  B:35.55, C:12.7, W:118.0, CC:9.1627, le:14.5, Ae:1.58,  Ve:22.8,  Al:1371.0 },
                         'FT200' : { PN:'2631626202', A:50.80, B:25.40, C:38.1, W:278.0, CC:2.3791, le:11.1, Ae:4.65,  Ve:51.432, Al:5282.0 },
                         'FT114' : { PN:'2631801202', A:29.00, B:19.00, C:13.85, W:25.0, CC:1.0795, le:7.33, Ae:0.679, Ve:4.977, Al:1164.0 },
                          'FT74' : { PN:'2631626302', A:18.70, B:10.15, C:14.65, W:13.3, CC:7.2188, le:4.26, Ae:0.59,  Ve:2.513, Al:1741.0 },
