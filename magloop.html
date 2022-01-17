@@ -236,7 +236,7 @@
             }
             
             function setGlobals() {
-                loop_turns = loop_turns_slider.value >= 1 ? loop_turns_slider.value : 2;
+                loop_turns = loop_turns_slider.value >= 1 ? parseInt(loop_turns_slider.value) : 2;
                 loop_mode = loop_turns_slider.value >= 1 ? "series" : "parallel";
                 inductance = getInductance();
                 area = getArea();
