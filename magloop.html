@@ -1385,9 +1385,9 @@
                         }
                     } else {
                         sctx.beginPath();
-                        sctx.arc(start_x + cond_spacing, bot_y, cond_radius, 0, Math.PI);
-                        sctx.arc(start_x + cond_spacing, top_y, cond_radius, Math.PI, 0);
-                        sctx.lineTo(start_x + cond_spacing + cond_radius, bot_y);
+                        sctx.arc(win_width/2, bot_y, cond_radius, 0, Math.PI);
+                        sctx.arc(win_width/2, top_y, cond_radius, Math.PI, 0);
+                        sctx.lineTo(win_width/2 + cond_radius, bot_y);
                         sctx.fill();
                     }
                 } else {
