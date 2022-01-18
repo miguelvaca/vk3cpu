@@ -270,7 +270,7 @@
                 return l_area;
             }
             
-            // Returns the loop area in square meters:
+            // Returns the perimeter length in meters:
             function getPerimeter() {
                 var l_perimeter = 0.0;
                 const width = loop_diameter_slider.value;
@@ -343,7 +343,7 @@
             }
 
             function radiationResistance(frequency) {
-                const wavelength = 3e8 / frequency;
+                const wavelength = 299792458.0 / frequency;
                 var retval = 0.0;
                 
                 if(shape == "circle") {
