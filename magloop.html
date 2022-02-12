@@ -126,6 +126,9 @@
             [2]: A. Boswell, A. J. Tyler and A. White, <b>"Performance of a Small Loop Antenna in the 3 - 10 MHz Band"</b> <i>, IEEE Antennas and Propagation Magazine, 47, 2, April 2005, pp. 5 1 -56.</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[12-Feb-22] - V8</b> <br>
+            * Changed the frequency list to include top and bottom frequencies of each band. This is to highlight the range of capacitance required between the top and bottom of each band.<br>
+            * Increased max c/a ratio from 10 to 30.<br>
             <b>[13-Jan-22] - V8</b> <br>
             * Added support for parallel conductor magloop antennas.<br>
             <b>[21-Nov-21] - V7</b> <br>
@@ -222,7 +225,7 @@
 
             function updateFrequencies() {
                 const hamFrequencies = [
-                    0.1365, 0.475, 1.8, 3.5, 5.3, 7.0, 10.1, 14.0, 18.068, 21.0, 24.89, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0, 54.0
+                    0.1357, 0.1378, 0.472, 0.479, 1.8, 1.875, 3.5, 3.8, 5.3, 5.4, 7.0, 7.3, 10.1, 10.15, 14.0, 14.35, 18.068, 18.168, 21.0, 21.45, 24.89, 24.99, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0, 54.0
                 ];
                 
                 frequencies = [];
@@ -1782,7 +1785,7 @@
                             callbacks: {
                                 title: function(context) {
                                     var value = context[0].parsed.x;
-                                    var lut = {0.1365:'2200', 0.475:'600', 1.8:'160', 3.5:'80', 5.3:'60', 7.0:'40', 10.1:'30', 14.0:'20', 18.068:'18', 21.0:'15', 24.89:'12', 28.0:'10', 29.7:'10', 35.0:'', 40.0:'', 45.0:'', 50.0:'6', 52.0:'6', 54.0:'6'};
+                                    var lut = {0.1357:'2200', 0.1378:'2200', 0.472:'600', 0.479:'600', 1.8:'160', 1.875:'160', 3.5:'80', 3.8:'80', 5.3:'60', 5.4:'60', 7.0:'40', 7.3:'40', 10.1:'30', 10.15:'30', 14.0:'20', 14.35:'20', 18.068:'18', 18.168:'18', 21.0:'15', 21.45:'15', 24.89:'12', 24.99:'12', 28.0:'10', 29.7:'10', 35.0:'', 40.0:'', 45.0:'', 50.0:'6', 52.0:'6', 54.0:'6'};
                                     var label = '' + value.toPrecision(3).toString() + ' MHz';
                                     if(lut[value]) {
                                         label += ' (';
