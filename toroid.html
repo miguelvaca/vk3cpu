@@ -151,7 +151,6 @@
             <ul>
                 <li> Add a DC current bias slider.</li>
                 <li> Consider adding temperature slider.</li>
-                <li> Add support for transformers (Auto-transformer, dual-winding, isolation, step-up, step-down, etc...).</li>
             </ul>
             <br>
             <b><u>Change history:</u></b><br>
@@ -1933,7 +1932,7 @@
 
             function setMode() {
                 var modes = document.getElementsByName("modes");
-                t_mode = modes[0].value;
+                controller.t_mode = modes[0].value;
                 
                 l_inductors = {
                     sort_order : {
@@ -1973,7 +1972,7 @@
                 } 
                 
                 var l_mat_selected;
-                if(t_mode == "Suppressor") {
+                if(controller.t_mode == "Suppressor") {
                     l_mat_selected = l_suppressors;
                 } else { // Inductors and Transformers should use the inductor material list:
                     l_mat_selected = l_inductors;
