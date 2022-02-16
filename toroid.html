@@ -23,7 +23,6 @@
                     <select name="modes" id="mode-select" onchange="setMode()">
                         <option value="Inductor">Inductor</option>
                         <option value="Suppressor">Suppressor</option>
-                        <option value="Transformer" disabled="false">Transformer</option>
                         <!--option value="Transformer" disabled="false">Transformer</option-->
                     </select>
                     <select name="toroids" id="toroid-select" onchange="setToroid()">
@@ -82,7 +81,8 @@
             <b><u>Inputs via the slider widgets:</u></b>
             <ul> 
                 <li>AWG : Select the wire gauge. Sliding L-R changes AWG from 40-0. (Defaults to 20 AWG)</li>
-                <li>Nd  : Winding density at the toroid inner-diameter. Controls how many single-layer turns can be achieved around the core. Maximum (100%, slider to hard-right) is reached when the turns are adjacent at the toroid's inner radius. (Defaults to 15%)</li>
+                <li>Nd  : Winding density at the toroid inner-diameter. Controls how many single-layer turns can be achieved around the core. 
+                Maximum (100%, slider to hard-right) is reached when the turns are adjacent at the toroid's inner radius. (Defaults to 15%)</li>
                 <li>Vrms : The RMS voltage applied to the inductor (Volts). Determines the flux-density (B) and field-intensity (H) within the ferrite toroid. (Defaults to 10Vrms)</li>
                 <li>f : Shifts the frequency of interest of the chart display from left-to-right. Left towards kHz, right towards GHz. </li>
             </ul>
@@ -115,7 +115,8 @@
                 <li>L&#7522; : Initial inductance in microhenries. This is based on the initial permeability figure found in data sheets. For accuracy, use the frequency-dependent inductance displayed in the chart.</li>
                 <li>Vrms : Excitation RMS voltage selected.</li>
                 <li>Rdc : Wire resistance in ohms.</li>
-                <li>Ceff : Experimental effective-capacitance calculation to determine SRF. (Under development so greyed-out. Based on David Knight's G3YNH work on the self-capacitance of toroidal inductors detailed <a href="https://www.g3ynh.info/zdocs/magnetics/appendix/Toroid_selfC.html">HERE</a>).</li>
+                <li>Ceff : Experimental effective-capacitance calculation to determine SRF. (Under development so greyed-out. Based on David Knight's G3YNH 
+                work on the self-capacitance of toroidal inductors detailed <a href="https://www.g3ynh.info/zdocs/magnetics/appendix/Toroid_selfC.html">HERE</a>).</li>
                 <li>SRF : Experimental self-resonant frequency prediction in MHz. (Under development so greyed-out. From the same paper detailed above.)</li>
             </ul>
             In the middle of the display are the following:
@@ -1840,9 +1841,9 @@
                                 mode: 'index',
                                 intersect: false,
                                 position: 'nearest',
-                            bodyFont: {
-                                family: 'monospace',
-                            },
+                                bodyFont: {
+                                    family: 'monospace',
+                                },
                                 callbacks: {
                                     title: function(context) {
                                         var value = context[0].parsed.x;
