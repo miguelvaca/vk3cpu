@@ -594,6 +594,7 @@
                 this.setMaterial = function (material) {
                     this.material = material;
                     this.mat = this.cores[this.material];
+                    this.core = this.mat.size[this.size];
                 };
                 
                 this.setSize = function (size) {
