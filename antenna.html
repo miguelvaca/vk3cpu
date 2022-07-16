@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+	<!-- @file   : antenna.html			-->
+	<!-- @author : J Miguel Vaca 					-->
+	<!-- @remark : This webpage uses Computational Electromagnetics (CEM) to solve antenna currents and fields. It then uses WebGL to visualise the currents -->
+	<!--         : and fields produced by the antenna.  -->
+	<!--         : Idea - allow adding wire antennas, one-at-a-time. Then have controls at the ends to move ends, stretch or shring the wire.  -->
+	<!--           Have a control in the middle that can be used to reposition the camera. Also a control to move the feedpoint along the wire. -->
+	<!-- Support multiple feedpoints, but with a single master feed (or frequency), and the others are slaved off the master, but with a controllable phase -->
+	<!-- shift that will allow modelling of phased-arrays. -->
+	<head>
+		<title>VK3CPU Antenna</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<!--link type="text/css" href="css/base.css" rel="stylesheet"/-->
+		<!--link type="text/css" href="css/visualisation.css" rel="stylesheet"/-->
+	</head>
+	<body>
+        <div id="info">
+            Visualisation by : <a href="mailto:vacamiguel@gmail.com">J Miguel Vaca</a> 
+        </div>
+
+        <!-- math.js library scripts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
+
+
+		<script src="https://threejs.org/build/three.js"></script>
+		<!--script src="./dat.gui.min.js"></script-->
+		<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+
+		<script>
+
+			var container; //, stats;
+			var camera, scene, renderer, geometry, controls;
+			var clock = new THREE.Clock();
+			var tick = 0;
+
+			function Antennas() {
+				//
+				this.wire = [];
+
+				this.antenna_types = {
+					'order' : ['dipole_v'],
+					'antennas' : {
+						'dipole_v' : { 
+							'wires' : [
+								[[0.00,-0.35,  0.00], [0.00, 0.35, 0.00]]
+							],
+						},
+						'dipole_h' : { 
+							'wires' : [
+								[[0.00, 0.00, -0.35], [0.00, 0.00, 0.35]]
+							],
+						},
+						'yagi_h' : { 
+							'wires' : [
+								[[-0.25, 0.00, -0.35], [-0.25, 0.00, 0.35]], // Reflector
+								[[0.00, 0.00, -0.25], [0.00, 0.00, 0.25]], // Exciter
+								[[0.25, 0.00, -0.25], [0.25, 0.00, 0.25]], // Director
+								[[0.50, 0.00, -0.25], [0.50, 0.00, 0.25]], // Director
+								[[0.75, 0.00, -0.25], [0.75, 0.00, 0.25]]// Director
+							],
+						}
+					},
+				};
+				//
+				this.getThreeObject3D = function () {
+					const material = new THREE.LineBasicMaterial({color:0xffff00});
+
+					const points = [];
+					const scale_factor = 100.0;
+					var wires = this.antenna_types['antennas']['yagi_h']['wires'];
+					wires.forEach(element => {
+						points.push(new THREE.Vector3(element[0][0] * scale_factor, element[0][1] * scale_factor, element[0][2] * scale_factor));
+						points.push(new THREE.Vector3(element[1][0] * scale_factor, element[1][1] * scale_factor, element[1][2] * scale_factor));
+					});
+
+					const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+					return new THREE.LineSegments( geometry, material );
+				};
+			}
+
+            function Antenna() {
+                const material = new THREE.LineBasicMaterial({color:0x00ff00});
+
+                const points = [];
+                points.push(new THREE.Vector3(0.0, 0.0, 0.0));
+                points.push(new THREE.Vector3(0.0, 100.0, 0.0));
+                points.push(new THREE.Vector3(0.0, 0.0, 10.0));
+
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+                return new THREE.Line( geometry, material );
+            }
+
+			init();
+			animate();
+			
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 5, 15000 );
+				camera.position.y = 120;
+				camera.position.z = 400;
+
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color(0.0, 0.0, 0.0);
+
+				//renderer = new THREE.WebGLRenderer({antialias:true});
+				renderer = new THREE.WebGLRenderer({antialias:true});
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+				//stats = new Stats();
+				//container.appendChild( stats.dom );
+				window.addEventListener( 'resize', onWindowResize, false );
+				
+				// Add an axis:
+				var axis = new THREE.AxesHelper(200);
+				scene.add(axis);
+				
+				// Create a half-wavelength long wire, with a radius of 0.001 lambda, and segmented into 10 pieces:
+				wire = createWire(0.5, 0.0001, 45);
+				//console.log(wire);
+				//console.log(wire);
+				frequency = 3e8;
+
+				// Solve the z-matrix:
+				var impedance = calculateZMatrix(wire);
+				console.log(impedance[22][22]);
+				var admittance = math.inv(impedance);
+				//console.log(admittance);
+				var V = createVoltageVector(45);
+				var I = math.multiply(admittance, V);
+				console.log(I[23]);
+				V = math.multiply(impedance, I);
+
+				var ant = new Antennas();
+				scene.add(ant.getThreeObject3D());
+			}
+			
+			function createWire(length, wire_radius, segments) {
+				// dimensions in lambda
+				var wire = {};
+				wire.length = length;
+				wire.seg_len = length / segments;
+				wire.radius = wire_radius;
+				const offset = 0.5 * length;
+				wire.points = [];
+				wire.points.push([0.0, 0.0, -offset]);
+				for (let i = 0; i < segments; i++) {
+					wire.points.push([0.0, 0.0, i * wire.seg_len + 0.5 * wire.seg_len - offset]);
+					wire.points.push([0.0, 0.0, (i+1) * wire.seg_len - offset]);
+				}
+				return wire;
+			}
+
+			function psi(wire, n, m) {
+				var retval = 0.0;
+				const k = 2.0 * Math.PI; // Normalised wavelength is equal to 1.0 - otherwise 2*pi/wavelength
+				const fourPI = 4.0 * Math.PI;
+				var Rmn = 0.0;
+				// From MININEC thesis (3-36) and (3-37):
+				if(m==n) {
+					retval = math.complex((1.0/(2.0*Math.PI*wire.seg_len)) * Math.log(wire.seg_len / wire.radius), (-k/fourPI));
+				} else {
+					Rmn = Math.sqrt((wire.points[m][0] - wire.points[n][0])**2 + (wire.points[m][1] - wire.points[n][1])**2 + (wire.points[m][2] - wire.points[n][2])**2);
+					retval = math.multiply(math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn)), (1/(fourPI*Rmn)));
+				}
+				//console.log(n, m, retval);
+				return retval;
+			}
+
+			function psi_old(wire, n, m) {
+				var retval = 0.0;
+				const k = 2.0 * Math.PI; // Normalised wavelength is equal to 1.0 - otherwise 2*pi/wavelength
+				const fourPI = 4.0 * Math.PI;
+				var Rmn = 0.0;
+				// From MININEC thesis (3-36) and (3-37):
+				if(m==n) {
+					Rmn = Math.sqrt(wire.radius**2 + (wire.seg_len*0.5)**2);
+				} else {
+					Rmn = Math.sqrt((wire.points[m][0] - wire.points[n][0])**2 + (wire.points[m][1] - wire.points[n][1])**2 + (wire.points[m][2] - wire.points[n][2])**2);
+				}
+				retval = math.multiply(math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn)), (1/(fourPI*Rmn)));
+				//console.log(n, m, retval);
+				return retval;
+			}
+
+			// Use Harrington's equations (129) and (135):
+			function psi2(wire, n, m) {
+				var retval = 0.0;
+				var Rmn = 0.0;
+				// Calculate the range from the source point (n) to the observation point (m) depending whether it is the same segment or not:
+				if(m==n) {
+					Rmn = Math.sqrt(wire.radius**2 + (wire.seg_len*0.5)**2);
+				} else {
+					Rmn = Math.sqrt((wire.points[m][0] - wire.points[n][0])**2 + (wire.points[m][1] - wire.points[n][1])**2 + (wire.points[m][2] - wire.points[n][2])**2);
+				}
+				// Now if r<10a, use 129. If r>=10a, use 135:
+				const alpha = wire.seg_len*0.5;
+				const zeta = wire.points[m][2] - wire.points[n][2]; // This is z at m when n is set as the coordinate space origin. So need to transform coord-space to make it N-centric first! Uugh!
+				// zeta is the projection of m onto the n segment, if the n-segment were centered at the origin along the z-direction.
+				const mn = math.subtract(wire.points[m], wire.points[n-1])
+				//var zeta = math.dot(wire.points[m], wire.points[n]);
+				//zeta = zeta / ()
+				const rho = 0;
+				if(Rmn < (10.0 * alpha)) {
+					// Eq 129:
+					var t1 = math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn));
+					t1 = math.multiply((1.0/(8.0*Math.PI*alpha)), t1);
+					const i1 = Math.log((zeta + alpha + Math.sqrt(rho**2 + (zeta + alpha)**2)) / (zeta - alpha + Math.sqrt(rho**2 + (zeta - alpha)**2)));
+					const i2 = 2 * alpha;
+					const i3 = (0.5 * (alpha + zeta)) * Math.sqrt(rho**2 + (alpha + zeta)**2) + (0.5 * (alpha - zeta)) * Math.sqrt(rho**2 + (zeta - alpha)**2) + (0.5 * rho**2 * i1);
+					const i4 = (2*alpha*rho**2) + (0.333333 * (2*alpha**3 + 6*alpha*zeta**2));
+					const re = i1 - 0.5*k**2 * (i3 - 2*Rmn*i2 + Rmn**2*i1);
+					const im = -k*(i2 - Rmn*i1) + (1.0/6)*k**3*(i4 - 3*Rmn*i3 + 3*Rmn**2*i2 - Rmn**3*i1);
+					retval = math.complex(math.multiply(t1, re), math.multiply(t1, im));
+				} else {
+					// Eq 135:
+
+				}
+				return retval;
+			}
+
+			function calculateZMatrix(wire) {
+				const w = 2.0 * Math.PI * frequency;
+				const k = 2.0 * Math.PI * frequency / 3e8; // 2*pi/lambda
+				const e0 =  8.854187e-12;
+				const mu0 = 4.0 * Math.PI * 1e-7;
+				const fourPI = 4.0 * Math.PI;
+				var Z = [];
+				for (let m = 1; m < wire.points.length; m+=2) {
+					var row = [];
+					for (let n = 1; n < wire.points.length; n+=2) {
+						// Use Harrington's method:
+						var tmp = math.dot(math.subtract(wire.points[n+1], wire.points[n-1]), math.subtract(wire.points[m+1], wire.points[m-1]));
+						tmp *= w * mu0;
+						tmp = math.multiply(math.complex(0,tmp), psi(wire, n, m));
+						var tmp2 = math.add(psi(wire, n+1, m+1), psi(wire, n-1, m-1));
+						var tmp3 = math.add(psi(wire, n-1, m+1), psi(wire, n+1, m-1));
+						var tmp4 = math.subtract(tmp2, tmp3);
+						tmp2 = math.multiply(tmp4, math.complex(0,-1/(w*e0)));
+						row.push(math.add(tmp, tmp2)); 
+					}
+					Z.push(row);
+				}
+				return Z;
+			}
+
+			function createVoltageVector(segments) {
+				var retval = [];
+				for(var i=0; i<segments; i++){
+					if(i == 22) {
+						retval.push(math.complex(1,0));
+					} else {
+						retval.push(math.complex(0,0));
+					}
+				}
+				return retval;
+			}
+
+			function calculateVoltage() {
+				var retval = [];
+				var x_axis = 0.0;
+				for(var i=0; i<V.length; i++) {
+					x_axis += wire.seg_len;
+					retval.push({x:x_axis, y:V[i].toPolar().r});
+				}
+				return retval;
+			}
+
+			function calculateCurrent() {
+				var retval = [];
+				var x_axis = 0.0;
+				for(var i=0; i<I.length; i++) {
+					x_axis += wire.seg_len;
+					retval.push({x:x_axis, y:I[i].toPolar().r});
+				}
+				return retval;
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				
+				// TODO - need to notify scene object shaders (via uniforms) here if required!
+				// becvfUniforms.cameraConstant.value = getCameraConstant( camera );
+			}
+
+			function getCameraConstant( camera ) {
+				return window.innerHeight / ( Math.tan( THREE.Math.DEG2RAD * 0.5 * camera.fov ) / camera.zoom );
+			}
+
+			function animate() {
+				// Update the elapsed time to later provide to the shaders:
+				var delta = clock.getDelta();
+				tick += delta;
+				if ( tick < 0 ) tick = 0;
+
+				// Tell WebGL to call the 'animate()' function for the next screen refresh:
+				requestAnimationFrame( animate );
+				
+				// Render the scene, and update the stats:
+				renderer.render( scene, camera );
+				//stats.update();
+			}
+		</script>
+	</body>
+</html>
