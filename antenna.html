@@ -9,26 +9,27 @@
 	<!-- Support multiple feedpoints, but with a single master feed (or frequency), and the others are slaved off the master, but with a controllable phase -->
 	<!-- shift that will allow modelling of phased-arrays. -->
 	<head>
-		<title>VK3CPU Antenna</title>
+		<title>VK3CPU Antenna Simulator</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<!--link type="text/css" href="css/base.css" rel="stylesheet"/-->
-		<!--link type="text/css" href="css/visualisation.css" rel="stylesheet"/-->
+		<link type="text/css" href="css/base.css" rel="stylesheet"/>
+		<link type="text/css" href="css/visualisation.css" rel="stylesheet"/>
 	</head>
 	<body>
-        <div id="info">
+        <!--div id="info">
             Visualisation by : <a href="mailto:vacamiguel@gmail.com">J Miguel Vaca</a> 
-        </div>
+        </div-->
 
         <!-- math.js library scripts -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
 
 
 		<script src="https://threejs.org/build/three.js"></script>
-		<!--script src="./dat.gui.min.js"></script-->
+		<script src="./dat.gui.min.js"></script>
 		<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 
 		<script>
+			//import { GUI } from 'dat.gui'
 
 			var container; //, stats;
 			var camera, scene, renderer, geometry, controls;
@@ -125,6 +126,18 @@
 				var axis = new THREE.AxesHelper(200);
 				scene.add(axis);
 				
+				const gui = new dat.GUI();
+				const cubeFolder = gui.addFolder('Cube')
+				/*
+				cubeFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
+				cubeFolder.add(cube.rotation, 'y', 0, Math.PI * 2)
+				cubeFolder.add(cube.rotation, 'z', 0, Math.PI * 2)
+				cubeFolder.open()
+				const cameraFolder = gui.addFolder('Camera')
+				cameraFolder.add(camera.position, 'z', 0, 10)
+				cameraFolder.open()
+				*/
+
 				// Create a half-wavelength long wire, with a radius of 0.001 lambda, and segmented into 10 pieces:
 				wire = createWire(0.5, 0.0001, 45);
 				//console.log(wire);
