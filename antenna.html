@@ -125,9 +125,26 @@
 				// Add an axis:
 				var axis = new THREE.AxesHelper(200);
 				scene.add(axis);
-				
+
+				var parameters = 
+				{
+					a: 200, // numeric
+					b: 200, // numeric slider
+					c: "Hello, GUI!", // string
+					d: false, // boolean (checkbox)
+					e: "#ff8800", // color (hex)
+					f: function() { alert("Hello!") },
+					g: function() { alert( parameters.c ) },
+					v : 0,    // dummy value, only type is important
+					w: "...", // dummy value, only type is important
+					x: 0, y: 0, z: 0
+				};
+
 				const gui = new dat.GUI();
-				const cubeFolder = gui.addFolder('Cube')
+				const cubeFolder = gui.addFolder('Antenna Parameters');
+				var stringList = ["Dipole H", "Dipole V", "Yagi H"];
+				gui.add( parameters, 'w', stringList ).name('List');
+
 				/*
 				cubeFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
 				cubeFolder.add(cube.rotation, 'y', 0, Math.PI * 2)
