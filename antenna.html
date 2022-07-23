@@ -36,24 +36,126 @@
 			var clock = new THREE.Clock();
 			var tick = 0;
 
+			class ViewManager {
+				// 
+				constructor() {
+					//
+				}
+
+				// 
+				setAntennaType(antenna_type) {
+					//
+					if (antenna_type == "yagi") {
+						self.antenna = new YagiAntenna();
+						// 
+					} else {
+						// 
+					}
+
+					/*
+					const vertices = new Float32Array([
+						-0.5, 0.0, 0.0,
+						 0.5, 0.0, 0.0
+					]);
+					*/
+
+					const material = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 1 });
+					const line = new THREE.Line(geometry, material);
+					const antenna_view = new THREE.Group();
+
+					self.antenna.wires.forEach(wire => {
+						const vertices = new Float32Array(wire.length);
+						// Copy the vertex locations across into a Float32Array for the geometry:
+						wire.forEach(vertex, index => {
+							vertices[index] = vertex;
+						});
+						// 
+						const geometry = new THREE.BufferGeometry();
+						geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+						// create a new wire with
+						const wire = new THREE.LineSegments(geometry, material);
+						antenna_view.add(wire);
+					});
+					// Add the antenna into the scene:
+					scene.add(antenna_view);
+				}
+			}
+
+			class AntennaBase {
+				//
+				constructor() {
+					// 
+				}
+
+				getWires() {
+					// 
+					return self.wires;
+				}
+			}
+
+			class DipoleH extends AntennaBase {
+				//
+				constructor() {
+					//
+					self.name = "Horizontal Dipole";
+					self.wires = [[0.00, 0.00, -0.35], [0.00, 0.00, 0.35]];
+				}
+				test() {
+					//
+				}
+			}
+
 			function Antennas() {
 				//
 				this.wire = [];
 
 				this.antenna_types = {
-					'order' : ['dipole_v'],
+					'order' : ['dipole_h', 'dipole_v', 'monopole_v', 'inverted_v', 'inverted_l', 'loop_lrg_tri_h', 'quad'],
 					'antennas' : {
 						'dipole_v' : { 
+							'name' : "Vertical Dipole",
 							'wires' : [
 								[[0.00,-0.35,  0.00], [0.00, 0.35, 0.00]]
 							],
 						},
 						'dipole_h' : { 
+							'name' : "Horizontal Dipole",
 							'wires' : [
 								[[0.00, 0.00, -0.35], [0.00, 0.00, 0.35]]
 							],
 						},
+						'monopole_v' : { 
+							'name' : "Vertical Monopole",
+							'wires' : [
+								[[0.00,-0.35,  0.00], [0.00, 0.35, 0.00]]
+							],
+						},
+						'inverted_v' : { 
+							'name' : "Inverted Vee",
+							'wires' : [
+								[[0.00, 0.00, -0.35], [0.00, 0.35, 0.00], [0.00, 0.00, 0.35]]
+							],
+						},
+						'inverted_l' : { 
+							'name' : "Inverted L",
+							'wires' : [
+								[[0.00, 0.00, -0.35], [0.00, 0.35, 0.00], [0.00, 0.00, 0.35]]
+							],
+						},
+						'loop_lrg_tri_h' : { 
+							'name' : "Loop Large Triangle",
+							'wires' : [
+								[[0.00, 0.00, -0.35], [0.00, 0.35, 0.00], [0.00, 0.00, 0.35]]
+							],
+						},
+						'quad' : { 
+							'name' : "Quad",
+							'wires' : [
+								[[0.00, 0.00, -0.35], [0.00, 0.35, 0.00], [0.00, 0.00, 0.35]]
+							],
+						},
 						'yagi_h' : { 
+							'name' : "Horizontal Yagi 5-element",
 							'wires' : [
 								[[-0.25, 0.00, -0.35], [-0.25, 0.00, 0.35]], // Reflector
 								[[0.00, 0.00, -0.25], [0.00, 0.00, 0.25]], // Exciter
@@ -144,6 +246,9 @@
 				const cubeFolder = gui.addFolder('Antenna Parameters');
 				var stringList = ["Dipole H", "Dipole V", "Yagi H"];
 				gui.add( parameters, 'w', stringList ).name('List');
+				this.antenna_types['order'].forEach(element => {
+					gui.add(, );
+				});
 
 				/*
 				cubeFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
