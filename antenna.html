@@ -35,6 +35,8 @@
 			var camera, scene, renderer, geometry, controls;
 			var clock = new THREE.Clock();
 			var tick = 0;
+			var ant = 0;
+			var current_antenna_object = 0;
 
 			class ViewManager {
 				// 
@@ -73,8 +75,8 @@
 						const geometry = new THREE.BufferGeometry();
 						geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 						// create a new wire with
-						const wire = new THREE.LineSegments(geometry, material);
-						antenna_view.add(wire);
+						const wire_line = new THREE.LineSegments(geometry, material);
+						antenna_view.add(wire_line);
 					});
 					// Add the antenna into the scene:
 					scene.add(antenna_view);
@@ -105,74 +107,84 @@
 				}
 			}
 
-			function Antennas() {
+			class Antennas {
 				//
-				this.wire = [];
+				constructor() {
+					this.wire = [];
 
-				this.antenna_types = {
-					'order' : ['dipole_h', 'dipole_v', 'monopole_v', 'inverted_v', 'inverted_l', 'loop_lrg_tri_h', 'quad'],
-					'antennas' : {
-						'dipole_v' : { 
-							'name' : "Vertical Dipole",
-							'wires' : [
-								[[0.00,-0.35,  0.00], [0.00, 0.35, 0.00]]
-							],
+					this.antenna_types = {
+						'order' : ['Horizontal Dipole', 'Vertical Dipole', 'Vertical Monopole', 'Inverted Vee', 'Inverted L', 'Loop Large Triangle', 'Quad', 'Horizontal Yagi 5-element'],
+						'antennas' : {
+							'Vertical Dipole' : { 
+								//'name' : "Vertical Dipole",
+								'wires' : [
+									[[0.00,-0.25,  0.00], [0.00, 0.25, 0.00]]
+								],
+							},
+							'Horizontal Dipole' : { 
+								//'name' : "Horizontal Dipole",
+								'wires' : [
+									[[-0.25, 0.00, 0.00], [0.25, 0.00, 0.00]]
+								],
+							},
+							'Vertical Monopole' : { 
+								//'name' : "Vertical Monopole",
+								'wires' : [
+									[[0.00, 0.05,  0.00], [0.00, 0.55, 0.00]]
+								],
+							},
+							'Inverted Vee' : { 
+								//'name' : "Inverted Vee",
+								'wires' : [
+									[[-0.25, 0.00, 0.00], [0.00, 0.25, 0.00], [0.25, 0.00, 0.00]]
+								],
+							},
+							'Inverted L' : { 
+								//'name' : "Inverted L",
+								'wires' : [
+									[[0.00, 0.00, 0.00], [0.00, 0.35, 0.00], [0.15, 0.35, 0.00]]
+								],
+							},
+							'Loop Large Triangle' : { 
+								//'name' : "Loop Large Triangle",
+								'wires' : [
+									[[-0.05, 0.00, 0.00], [-0.35, 0.00, 0.00], [0.00, 0.35, 0.00], [0.35, 0.00, 0.00], [0.05, 0.00, 0.00]]
+								],
+							},
+							'Quad' : { 
+								//'name' : "Quad",
+								'wires' : [
+								[[-0.05, 0.00, 0.00], [-0.35, 0.00, 0.00], [-0.35, 0.35, 0.00], [0.35, 0.35, 0.00], [0.35, 0.00, 0.00], [0.05, 0.00, 0.00]]
+								],
+							},
+							'Horizontal Yagi 5-element' : { 
+								//'name' : "Horizontal Yagi 5-element",
+								'wires' : [
+									[[-0.25, 0.00, -0.35], [-0.25, 0.00, 0.35]], // Reflector
+									[[0.00, 0.00, -0.25], [0.00, 0.00, 0.25]], // Exciter
+									[[0.25, 0.00, -0.25], [0.25, 0.00, 0.25]], // Director
+									[[0.50, 0.00, -0.25], [0.50, 0.00, 0.25]], // Director
+									[[0.75, 0.00, -0.25], [0.75, 0.00, 0.25]]// Director
+								],
+							}
 						},
-						'dipole_h' : { 
-							'name' : "Horizontal Dipole",
-							'wires' : [
-								[[0.00, 0.00, -0.35], [0.00, 0.00, 0.35]]
-							],
-						},
-						'monopole_v' : { 
-							'name' : "Vertical Monopole",
-							'wires' : [
-								[[0.00,-0.35,  0.00], [0.00, 0.35, 0.00]]
-							],
-						},
-						'inverted_v' : { 
-							'name' : "Inverted Vee",
-							'wires' : [
-								[[0.00, 0.00, -0.35], [0.00, 0.35, 0.00], [0.00, 0.00, 0.35]]
-							],
-						},
-						'inverted_l' : { 
-							'name' : "Inverted L",
-							'wires' : [
-								[[0.00, 0.00, -0.35], [0.00, 0.35, 0.00], [0.00, 0.00, 0.35]]
-							],
-						},
-						'loop_lrg_tri_h' : { 
-							'name' : "Loop Large Triangle",
-							'wires' : [
-								[[0.00, 0.00, -0.35], [0.00, 0.35, 0.00], [0.00, 0.00, 0.35]]
-							],
-						},
-						'quad' : { 
-							'name' : "Quad",
-							'wires' : [
-								[[0.00, 0.00, -0.35], [0.00, 0.35, 0.00], [0.00, 0.00, 0.35]]
-							],
-						},
-						'yagi_h' : { 
-							'name' : "Horizontal Yagi 5-element",
-							'wires' : [
-								[[-0.25, 0.00, -0.35], [-0.25, 0.00, 0.35]], // Reflector
-								[[0.00, 0.00, -0.25], [0.00, 0.00, 0.25]], // Exciter
-								[[0.25, 0.00, -0.25], [0.25, 0.00, 0.25]], // Director
-								[[0.50, 0.00, -0.25], [0.50, 0.00, 0.25]], // Director
-								[[0.75, 0.00, -0.25], [0.75, 0.00, 0.25]]// Director
-							],
-						}
-					},
-				};
+					};
+					this.current_type = this.antenna_types['order'][0];
+					console.log(this.current_type);
+				}
+				setAntennaType(antenna_type) {
+					console.log("setAntennaType" + antenna_type);
+					this.current_type = antenna_type;
+				}
+
 				//
-				this.getThreeObject3D = function () {
+				getThreeObject3D = function () {
+					/*
 					const material = new THREE.LineBasicMaterial({color:0xffff00});
 
 					const points = [];
 					const scale_factor = 100.0;
-					var wires = this.antenna_types['antennas']['yagi_h']['wires'];
+					var wires = this.antenna_types['antennas'][this.current_type]['wires'];
 					wires.forEach(element => {
 						points.push(new THREE.Vector3(element[0][0] * scale_factor, element[0][1] * scale_factor, element[0][2] * scale_factor));
 						points.push(new THREE.Vector3(element[1][0] * scale_factor, element[1][1] * scale_factor, element[1][2] * scale_factor));
@@ -181,21 +193,34 @@
 					const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
 					return new THREE.LineSegments( geometry, material );
+					*/
+					const material = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 10 });
+					//const line = new THREE.Line(geometry, material);
+					const antenna_view = new THREE.Group();
+
+					this.antenna_types['antennas'][this.current_type]['wires'].forEach(wire => {
+						//console.log(wire);
+						var vertices = new Float32Array(wire.length * 3);
+						var vidx = 0;
+						const scale_factor = 200.0;
+						// Copy the vertex locations across into a Float32Array for the geometry:
+						wire.forEach((vertex) => {
+							vertices[vidx++] = (vertex[0] * scale_factor);
+							vertices[vidx++] = (vertex[1] * scale_factor);
+							vertices[vidx++] = (vertex[2] * scale_factor);
+						});
+						//console.log(vertices);
+						// 
+						const geometry = new THREE.BufferGeometry();
+						geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+						// create a new wire with
+						const wire_line = new THREE.Line(geometry, material);
+						antenna_view.add(wire_line);
+					});
+					// Add the antenna into the scene:
+					return antenna_view;
 				};
 			}
-
-            function Antenna() {
-                const material = new THREE.LineBasicMaterial({color:0x00ff00});
-
-                const points = [];
-                points.push(new THREE.Vector3(0.0, 0.0, 0.0));
-                points.push(new THREE.Vector3(0.0, 100.0, 0.0));
-                points.push(new THREE.Vector3(0.0, 0.0, 10.0));
-
-                const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-                return new THREE.Line( geometry, material );
-            }
 
 			init();
 			animate();
@@ -243,12 +268,33 @@
 				};
 
 				const gui = new dat.GUI();
-				const cubeFolder = gui.addFolder('Antenna Parameters');
-				var stringList = ["Dipole H", "Dipole V", "Yagi H"];
-				gui.add( parameters, 'w', stringList ).name('List');
-				this.antenna_types['order'].forEach(element => {
-					gui.add(, );
+				const cubeFolder = gui.addFolder('Antenna Controls');
+				ant = new Antennas();
+				var stringList = [];
+				for (let idx = 0; idx < ant.antenna_types['order'].length; idx++) {
+					const element = ant.antenna_types['order'][idx];
+					//cubeFolder.addFolder(ant.antenna_types['antennas'][element]['name']);
+					stringList.push(element);
+				}
+				gui.add( parameters, 'w', stringList )
+				.setValue(ant.current_type)
+				.name('Types')
+				.onChange(function(value) {
+					console.log(value);
+					// Remove the current antenna visual model, if one was loaded:
+					scene.remove(current_antenna_object);
+					// Use selected antenna to rebuild new wire model:
+					ant.setAntennaType(value);
+					// Load new antenna visual model into the scene:
+					current_antenna_object = ant.getThreeObject3D();
+					scene.add(current_antenna_object);
 				});
+				
+				/*
+				ant.antenna_types['order'].forEach(element => {
+					cubeFolder.add(element);
+				});
+				*/
 
 				/*
 				cubeFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
@@ -276,8 +322,8 @@
 				console.log(I[23]);
 				V = math.multiply(impedance, I);
 
-				var ant = new Antennas();
-				scene.add(ant.getThreeObject3D());
+				current_antenna_object = ant.getThreeObject3D();
+				scene.add(current_antenna_object);
 			}
 			
 			function createWire(length, wire_radius, segments) {
