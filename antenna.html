@@ -30,6 +30,7 @@
 
 		<script>
 			//import { GUI } from 'dat.gui'
+			//import Stats from 'three/examples/jsm/libs/stats.module'
 
 			var container; //, stats;
 			var camera, scene, renderer, geometry, controls;
@@ -166,14 +167,23 @@
 									[[0.50, 0.00, -0.25], [0.50, 0.00, 0.25]], // Director
 									[[0.75, 0.00, -0.25], [0.75, 0.00, 0.25]]// Director
 								],
+							},
+							'Spiderbeam 5' : { 
+								'wires' : [
+									[[-0.25, 0.00, -0.35], [-0.25, 0.00, 0.35]], // Reflector
+									[[0.00, 0.00, -0.25], [0.00, 0.00, 0.25]], // Exciter
+									[[0.25, 0.00, -0.25], [0.25, 0.00, 0.25]], // Director
+									[[0.50, 0.00, -0.25], [0.50, 0.00, 0.25]], // Director
+									[[0.75, 0.00, -0.25], [0.75, 0.00, 0.25]]// Director
+								],
 							}
 						},
 					};
 					this.current_type = this.antenna_types['order'][0];
-					console.log(this.current_type);
+					//console.log(this.current_type);
 				}
 				setAntennaType(antenna_type) {
-					console.log("setAntennaType" + antenna_type);
+					//console.log("setAntennaType" + antenna_type);
 					this.current_type = antenna_type;
 				}
 
@@ -195,7 +205,6 @@
 					return new THREE.LineSegments( geometry, material );
 					*/
 					const material = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 10 });
-					//const line = new THREE.Line(geometry, material);
 					const antenna_view = new THREE.Group();
 
 					this.antenna_types['antennas'][this.current_type]['wires'].forEach(wire => {
@@ -209,7 +218,6 @@
 							vertices[vidx++] = (vertex[1] * scale_factor);
 							vertices[vidx++] = (vertex[2] * scale_factor);
 						});
-						//console.log(vertices);
 						// 
 						const geometry = new THREE.BufferGeometry();
 						geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
@@ -237,7 +245,6 @@
 				scene = new THREE.Scene();
 				scene.background = new THREE.Color(0.0, 0.0, 0.0);
 
-				//renderer = new THREE.WebGLRenderer({antialias:true});
 				renderer = new THREE.WebGLRenderer({antialias:true});
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
@@ -253,6 +260,7 @@
 				var axis = new THREE.AxesHelper(200);
 				scene.add(axis);
 
+				/*
 				var parameters = 
 				{
 					a: 200, // numeric
@@ -266,17 +274,31 @@
 					w: "...", // dummy value, only type is important
 					x: 0, y: 0, z: 0
 				};
+				*/
+
+				var parameters = {
+					//
+					mode: true,
+					axes: true,
+					w: "...", // dummy value, only type is important
+				};
 
 				const gui = new dat.GUI();
-				const cubeFolder = gui.addFolder('Antenna Controls');
+
+				// Add a mode selector. View is to change perspective. Edit allows moving vertices. Solve runs the EM solver. (Maybe should be edit+solve?)
+				gui.add(parameters, 'mode', ['view', 'edit', 'solve'])
+				.setValue('view')
+				.onChange(function(value){ console.log(value); });
+				
+				// Add an enable axes-helper button:
+				gui.add(parameters, 'axes')
+				.setValue(true)
+				.onChange(function(value){ axis.visible = value; });
+
+				// Create the Antennas object, which holds all the antenna types and creates the visual model on-request
 				ant = new Antennas();
-				var stringList = [];
-				for (let idx = 0; idx < ant.antenna_types['order'].length; idx++) {
-					const element = ant.antenna_types['order'][idx];
-					//cubeFolder.addFolder(ant.antenna_types['antennas'][element]['name']);
-					stringList.push(element);
-				}
-				gui.add( parameters, 'w', stringList )
+
+				gui.add( parameters, 'w', ant.antenna_types['order'])
 				.setValue(ant.current_type)
 				.name('Types')
 				.onChange(function(value) {
@@ -289,6 +311,9 @@
 					current_antenna_object = ant.getThreeObject3D();
 					scene.add(current_antenna_object);
 				});
+
+				// Add a folder for the antenna-specific controls.
+				const cubeFolder = gui.addFolder('Antenna Controls');
 				
 				/*
 				ant.antenna_types['order'].forEach(element => {
