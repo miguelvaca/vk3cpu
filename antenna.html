@@ -39,82 +39,13 @@
 			var ant = 0;
 			var current_antenna_object = 0;
 
-			class ViewManager {
-				// 
-				constructor() {
-					//
-				}
-
-				// 
-				setAntennaType(antenna_type) {
-					//
-					if (antenna_type == "yagi") {
-						self.antenna = new YagiAntenna();
-						// 
-					} else {
-						// 
-					}
-
-					/*
-					const vertices = new Float32Array([
-						-0.5, 0.0, 0.0,
-						 0.5, 0.0, 0.0
-					]);
-					*/
-
-					const material = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 1 });
-					const line = new THREE.Line(geometry, material);
-					const antenna_view = new THREE.Group();
-
-					self.antenna.wires.forEach(wire => {
-						const vertices = new Float32Array(wire.length);
-						// Copy the vertex locations across into a Float32Array for the geometry:
-						wire.forEach(vertex, index => {
-							vertices[index] = vertex;
-						});
-						// 
-						const geometry = new THREE.BufferGeometry();
-						geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-						// create a new wire with
-						const wire_line = new THREE.LineSegments(geometry, material);
-						antenna_view.add(wire_line);
-					});
-					// Add the antenna into the scene:
-					scene.add(antenna_view);
-				}
-			}
-
-			class AntennaBase {
-				//
-				constructor() {
-					// 
-				}
-
-				getWires() {
-					// 
-					return self.wires;
-				}
-			}
-
-			class DipoleH extends AntennaBase {
-				//
-				constructor() {
-					//
-					self.name = "Horizontal Dipole";
-					self.wires = [[0.00, 0.00, -0.35], [0.00, 0.00, 0.35]];
-				}
-				test() {
-					//
-				}
-			}
-
 			class Antennas {
 				//
 				constructor() {
 					this.wire = [];
 
 					this.antenna_types = {
-						'order' : ['Horizontal Dipole', 'Vertical Dipole', 'Vertical Monopole', 'Inverted Vee', 'Inverted L', 'Loop Large Triangle', 'Quad', 'Horizontal Yagi 5-element'],
+						'order' : ['Horizontal Dipole', 'Vertical Dipole', 'Vertical Monopole', 'Inverted Vee', 'Inverted L', 'Loop Large Triangle', 'Quad', 'H Yagi 5-element'],
 						'antennas' : {
 							'Vertical Dipole' : { 
 								//'name' : "Vertical Dipole",
@@ -158,14 +89,14 @@
 								[[-0.05, 0.00, 0.00], [-0.35, 0.00, 0.00], [-0.35, 0.35, 0.00], [0.35, 0.35, 0.00], [0.35, 0.00, 0.00], [0.05, 0.00, 0.00]]
 								],
 							},
-							'Horizontal Yagi 5-element' : { 
+							'H Yagi 5-element' : { 
 								//'name' : "Horizontal Yagi 5-element",
 								'wires' : [
-									[[-0.25, 0.00, -0.35], [-0.25, 0.00, 0.35]], // Reflector
-									[[0.00, 0.00, -0.25], [0.00, 0.00, 0.25]], // Exciter
-									[[0.25, 0.00, -0.25], [0.25, 0.00, 0.25]], // Director
-									[[0.50, 0.00, -0.25], [0.50, 0.00, 0.25]], // Director
-									[[0.75, 0.00, -0.25], [0.75, 0.00, 0.25]]// Director
+									[[-0.35, 0.00, -0.25], [0.35, 0.00, -0.25]], // Reflector
+									[[-0.25, 0.00,  0.00], [0.25, 0.00,  0.00]], // Exciter
+									[[-0.25, 0.00,  0.25], [0.25, 0.00,  0.25]], // Director
+									[[-0.25, 0.00,  0.50], [0.25, 0.00,  0.50]], // Director
+									[[-0.25, 0.00,  0.75], [0.25, 0.00,  0.75]]// Director
 								],
 							},
 							'Spiderbeam 5' : { 
