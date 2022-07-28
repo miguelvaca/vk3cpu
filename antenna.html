@@ -36,8 +36,11 @@
 			var camera, scene, renderer, geometry, controls;
 			var clock = new THREE.Clock();
 			var tick = 0;
+
 			var ant = 0;
 			var current_antenna_object = 0;
+			var ground_plane = 0;
+			var height_above_ground = 0;
 
 			class Antennas {
 				//
@@ -74,7 +77,7 @@
 							'Inverted L' : { 
 								//'name' : "Inverted L",
 								'wires' : [
-									[[0.00, 0.00, 0.00], [0.00, 0.35, 0.00], [0.15, 0.35, 0.00]]
+									[[0.00, 0.00, 0.00], [0.00, 0.35, 0.00], [0.00, 0.35, -0.20]]
 								],
 							},
 							'Loop Large Triangle' : { 
@@ -208,9 +211,10 @@
 				*/
 
 				var parameters = {
-					//
 					mode: true,
-					axes: true,
+					axis: true,
+					ground: true,
+					height: 0.0, 
 					w: "...", // dummy value, only type is important
 				};
 
@@ -221,13 +225,33 @@
 				.setValue('view')
 				.onChange(function(value){ console.log(value); });
 				
+				// Create the Antennas object, which holds all the antenna types and creates the visual model on-request
+				ant = new Antennas();
+
+				const geometry = new THREE.CircleGeometry( 150, 32 );
+				const material = new THREE.MeshBasicMaterial( { color: 0x006f00, wireframe: true } );
+				const ground_plane = new THREE.Mesh( geometry, material );
+				ground_plane.rotateX(Math.PI * -0.5);
+				scene.add( ground_plane );
+
 				// Add an enable axes-helper button:
-				gui.add(parameters, 'axes')
+				gui.add(parameters, 'axis')
 				.setValue(true)
 				.onChange(function(value){ axis.visible = value; });
 
-				// Create the Antennas object, which holds all the antenna types and creates the visual model on-request
-				ant = new Antennas();
+				// Add an enable axes-helper button:
+				gui.add(parameters, 'ground')
+				.setValue(true)
+				.onChange(function(value){ ground_plane.visible = value; });
+
+				// Add an enable axes-helper button:
+				gui.add(parameters, 'height', 0.0, 500.0)
+				.setValue(true)
+				.onChange(function(value){ 
+					//console.log(current_antenna_object['position']);
+					current_antenna_object['position'].y = value; 
+					//console.log(parameters['height']);
+				});
 
 				gui.add( parameters, 'w', ant.antenna_types['order'])
 				.setValue(ant.current_type)
@@ -240,6 +264,7 @@
 					ant.setAntennaType(value);
 					// Load new antenna visual model into the scene:
 					current_antenna_object = ant.getThreeObject3D();
+					current_antenna_object['position'].y = parameters['height']; 
 					scene.add(current_antenna_object);
 				});
 
