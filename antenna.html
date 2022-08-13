@@ -32,6 +32,31 @@
 			//import { GUI } from 'dat.gui'
 			//import Stats from 'three/examples/jsm/libs/stats.module'
 
+			// Heatmap vertex shader - Use this to update the position due to camera projection 
+			var radiationPatternVertexShader = 
+				"uniform vec4  hiColor; 							\n" + 
+				"uniform vec4  loColor;								\n" + 
+				"uniform float maxHistogramValue;					\n" + 
+				"uniform float contrast;							\n" + 
+				"uniform float shape;								\n" + 
+				"varying vec4 vColor;								\n" + 
+				"\n" 													+ 
+				"void main() {										\n" + 
+				"	vec4 mvPosition;								\n" + 
+				"	// UV.x contains histogram value				\n" + 
+				"	// UV.y is identical to UV.x 					\n" + 
+				"	if(maxHistogramValue > 0.0) {					\n" + 
+				"		vColor = pow((uv.x / maxHistogramValue), contrast) * (hiColor-loColor) + loColor;	\n" + 
+				"		mvPosition = modelViewMatrix * vec4( position.xyz*pow((uv.x / maxHistogramValue),shape), 1.0 );	\n" + 
+				"	} else {										\n" + 
+				"		vColor = hiColor; 							\n" + 
+				"		mvPosition = modelViewMatrix * vec4( position.xyz, 1.0 ); 	\n" + 
+				"	}												\n" + 
+				"													\n" + 
+				"	gl_PointSize = 2.0;								\n" + 
+				"	gl_Position = projectionMatrix * mvPosition; \n" 	+ 
+				"}	\n";
+
 			var container; //, stats;
 			var camera, scene, renderer, geometry, controls;
 			var clock = new THREE.Clock();
@@ -45,70 +70,99 @@
 			class Antennas {
 				//
 				constructor() {
-					this.wire = [];
+					this.wires = [];
+					this.Z = [];
+					this.Y = [];
 
 					this.antenna_types = {
-						'order' : ['Horizontal Dipole', 'Vertical Dipole', 'Vertical Monopole', 'Inverted Vee', 'Inverted L', 'Loop Large Triangle', 'Quad', 'H Yagi 5-element'],
+						'order' : ['Horizontal Dipole', 'Vertical Dipole', 'Vertical Monopole', 'Inverted Vee', 'Inverted L', 'Loop Large Triangle', 'Quad', 'H Yagi 5-element', 'Spiderbeam 5'],
 						'antennas' : {
 							'Vertical Dipole' : { 
-								//'name' : "Vertical Dipole",
+								'vertex' : [
+									[0.00, -0.25, 0.00], [0.00, 0.25, 0.00]
+								],
 								'wires' : [
-									[[0.00,-0.25,  0.00], [0.00, 0.25, 0.00]]
+									[0, 1]
 								],
 							},
 							'Horizontal Dipole' : { 
-								//'name' : "Horizontal Dipole",
+								'vertex' : [
+									[-0.25, 0.00, 0.00], [0.25, 0.00, 0.00]
+								],
 								'wires' : [
-									[[-0.25, 0.00, 0.00], [0.25, 0.00, 0.00]]
+									[0, 1]
 								],
 							},
 							'Vertical Monopole' : { 
-								//'name' : "Vertical Monopole",
+								'vertex' : [
+									[0.00, 0.05,  0.00], [0.00, 0.55, 0.00]
+								],
 								'wires' : [
-									[[0.00, 0.05,  0.00], [0.00, 0.55, 0.00]]
+									[0, 1]
 								],
 							},
 							'Inverted Vee' : { 
-								//'name' : "Inverted Vee",
+								'vertex' : [
+									[-0.25, 0.00, 0.00], [0.00, 0.25, 0.00], [0.25, 0.00, 0.00]
+								],
 								'wires' : [
-									[[-0.25, 0.00, 0.00], [0.00, 0.25, 0.00], [0.25, 0.00, 0.00]]
+									[0, 1, 2]
 								],
 							},
 							'Inverted L' : { 
-								//'name' : "Inverted L",
+								'vertex' : [
+									[0.00, 0.00, 0.00], [0.00, 0.35, 0.00], [0.00, 0.35, -0.20]
+								],
 								'wires' : [
-									[[0.00, 0.00, 0.00], [0.00, 0.35, 0.00], [0.00, 0.35, -0.20]]
+									[0, 1, 2]
 								],
 							},
 							'Loop Large Triangle' : { 
-								//'name' : "Loop Large Triangle",
+								'vertex' : [
+									[-0.05, 0.00, 0.00], [-0.35, 0.00, 0.00], [0.00, 0.35, 0.00], [0.35, 0.00, 0.00], [0.05, 0.00, 0.00]
+								],
 								'wires' : [
-									[[-0.05, 0.00, 0.00], [-0.35, 0.00, 0.00], [0.00, 0.35, 0.00], [0.35, 0.00, 0.00], [0.05, 0.00, 0.00]]
+									[0, 1, 2, 3, 4]
 								],
 							},
 							'Quad' : { 
-								//'name' : "Quad",
+								'vertex' : [
+								[-0.05, 0.00, 0.00], [-0.35, 0.00, 0.00], [-0.35, 0.35, 0.00], [0.35, 0.35, 0.00], [0.35, 0.00, 0.00], [0.05, 0.00, 0.00]
+								],
 								'wires' : [
-								[[-0.05, 0.00, 0.00], [-0.35, 0.00, 0.00], [-0.35, 0.35, 0.00], [0.35, 0.35, 0.00], [0.35, 0.00, 0.00], [0.05, 0.00, 0.00]]
+								[0, 1, 2, 3, 4, 5]
 								],
 							},
 							'H Yagi 5-element' : { 
-								//'name' : "Horizontal Yagi 5-element",
+								'vertex' : [
+									[-0.35, 0.00, -0.25], [0.35, 0.00, -0.25],  // Reflector
+									[-0.25, 0.00,  0.00], [0.25, 0.00,  0.00],  // Exciter
+									[-0.25, 0.00,  0.25], [0.25, 0.00,  0.25],  // Director
+									[-0.25, 0.00,  0.50], [0.25, 0.00,  0.50],  // Director
+									[-0.25, 0.00,  0.75], [0.25, 0.00,  0.75]   // Director
+								],
 								'wires' : [
-									[[-0.35, 0.00, -0.25], [0.35, 0.00, -0.25]], // Reflector
-									[[-0.25, 0.00,  0.00], [0.25, 0.00,  0.00]], // Exciter
-									[[-0.25, 0.00,  0.25], [0.25, 0.00,  0.25]], // Director
-									[[-0.25, 0.00,  0.50], [0.25, 0.00,  0.50]], // Director
-									[[-0.25, 0.00,  0.75], [0.25, 0.00,  0.75]]// Director
+									[0, 1], // Reflector
+									[2, 3], // Exciter
+									[4, 5], // Director
+									[6, 7], // Director
+									[8, 9]  // Director
 								],
 							},
 							'Spiderbeam 5' : { 
+								'vertex' :  [
+									[-0.25, 0.00, -0.35], [-0.25, 0.00, 0.35], // Reflector
+									[0.00, 0.00, -0.25], [0.00, 0.00, 0.25], // Exciter
+									[0.25, 0.00, -0.25], [0.25, 0.00, 0.25], // Director
+									[0.50, 0.00, -0.25], [0.50, 0.00, 0.25], // Director
+									[0.75, 0.00, -0.25], [0.75, 0.00, 0.25]
+								],
 								'wires' : [
-									[[-0.25, 0.00, -0.35], [-0.25, 0.00, 0.35]], // Reflector
-									[[0.00, 0.00, -0.25], [0.00, 0.00, 0.25]], // Exciter
-									[[0.25, 0.00, -0.25], [0.25, 0.00, 0.25]], // Director
-									[[0.50, 0.00, -0.25], [0.50, 0.00, 0.25]], // Director
-									[[0.75, 0.00, -0.25], [0.75, 0.00, 0.25]]// Director
+									[0, 1], // Reflector
+									[2, 3], // Exciter
+									[4, 5], // Director
+									[6, 7], // Director
+									[8, 9]  // Director
 								],
 							}
 						},
@@ -116,41 +170,212 @@
 					this.current_type = this.antenna_types['order'][3];
 					//console.log(this.current_type);
 				}
+
 				setAntennaType(antenna_type) {
 					//console.log("setAntennaType" + antenna_type);
 					this.current_type = antenna_type;
 				}
+/*
+				psi(wire, n, m) {
+					var retval = 0.0;
+					const k = 2.0 * Math.PI; // Normalised wavelength is equal to 1.0 - otherwise 2*pi/wavelength
+					const fourPI = 4.0 * Math.PI;
+					var Rmn = 0.0;
+					// From MININEC thesis (3-36) and (3-37):
+					if(m==n) {
+						retval = math.complex((1.0/(2.0*Math.PI*wire.seg_len)) * Math.log(wire.seg_len / wire.radius), (-k/fourPI));
+					} else {
+						Rmn = Math.sqrt((wire.points[m][0] - wire.points[n][0])**2 + (wire.points[m][1] - wire.points[n][1])**2 + (wire.points[m][2] - wire.points[n][2])**2);
+						retval = math.multiply(math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn)), (1/(fourPI*Rmn)));
+					}
+					//console.log(n, m, retval);
+					return retval;
+				}
+*/
+
+				psi(seg_n, seg_m, point_n, point_m) {
+					var retval = 0.0;
+					const k = 2.0 * Math.PI; // Normalised wavelength is equal to 1.0 - otherwise 2*pi/wavelength
+					const fourPI = 4.0 * Math.PI;
+					var Rmn = 0.0;
+					// From MININEC thesis (3-36) and (3-37):
+					if(point_n==point_m) {
+						//console.log(point_n, point_m);
+						retval = math.complex((1.0/(2.0*Math.PI*seg_n.len)) * Math.log(seg_n.len / seg_n.radius), (-k/fourPI));
+						//console.log(retval, seg_n.len, seg_n.radius);
+					} else {
+						Rmn = Math.sqrt((point_m[0] - point_n[0])**2 + (point_m[1] - point_n[1])**2 + (point_m[2] - point_n[2])**2);
+						retval = math.multiply(math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn)), (1/(fourPI*Rmn)));
+					}
+					//console.log(n, m, retval);
+					return retval;
+				}
+
+				calculateZMatrix() {
+					const w = 2.0 * Math.PI * frequency;
+					const k = 2.0 * Math.PI * frequency / 3e8; // 2*pi/lambda
+					const e0 =  8.854187e-12;
+					const mu0 = 4.0 * Math.PI * 1e-7;
+					const fourPI = 4.0 * Math.PI;
+					
+					var segments = [];
+					this.wires.forEach(wire => {
+						for (let m = 1; m < wire.points.length; m+=2) {
+							//
+							var t_seg = {};
+							t_seg.start = wire.points[m-1];
+							t_seg.end = wire.points[m+1];
+							t_seg.mid = wire.points[m];
+							t_seg.len = wire.seg_len;
+							t_seg.radius = wire.radius;
+							t_seg.feedpoint = false;
+
+							segments.push(t_seg);
+						}
+					});
+
+					this.Z = [];
+					for (let m = 0; m < segments.length; m++) {
+						var row = [];
+						for (let n = 0; n < segments.length; n++) {
+							// Use Harrington's method:
+							var tmp = math.dot(math.subtract(segments[n].end, segments[n].start), math.subtract(segments[m].end, segments[m].start));
+							//var tmp = math.dot(math.subtract(wire.points[n+1], wire.points[n-1]), math.subtract(wire.points[m+1], wire.points[m-1]));
+							tmp *= w * mu0;
+							tmp = math.multiply(math.complex(0,tmp), this.psi(segments[n], segments[m], segments[n].mid, segments[m].mid));
+							// tmp = math.multiply(math.complex(0,tmp), this.psi(wire, n, m));
+							var tmp2 = math.add(this.psi(segments[n], segments[m], segments[n].end, segments[m].end), this.psi(segments[n], segments[m], segments[n].start, segments[m].start));
+							// var tmp2 = math.add(this.psi(wire, n+1, m+1), this.psi(wire, n-1, m-1));
+							var tmp3 = math.add(this.psi(segments[n], segments[m], segments[n].start, segments[m].end), this.psi(segments[n], segments[m], segments[n].end, segments[m].start));
+							//var tmp3 = math.add(this.psi(wire, n-1, m+1), this.psi(wire, n+1, m-1));
+							var tmp4 = math.subtract(tmp2, tmp3);
+							tmp2 = math.multiply(tmp4, math.complex(0,-1/(w*e0)));
+							row.push(math.add(tmp, tmp2)); 
+						}
+						this.Z.push(row);
+					}
+
+					/*
+					this.Z = [];
+					for (let m = 1; m < wire.points.length; m+=2) {
+						var row = [];
+						for (let n = 1; n < wire.points.length; n+=2) {
+							// Use Harrington's method:
+							var tmp = math.dot(math.subtract(wire.points[n+1], wire.points[n-1]), math.subtract(wire.points[m+1], wire.points[m-1]));
+							tmp *= w * mu0;
+							tmp = math.multiply(math.complex(0,tmp), this.psi(wire, n, m));
+							var tmp2 = math.add(this.psi(wire, n+1, m+1), this.psi(wire, n-1, m-1));
+							var tmp3 = math.add(this.psi(wire, n-1, m+1), this.psi(wire, n+1, m-1));
+							var tmp4 = math.subtract(tmp2, tmp3);
+							tmp2 = math.multiply(tmp4, math.complex(0,-1/(w*e0)));
+							row.push(math.add(tmp, tmp2)); 
+						}
+						this.Z.push(row);
+					}
+					*/
+					//console.log(this.Z);
+					this.Y = math.inv(this.Z);
+					return this.Z;
+				}
+
+				createVoltageVector() {
+					this.V = [];
+					for(var i=0; i<this.Z.length; i++){
+						if(i == ((this.Z.length-1)/2)) {
+							this.V.push(math.complex(1,0));
+						} else {
+							this.V.push(math.complex(0,0));
+						}
+					}
+					return this.V;
+				}
+
+				calculateVoltage() {
+					var retval = [];
+					var x_axis = 0.0;
+					for(var i=0; i<V.length; i++) {
+						x_axis += wire.seg_len;
+						retval.push({x:x_axis, y:V[i].toPolar().r});
+					}
+					return retval;
+				}
+
+				calculateCurrent() {
+					var retval = [];
+					var x_axis = 0.0;
+					for(var i=0; i<I.length; i++) {
+						x_axis += wire.seg_len;
+						retval.push({x:x_axis, y:I[i].toPolar().r});
+					}
+					return retval;
+				}
+
+				getPatternAt(x, y, z) {
+					// Return the magnitude of the radiation pattern in the xyz direction. Later, update this to provide a composite object containing polarization-specific patterns:
+					return 1.0;
+				}
+				
+				// Return the wire elements for solving:
+				getWires() {
+					this.wires = [];
+					// 
+					var ws = this.antenna_types['antennas'][this.current_type]['wires'];
+					var vs = this.antenna_types['antennas'][this.current_type]['vertex'];
+					
+					ws.forEach(w => {
+						// 
+						var ww = {};
+						// ww.length = ;
+						// ww.seg_len = ;
+						ww.radius = 0.0001;
+						ww.points = [];
+						for (let index = 0; index < (w.length-1); index++) {
+							const wire_length = Math.sqrt(
+								(vs[w[index]][0] -  vs[w[index+1]][0])**2 +
+								(vs[w[index]][1] -  vs[w[index+1]][1])**2 +
+								(vs[w[index]][2] -  vs[w[index+1]][2])**2 
+							);
+							// Minimum of 10 segments per half-wavelength => 0.05
+							const segments = Math.round(wire_length / 0.025);
+							ww.seg_len = wire_length / segments;
+							//const frac = 1.0 / segments;
+							for (let ii = 0; ii < segments; ii++) {
+								const frac = 1.0 * ii / segments;
+								const x = vs[w[index]][0] * (1.0 - frac) + frac *  vs[w[index+1]][0];
+								const y = vs[w[index]][1] * (1.0 - frac) + frac *  vs[w[index+1]][1];
+								const z = vs[w[index]][2] * (1.0 - frac) + frac *  vs[w[index+1]][2];
+								ww.points.push([x,y,z]);
+							}
+						}
+						// Add the final point:
+						const x = vs[w[w.length-1]][0];
+						const y = vs[w[w.length-1]][1];
+						const z = vs[w[w.length-1]][2];
+						ww.points.push([x,y,z]);
+						//retval.push(ww);
+						this.wires.push(ww);
+					});
+					return this.wires;
+				}
 
 				//
 				getThreeObject3D = function () {
-					/*
-					const material = new THREE.LineBasicMaterial({color:0xffff00});
-
-					const points = [];
-					const scale_factor = 100.0;
-					var wires = this.antenna_types['antennas'][this.current_type]['wires'];
-					wires.forEach(element => {
-						points.push(new THREE.Vector3(element[0][0] * scale_factor, element[0][1] * scale_factor, element[0][2] * scale_factor));
-						points.push(new THREE.Vector3(element[1][0] * scale_factor, element[1][1] * scale_factor, element[1][2] * scale_factor));
-					});
-
-					const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-					return new THREE.LineSegments( geometry, material );
-					*/
 					const material = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 10 });
 					const antenna_view = new THREE.Group();
 
-					this.antenna_types['antennas'][this.current_type]['wires'].forEach(wire => {
+					const ww = this.antenna_types['antennas'][this.current_type]['wires'];
+					const vv = this.antenna_types['antennas'][this.current_type]['vertex'];
+					ww.forEach(wire => {
 						//console.log(wire);
 						var vertices = new Float32Array(wire.length * 3);
 						var vidx = 0;
 						const scale_factor = 200.0;
 						// Copy the vertex locations across into a Float32Array for the geometry:
 						wire.forEach((vertex) => {
-							vertices[vidx++] = (vertex[0] * scale_factor);
-							vertices[vidx++] = (vertex[1] * scale_factor);
-							vertices[vidx++] = (vertex[2] * scale_factor);
+							//console.log(vertex, vv[vertex]);
+							vertices[vidx++] = (vv[vertex][0] * scale_factor);
+							vertices[vidx++] = (vv[vertex][1] * scale_factor);
+							vertices[vidx++] = (vv[vertex][2] * scale_factor);
 						});
 						// 
 						const geometry = new THREE.BufferGeometry();
@@ -163,6 +388,182 @@
 					return antenna_view;
 				};
 			}
+
+
+			// Density map class for calculating the CVF heat/density map:
+			class RadiationPattern {
+				constructor() {
+					// Heatmap specific stuff:
+					this.radiationPatternGeometry  = new THREE.IcosahedronBufferGeometry( 98, 5 );
+					this.radiationPatternVertices  = this.radiationPatternGeometry.getAttribute('position');
+					this.radiationPatternHistogram = this.radiationPatternGeometry.getAttribute('uv');
+					//var radiationPatternColor = new Float32Array( radiationPatternVertices.count * 3 );
+				
+					// Initialise to ZERO the UV values:
+					for(var i = 0; i < this.radiationPatternHistogram.count; i++) {
+						this.radiationPatternHistogram.setX(i, 0.0);
+						this.radiationPatternHistogram.setY(i, 0.0);
+					}
+
+					this.hiColor = [0, 255, 0, 1.0]; 	// Let's default to RED in [R, G, B, A]
+					this.loColor = [0, 0, 255, 1.0]; 	// Let's default to RED in [R, G, B, A]
+					this.contrast = 1.0;
+					this.shape = 1.0;
+					this.radiationPatternUniforms = {
+						//cameraConstant: 	{ value: getCameraConstant( camera ) },
+						hiColor: 			{ value: new THREE.Vector4(this.hiColor[0]/255.0, this.hiColor[1]/255.0, this.hiColor[2]/255.0, this.hiColor[3]) },
+						loColor: 			{ value: new THREE.Vector4(this.loColor[0]/255.0, this.loColor[1]/255.0, this.loColor[2]/255.0, this.loColor[3]) },
+						maxHistogramValue: 	{ value: 0.0 },
+						contrast:			{ value: this.contrast },
+						shape: 				{ value: this.shape }
+					};
+
+					// ShaderMaterial
+					this.wireframe = true;
+					this.material = new THREE.ShaderMaterial( {
+															uniforms:       this.radiationPatternUniforms,
+															vertexShader:   radiationPatternVertexShader,
+															//fragmentShader: cvfFragmentShader,
+															wireframe: 		this.wireframe
+															} );
+					this.material.extensions.drawBuffers = true;
+					this.radiationPatternMesh = new THREE.Mesh( this.radiationPatternGeometry, this.material );
+					this.visibility = true;
+					this.radiationPatternMesh.visible = this.visibility;
+					
+					this.hasWork = false;
+				}
+				
+				// Insert the geometries into the scenegraph's sceneObject:
+				insertScene(sceneObject) {
+					sceneObject.add(this.radiationPatternMesh);
+				}
+				
+				// Set the visible geometry. No point ever displaying both, as they use the SAME vertices:
+				setVisibility(value) {
+					this.visibility = value;
+					this.radiationPatternMesh.visible = value;
+				}
+				
+				// Select whether to animate or not:
+				setAnimate(value) {
+					this.radiationPatternUniforms.animate.value = (value) ? true : false;
+				}
+				
+				// Little hack for dat.gui. Update the color by passing 4-element array in form [255, 128, 0, 1.0]:
+				setHiColor(value) {
+					this.hiColor = value;
+					this.radiationPatternUniforms.hiColor.value = [this.hiColor[0]/255.0, this.hiColor[1]/255.0, this.hiColor[2]/255.0, this.hiColor[3]];
+				}
+				
+				setLoColor(value) {
+					this.loColor = value;
+					this.radiationPatternUniforms.loColor.value = [this.loColor[0]/255.0, this.loColor[1]/255.0, this.loColor[2]/255.0, this.loColor[3]];
+				}
+
+				setPattern(ant_obj) {
+					// Populate the lookup table with the vertex and its index:
+					for(var i = 0; i < this.densitymapVertices.count; i++) {
+						const x = this.densitymapVertices.getX(i);
+						const y = this.densitymapVertices.getY(i);
+						const z = this.densitymapVertices.getZ(i);
+						// p at first should be a scalar. But later might be a composite of 2 scalars, to denote polarization (H, V)
+						var p = ant_obj.getPatternAt(x, y, z);
+						this.radiationPatternHistogram.setX(i, p);
+						this.radiationPatternHistogram.setY(i, p);
+					}
+				}
+				
+				reset() {
+					// Clear the geometry UV:
+					for(var i = 0; i < this.radiationPatternHistogram.count; i++) {
+						this.radiationPatternHistogram.setX(i, 0.0);
+						this.radiationPatternHistogram.setY(i, 0.0);
+					}
+					this.radiationPatternUniforms.maxHistogramValue.value = 0.0;
+					this.radiationPatternHistogram.needsUpdate = true;
+					this.i_n = 0;
+					this.i_m = 0;
+					this.i_phi = 0;
+					this.hasWork = true;
+				}
+				
+				pause() {
+					this.hasWork = !this.hasWork;
+				}
+				
+				// Function that solves the density map, but is capable of solving it in chunks of work, so as not to stall
+				// the screen refresh cycle. That way, high values of N x M x Phi, which can take minutes to solve, but 
+				// still allows a dynamic and responsive user interface.
+				process(value) {
+					if(this.hasWork) {
+						var count = 0;
+						OUT:
+						for(; this.i_phi < this.PHI; ++this.i_phi) {
+							for(; this.i_m < this.M; ++this.i_m) {
+								for(; this.i_n < this.N; ++this.i_n) {
+									var geo = CVF.getY00Vertex (1, 98.0, this.i_n, this.N, this.i_m, this.M, this.i_phi, this.PHI);
+
+									// Obtain xyz coords of the CVF vertex:
+									var hx = Math.trunc(geo[0]/25.0) + 6;
+									var hy = Math.trunc(geo[1]/25.0) + 6;
+									var hz = Math.trunc(geo[2]/25.0) + 6;
+									
+									// Look in the buckets/bins on either side of this point, to capture all vertices in range.
+									// This means looking in a 3x3 grid of bins to search. Still much quicker then iterating 
+									// through ALL vertices:
+									for(var xx=-1; xx<2; ++xx) {
+										for(var yy=-1; yy<2; ++yy) {
+											for(var zz=-1; zz<2; ++zz) {
+											
+												// Now find all the vertices in the bin, and increment its histogram:
+												for(var j=0, jl=this.fast_index[hx+xx][hy+yy][hz+zz].length; j < jl; ++j) {
+													var pos = this.fast_index[hx+xx][hy+yy][hz+zz][j];
+													var rangeSquared = Math.pow(geo[0] - this.radiationPatternVertices.getX(pos), 2)
+																	+ Math.pow(geo[1] - this.radiationPatternVertices.getY(pos), 2)
+																	+ Math.pow(geo[2] - this.radiationPatternVertices.getZ(pos), 2);
+										
+													// Use a range of 15 units, so 15*15=225:
+													if(rangeSquared < 225.0) {
+														var num = this.radiationPatternHistogram.getX(pos);
+														this.radiationPatternHistogram.setX(pos, num+1.0);
+					
+														// Find highest value in array:
+														if((num+1.0) > this.radiationPatternUniforms.maxHistogramValue.value) {
+															this.radiationPatternUniforms.maxHistogramValue.value = num+1.0;
+														}
+													}
+												}
+											}
+										}
+									}
+									
+									// This is where we check if we've completed a certain number of searches. If we have
+									// done more than "value", then we finish for now, and continue during the next
+									// process() function call, and continue where we left-off:
+									if(++count >= value) {
+										this.radiationPatternHistogram.needsUpdate = true;
+										break OUT;
+									}
+								}
+								// Finished the N-loop, so re-zero the iterator here:
+								this.i_n = 0;
+							} 
+							// Finished the M-loop, so re-zero the iterator here:
+							this.i_m = 0;
+						}
+						// This checks the condition that we are completely done iterating through NxMxPHI. The needsUpdate
+						// variable is how we tell THREE.js to update/reload the geometry in VRAM (GPU buffers)
+						if(this.i_phi >= this.PHI) {
+							this.hasWork = false;
+							this.radiationPatternHistogram.needsUpdate = true;
+						}
+					}
+				}
+			}
+
+
+
 
 			init();
 			animate();
@@ -194,6 +595,10 @@
 				var axis = new THREE.AxesHelper(200);
 				scene.add(axis);
 
+				// Add the radiation pattern:
+				var pattern = new RadiationPattern();
+				pattern.insertScene(scene);
+
 				/*
 				var parameters = 
 				{
@@ -216,6 +621,7 @@
 					ground: true,
 					height: 50.0, 
 					w: "...", // dummy value, only type is important
+					pattern: true,
 				};
 
 				const gui = new dat.GUI();
@@ -228,6 +634,7 @@
 				// Create the Antennas object, which holds all the antenna types and creates the visual model on-request
 				ant = new Antennas();
 
+				// Ground-plane
 				const geometry = new THREE.CircleGeometry( 150, 32 );
 				const material = new THREE.MeshBasicMaterial( { color: 0x006f00, wireframe: true } );
 				const ground_plane = new THREE.Mesh( geometry, material );
@@ -253,6 +660,12 @@
 					//console.log(parameters['height']);
 				});
 
+				gui.add( parameters, 'pattern')
+				.setValue(true)
+				.onChange(function(value){
+					pattern.setVisibility(value);
+				});
+
 				gui.add( parameters, 'w', ant.antenna_types['order'])
 				.setValue(ant.current_type)
 				.name('Types')
@@ -262,7 +675,20 @@
 					scene.remove(current_antenna_object);
 					// Use selected antenna to rebuild new wire model:
 					ant.setAntennaType(value);
+
+					console.log(ant.getWires());
+					// Solve the z-matrix:
+					ant.calculateZMatrix();
+					console.log('Z', ant.Z);
+					var admittance = math.inv(ant.Z);
+					console.log('S', admittance);
+					var V = ant.createVoltageVector();
+					console.log('V', V);
+					var I = math.multiply(admittance, V);
+					console.log(I);
+
 					// Load new antenna visual model into the scene:
+					//console.log(ant.getWires());
 					current_antenna_object = ant.getThreeObject3D();
 					current_antenna_object['position'].y = parameters['height']; 
 					scene.add(current_antenna_object);
@@ -288,20 +714,24 @@
 				*/
 
 				// Create a half-wavelength long wire, with a radius of 0.001 lambda, and segmented into 10 pieces:
-				wire = createWire(0.5, 0.0001, 45);
+				//wire = createWire(0.5, 0.0001, 45);
+				wire = ant.getWires()[0];
+				//console.log(createWire(0.5, 0.0001, 45));
+				console.log(ant.getWires()[0]);
 				//console.log(wire);
-				//console.log(wire);
-				frequency = 3e8;
+				frequency = 3.0e8;
+				//frequency = 1.0;
 
 				// Solve the z-matrix:
-				var impedance = calculateZMatrix(wire);
-				console.log(impedance[22][22]);
-				var admittance = math.inv(impedance);
-				//console.log(admittance);
-				var V = createVoltageVector(45);
+				ant.calculateZMatrix();
+				console.log('Z', ant.Z);
+				var admittance = math.inv(ant.Z);
+				console.log('S', admittance);
+				var V = ant.createVoltageVector();
+				console.log('V', V);
 				var I = math.multiply(admittance, V);
-				console.log(I[23]);
-				V = math.multiply(impedance, I);
+				console.log(I);
+				//V = math.multiply(impedance, I);
 
 				current_antenna_object = ant.getThreeObject3D();
 				current_antenna_object['position'].y = parameters['height']; 
@@ -322,22 +752,6 @@
 					wire.points.push([0.0, 0.0, (i+1) * wire.seg_len - offset]);
 				}
 				return wire;
-			}
-
-			function psi(wire, n, m) {
-				var retval = 0.0;
-				const k = 2.0 * Math.PI; // Normalised wavelength is equal to 1.0 - otherwise 2*pi/wavelength
-				const fourPI = 4.0 * Math.PI;
-				var Rmn = 0.0;
-				// From MININEC thesis (3-36) and (3-37):
-				if(m==n) {
-					retval = math.complex((1.0/(2.0*Math.PI*wire.seg_len)) * Math.log(wire.seg_len / wire.radius), (-k/fourPI));
-				} else {
-					Rmn = Math.sqrt((wire.points[m][0] - wire.points[n][0])**2 + (wire.points[m][1] - wire.points[n][1])**2 + (wire.points[m][2] - wire.points[n][2])**2);
-					retval = math.multiply(math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn)), (1/(fourPI*Rmn)));
-				}
-				//console.log(n, m, retval);
-				return retval;
 			}
 
 			function psi_old(wire, n, m) {
@@ -387,64 +801,18 @@
 					retval = math.complex(math.multiply(t1, re), math.multiply(t1, im));
 				} else {
 					// Eq 135:
-
-				}
-				return retval;
-			}
-
-			function calculateZMatrix(wire) {
-				const w = 2.0 * Math.PI * frequency;
-				const k = 2.0 * Math.PI * frequency / 3e8; // 2*pi/lambda
-				const e0 =  8.854187e-12;
-				const mu0 = 4.0 * Math.PI * 1e-7;
-				const fourPI = 4.0 * Math.PI;
-				var Z = [];
-				for (let m = 1; m < wire.points.length; m+=2) {
-					var row = [];
-					for (let n = 1; n < wire.points.length; n+=2) {
-						// Use Harrington's method:
-						var tmp = math.dot(math.subtract(wire.points[n+1], wire.points[n-1]), math.subtract(wire.points[m+1], wire.points[m-1]));
-						tmp *= w * mu0;
-						tmp = math.multiply(math.complex(0,tmp), psi(wire, n, m));
-						var tmp2 = math.add(psi(wire, n+1, m+1), psi(wire, n-1, m-1));
-						var tmp3 = math.add(psi(wire, n-1, m+1), psi(wire, n+1, m-1));
-						var tmp4 = math.subtract(tmp2, tmp3);
-						tmp2 = math.multiply(tmp4, math.complex(0,-1/(w*e0)));
-						row.push(math.add(tmp, tmp2)); 
-					}
-					Z.push(row);
-				}
-				return Z;
-			}
-
-			function createVoltageVector(segments) {
-				var retval = [];
-				for(var i=0; i<segments; i++){
-					if(i == 22) {
-						retval.push(math.complex(1,0));
-					} else {
-						retval.push(math.complex(0,0));
-					}
-				}
-				return retval;
-			}
-
-			function calculateVoltage() {
-				var retval = [];
-				var x_axis = 0.0;
-				for(var i=0; i<V.length; i++) {
-					x_axis += wire.seg_len;
-					retval.push({x:x_axis, y:V[i].toPolar().r});
-				}
-				return retval;
-			}
-
-			function calculateCurrent() {
-				var retval = [];
-				var x_axis = 0.0;
-				for(var i=0; i<I.length; i++) {
-					x_axis += wire.seg_len;
-					retval.push({x:x_axis, y:I[i].toPolar().r});
+					const a_r = alpha / rho;
+					const z_r = zeta / rho;
+					const A0 = 1 + (1.0/6.0) * (a_r ** 2) * (-1 + 3 * z_r**2) + (1/40) * a_r ** 4 * (3 - 30 * z_r**2 + 35 * z_r**4);
+					const A1 = (1/6)*a_r*(-1 + 3 * z_r**2) + (1/40)*a_r**3 * (3 - 30 * z_r**2 + 35 * z_r**4);
+					const A2 = (-1/6)*(z_r)**2 - (1/40) * (a_r)**2 * (1 - 12*z_r**2 + 15 * z_r**4);
+					const A3 = (1/60)*a_r*(3*z_r**2 - 5 * z_r**4);
+					const A4 = (1/120)*(z_r**4);
+					const ka = k * alpha;
+					const kr = k * rho;
+					const re = (B*Math.cos(kr)) * (A0 + ka**2 * A2 + ka**4 * A4);
+					const im = (B*Math.sin(kr)) * (ka*A1 + ka**3 * A3);
+					retval = math.complex(re + im);
 				}
 				return retval;
 			}
