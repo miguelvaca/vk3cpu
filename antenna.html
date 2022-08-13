@@ -175,23 +175,6 @@
 					//console.log("setAntennaType" + antenna_type);
 					this.current_type = antenna_type;
 				}
-/*
-				psi(wire, n, m) {
-					var retval = 0.0;
-					const k = 2.0 * Math.PI; // Normalised wavelength is equal to 1.0 - otherwise 2*pi/wavelength
-					const fourPI = 4.0 * Math.PI;
-					var Rmn = 0.0;
-					// From MININEC thesis (3-36) and (3-37):
-					if(m==n) {
-						retval = math.complex((1.0/(2.0*Math.PI*wire.seg_len)) * Math.log(wire.seg_len / wire.radius), (-k/fourPI));
-					} else {
-						Rmn = Math.sqrt((wire.points[m][0] - wire.points[n][0])**2 + (wire.points[m][1] - wire.points[n][1])**2 + (wire.points[m][2] - wire.points[n][2])**2);
-						retval = math.multiply(math.complex(Math.cos(k * Rmn), -Math.sin(k * Rmn)), (1/(fourPI*Rmn)));
-					}
-					//console.log(n, m, retval);
-					return retval;
-				}
-*/
 
 				psi(seg_n, seg_m, point_n, point_m) {
 					var retval = 0.0;
@@ -255,24 +238,6 @@
 						this.Z.push(row);
 					}
 
-					/*
-					this.Z = [];
-					for (let m = 1; m < wire.points.length; m+=2) {
-						var row = [];
-						for (let n = 1; n < wire.points.length; n+=2) {
-							// Use Harrington's method:
-							var tmp = math.dot(math.subtract(wire.points[n+1], wire.points[n-1]), math.subtract(wire.points[m+1], wire.points[m-1]));
-							tmp *= w * mu0;
-							tmp = math.multiply(math.complex(0,tmp), this.psi(wire, n, m));
-							var tmp2 = math.add(this.psi(wire, n+1, m+1), this.psi(wire, n-1, m-1));
-							var tmp3 = math.add(this.psi(wire, n-1, m+1), this.psi(wire, n+1, m-1));
-							var tmp4 = math.subtract(tmp2, tmp3);
-							tmp2 = math.multiply(tmp4, math.complex(0,-1/(w*e0)));
-							row.push(math.add(tmp, tmp2)); 
-						}
-						this.Z.push(row);
-					}
-					*/
 					//console.log(this.Z);
 					this.Y = math.inv(this.Z);
 					return this.Z;
