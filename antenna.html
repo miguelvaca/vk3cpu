@@ -22,15 +22,24 @@
 
         <!-- math.js library scripts -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
-
-
-		<script src="https://threejs.org/build/three.js"></script>
 		<script src="./dat.gui.min.js"></script>
-		<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 
-		<script>
-			//import { GUI } from 'dat.gui'
-			//import Stats from 'three/examples/jsm/libs/stats.module'
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "https://threejs.org/build/three.module.js",
+					"three/addons/": "https://threejs.org/examples/jsm/"
+				}
+			}
+		</script>
+
+		<script type="module">
+
+			import * as THREE from 'three';
+
+			import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 			// Heatmap vertex shader - Use this to update the position due to camera projection 
 			var radiationPatternVertexShader = 
@@ -73,6 +82,7 @@
 					this.wires = [];
 					this.Z = [];
 					this.Y = [];
+					this.frequency = 3e8;
 
 					this.antenna_types = {
 						'order' : ['Horizontal Dipole', 'Vertical Dipole', 'Vertical Monopole', 'Inverted Vee', 'Inverted L', 'Loop Large Triangle', 'Quad', 'H Yagi 5-element', 'Spiderbeam 5'],
@@ -195,8 +205,8 @@
 				}
 
 				calculateZMatrix() {
-					const w = 2.0 * Math.PI * frequency;
-					const k = 2.0 * Math.PI * frequency / 3e8; // 2*pi/lambda
+					const w = 2.0 * Math.PI * this.frequency;
+					const k = 2.0 * Math.PI * this.frequency / 3e8; // 2*pi/lambda
 					const e0 =  8.854187e-12;
 					const mu0 = 4.0 * Math.PI * 1e-7;
 					const fourPI = 4.0 * Math.PI;
@@ -246,7 +256,7 @@
 				createVoltageVector() {
 					this.V = [];
 					for(var i=0; i<this.Z.length; i++){
-						if(i == ((this.Z.length-1)/2)) {
+						if(i == Math.round(this.Z.length/2)) {
 							this.V.push(math.complex(1,0));
 						} else {
 							this.V.push(math.complex(0,0));
@@ -275,8 +285,30 @@
 					return retval;
 				}
 
+				distanceToOrigin(px) {
+					return(Math.sqrt(px[0]**2 + px[1]**2 + px[2]**2));
+				}
+
+				/*getPatternAt(el, az) {*/
 				getPatternAt(x, y, z) {
 					// Return the magnitude of the radiation pattern in the xyz direction. Later, update this to provide a composite object containing polarization-specific patterns:
+
+					// First, refer all the current segments to the origin, along the line subtending along the el-az direction:
+					this.wires.forEach(wire => {
+						wire.forEach(segment => {
+							// Calculate the dot-product between the observation vector, to the origin-midpoint vector:
+							var phase_distance = math.dot(segment.mid, );
+
+							// Use each segment's midpoint for the xyz value, relative to x0y0z0:
+							var distance = distanceToOrigin(segment.mid);
+							
+							// Actually, we need the distance to the plane perpendicular to the observation point, that goes through the origin:
+
+						});
+					});
+					
+					// Next, return the current components in the vertical and horizontal direction:
+
 					return 1.0;
 				}
 				
@@ -301,7 +333,7 @@
 								(vs[w[index]][2] -  vs[w[index+1]][2])**2 
 							);
 							// Minimum of 10 segments per half-wavelength => 0.05
-							const segments = Math.round(wire_length / 0.025);
+							const segments = Math.round(wire_length / 0.02);
 							ww.seg_len = wire_length / segments;
 							//const frac = 1.0 / segments;
 							for (let ii = 0; ii < segments; ii++) {
@@ -354,12 +386,11 @@
 				};
 			}
 
-
 			// Density map class for calculating the CVF heat/density map:
 			class RadiationPattern {
 				constructor() {
 					// Heatmap specific stuff:
-					this.radiationPatternGeometry  = new THREE.IcosahedronBufferGeometry( 98, 5 );
+					this.radiationPatternGeometry  = new THREE.IcosahedronGeometry( 98, 5 );
 					this.radiationPatternVertices  = this.radiationPatternGeometry.getAttribute('position');
 					this.radiationPatternHistogram = this.radiationPatternGeometry.getAttribute('uv');
 					//var radiationPatternColor = new Float32Array( radiationPatternVertices.count * 3 );
@@ -428,10 +459,10 @@
 
 				setPattern(ant_obj) {
 					// Populate the lookup table with the vertex and its index:
-					for(var i = 0; i < this.densitymapVertices.count; i++) {
-						const x = this.densitymapVertices.getX(i);
-						const y = this.densitymapVertices.getY(i);
-						const z = this.densitymapVertices.getZ(i);
+					for(var i = 0; i < this.radiationPatternVertices.count; i++) {
+						const x = this.radiationPatternVertices.getX(i);
+						const y = this.radiationPatternVertices.getY(i);
+						const z = this.radiationPatternVertices.getZ(i);
 						// p at first should be a scalar. But later might be a composite of 2 scalars, to denote polarization (H, V)
 						var p = ant_obj.getPatternAt(x, y, z);
 						this.radiationPatternHistogram.setX(i, p);
@@ -485,8 +516,8 @@
 												for(var j=0, jl=this.fast_index[hx+xx][hy+yy][hz+zz].length; j < jl; ++j) {
 													var pos = this.fast_index[hx+xx][hy+yy][hz+zz][j];
 													var rangeSquared = Math.pow(geo[0] - this.radiationPatternVertices.getX(pos), 2)
-																	+ Math.pow(geo[1] - this.radiationPatternVertices.getY(pos), 2)
-																	+ Math.pow(geo[2] - this.radiationPatternVertices.getZ(pos), 2);
+																		+ Math.pow(geo[1] - this.radiationPatternVertices.getY(pos), 2)
+																		+ Math.pow(geo[2] - this.radiationPatternVertices.getZ(pos), 2);
 										
 													// Use a range of 15 units, so 15*15=225:
 													if(rangeSquared < 225.0) {
@@ -527,9 +558,6 @@
 				}
 			}
 
-
-
-
 			init();
 			animate();
 			
@@ -550,7 +578,7 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( renderer.domElement );
 
-				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls = new OrbitControls( camera, renderer.domElement );
 
 				//stats = new Stats();
 				//container.appendChild( stats.dom );
@@ -680,11 +708,11 @@
 
 				// Create a half-wavelength long wire, with a radius of 0.001 lambda, and segmented into 10 pieces:
 				//wire = createWire(0.5, 0.0001, 45);
-				wire = ant.getWires()[0];
+				var wire = ant.getWires()[0];
 				//console.log(createWire(0.5, 0.0001, 45));
-				console.log(ant.getWires()[0]);
+				console.log(wire);
 				//console.log(wire);
-				frequency = 3.0e8;
+				//var frequency = 3.0e8;
 				//frequency = 1.0;
 
 				// Solve the z-matrix:
