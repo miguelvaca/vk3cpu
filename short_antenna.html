@@ -382,9 +382,16 @@
                 const L = Xl / (2 * Math.PI * dipole.frequency_hz * 0.000001);
                 fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y));
                 fctx.fillText("Xl = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) + 18);
-                
-                fctx.textAlign = "center";
-                fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", wire_x, down_wire_bot_y + 30);
+                fctx.font = frequency_font;
+                fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", 20, down_wire_bot_y - 36);
+                fctx.font = loop_dia_font;
+                fctx.fillText("l = " + (antenna_length_slider.value * 1e2).toFixed(2).toString() + " %", 20, down_wire_bot_y - 18);
+                fctx.font = spacing_font;
+                fctx.fillText("% = " + (dipole.spacing_ratio * 1e2).toFixed(2).toString() + " %", 20, down_wire_bot_y );
+                fctx.font = cond_dia_font;
+
+                //fctx.textAlign = "center";
+                //fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", wire_x, down_wire_bot_y + 30);
 
                 // Draw the bottom antenna element:
                 fctx.beginPath();
