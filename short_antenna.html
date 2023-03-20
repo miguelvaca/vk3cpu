@@ -338,6 +338,8 @@
                 fctx.fillText("Wire : " + (40-conductor_diameter_slider.value).toString() + "AWG : " +
                                 "\u2300 = " + cond_diameter_inches.toFixed(4).toString() + "\" " +
                                 "(" + cond_diameter_mm.toFixed(3).toString() + " mm)", loopx, 16);
+                
+                fctx.font = normal_font;
 
                 const wire_x = win_width * 0.50;
                 const up_wire_top_y = 40;
@@ -382,14 +384,16 @@
                 fctx.fillText("0.00", wire_x + 60, down_wire_bot_y + 5);
                 //drawArrow(fctx, wire_x + 10, up_wire_bot_y, -0.5*Math.PI);
                 const L = Xl / (2 * Math.PI * dipole.frequency_hz * 0.000001);
+                fctx.font = emphasis_font;
                 fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, d_pos - 4);
+                fctx.font = normal_font;
                 fctx.fillText("X = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, d_pos + 12);
                 fctx.font = frequency_font;
                 fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", 20, down_wire_bot_y - 36);
                 fctx.font = loop_dia_font;
-                fctx.fillText("l = " + (antenna_length_slider.value * 1e2).toFixed(2).toString() + " %", 20, down_wire_bot_y - 18);
+                fctx.fillText("l = " + (antenna_length_slider.value * 1e2).toFixed(1).toString() + " %", 20, down_wire_bot_y - 18);
                 fctx.font = spacing_font;
-                fctx.fillText("d = " + (dipole.spacing_ratio * 1e2).toFixed(2).toString() + " %", 20, down_wire_bot_y );
+                fctx.fillText("d = " + (dipole.spacing_ratio * 1e2).toFixed(1).toString() + " %", 20, down_wire_bot_y );
                 fctx.font = cond_dia_font;
 
                 //fctx.textAlign = "center";
