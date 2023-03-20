@@ -27,10 +27,6 @@
                     <input type="range" id="inductor_distance" min="10" max="80" value="50" step="1">
                 </div>
                 <div class="sliders">
-                    <label for="loop_turns_slider">N:</label>
-                    <input type="range" id="loop_turns_slider" min="2" max="150" value="8.0" step="1.0">
-                </div>
-                <div class="sliders">
                     <label for="conductor_diameter_slider">AWG:</label>
                     <input type="range" id="conductor_diameter_slider" min="0" max="40" value="20" step="1">
                 </div>
@@ -155,7 +151,7 @@
                 inductor.loop_diameter_meters = 0.001 * antenna_length_slider.value * 25.4; // Inches to mm then to m
                 inductor.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
                 inductor.spacing_ratio = 1.0 * inductor_distance.value;
-                inductor.loop_turns = 1.0 * loop_turns_slider.value;
+                //inductor.loop_turns = 1.0 * loop_turns_slider.value;
                 inductor.frequency_hz = 1e6 * frequency_slider.value;
                 // Frequency independent characteristics:
                 inductor.L = getInductance(inductor.loop_diameter_meters, inductor.cond_diameter_meters, inductor.spacing_ratio, inductor.loop_turns);
@@ -223,29 +219,6 @@
                         cond_dia_font = normal_font;
                         drawDesign();
                         cond_dia_timer_handler = 0;
-                    }, emphasis_delay);
-                }
-                drawDesign();
-            }
-
-            var turns_timer_handler = 0;
-            var turns_font = normal_font;
-            
-            loop_turns_slider.oninput = function() {
-                recalculate();
-                if(turns_timer_handler == 0) {
-                    turns_font = emphasis_font;
-                    turns_timer_handler = setTimeout(function(){
-                        turns_font = normal_font;
-                        drawDesign();
-                        turns_timer_handler = 0;
-                    }, emphasis_delay);
-                } else {
-                    clearTimeout(turns_timer_handler);
-                    turns_timer_handler = setTimeout(function(){
-                        turns_font = normal_font;
-                        drawDesign();
-                        turns_timer_handler = 0;
                     }, emphasis_delay);
                 }
                 drawDesign();
@@ -418,9 +391,9 @@
                 fctx.fillText("l = " + (antenna_length_slider.value * 1.0).toFixed(1).toString() + " m", wire_x + 40, up_wire_top_y );
                 fctx.fillText("f = " + (frequency_slider.value * 1.0).toFixed(1).toString() + " MHz", wire_x + 40, up_wire_top_y + 18 );
                 //drawArrow(fctx, wire_x + 10, up_wire_bot_y, -0.5*Math.PI);
-                fctx.fillText("Xl = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y) + 18);
                 const L = Xl / (2 * Math.PI * inductor.frequency_hz * 0.000001);
                 fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y));
+                fctx.fillText("Xl = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y) + 18);
                 
                 // Draw the bottom antenna element:
                 fctx.beginPath();
