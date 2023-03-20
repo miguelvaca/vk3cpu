@@ -416,10 +416,10 @@
                 fctx.textAlign = "left";
                 fctx.fillText("l = " + (antenna_length_slider.value * 1.0).toFixed(1).toString() + " m", wire_x + 40, up_wire_top_y );
                 fctx.fillText("f = " + (frequency_slider.value * 1.0).toFixed(1).toString() + " MHz", wire_x + 40, up_wire_top_y + 18 );
-                drawArrow(fctx, wire_x + 10, up_wire_bot_y, -0.5*Math.PI);
-                fctx.fillText("Xl = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y));
+                //drawArrow(fctx, wire_x + 10, up_wire_bot_y, -0.5*Math.PI);
+                fctx.fillText("Xl = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y) + 18);
                 const L = Xl / (2 * Math.PI * inductor.frequency_hz * 0.000001);
-                fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y) + 18);
+                fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y));
                 
                 // Draw the bottom antenna element:
                 fctx.beginPath();
@@ -428,8 +428,8 @@
                 fctx.stroke();
 
                 drawInductor(fctx, wire_x, down_wire_top_y + inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
-                drawArrow(fctx, wire_x + 10, down_wire_top_y, -0.5*Math.PI);
-                drawArrow(fctx, wire_x + 10, down_wire_bot_y, -0.5*Math.PI);
+                //drawArrow(fctx, wire_x + 10, down_wire_top_y, -0.5*Math.PI);
+                //drawArrow(fctx, wire_x + 10, down_wire_bot_y, -0.5*Math.PI);
                                
             }
             recalculate();
