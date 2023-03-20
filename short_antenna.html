@@ -361,27 +361,29 @@
                 fctx.lineTo(wire_x - 15, up_wire_bot_y);
                 fctx.stroke();
 
+                const d_pos = up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y);
+
                 fctx.textAlign = "right";
-                drawInductor(fctx, wire_x, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
-                drawArrow(fctx, wire_x - 30, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y), 0.5*Math.PI);
-                fctx.fillText(dipole.distance_meters.toFixed(2).toString() + " m", wire_x - 60, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) + 16 );
-                fctx.fillText(dipole.distance_feet.toFixed(2).toString() + " ft", wire_x - 60, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) );
+                drawInductor(fctx, wire_x, d_pos, 0.0*Math.PI);
+                drawArrow(fctx, wire_x - 30, d_pos, 0.5*Math.PI);
+                fctx.fillText(dipole.distance_meters.toFixed(2).toString() + " m", wire_x - 60, d_pos + 12 );
+                fctx.fillText(dipole.distance_feet.toFixed(2).toString() + " ft", wire_x - 60, d_pos - 4);
                 drawArrow(fctx, wire_x - 30, up_wire_bot_y, 0.5*Math.PI);
                 fctx.fillText("0.00", wire_x - 60, up_wire_bot_y + 5);
                 //fctx.fillText("0.00 m", wire_x - 60, up_wire_bot_y + 18);
                 drawArrow(fctx, wire_x - 30, up_wire_top_y, 0.5*Math.PI);
-                fctx.fillText((dipole.length_feet * 0.5).toFixed(2).toString() + " ft", wire_x - 60, up_wire_top_y );
-                fctx.fillText((dipole.length_meters * 0.5).toFixed(2).toString() + " m", wire_x - 60, up_wire_top_y + 16);
+                fctx.fillText((dipole.length_feet * 0.5).toFixed(2).toString() + " ft", wire_x - 60, up_wire_top_y - 4);
+                fctx.fillText((dipole.length_meters * 0.5).toFixed(2).toString() + " m", wire_x - 60, up_wire_top_y + 12);
 
                 fctx.textAlign = "left";
-                fctx.fillText(dipole.length_feet.toFixed(2).toString() + " ft", wire_x + 60, up_wire_top_y );
-                fctx.fillText(dipole.length_meters.toFixed(2).toString() + " m", wire_x + 60, up_wire_top_y + 16);
+                fctx.fillText(dipole.length_feet.toFixed(2).toString() + " ft", wire_x + 60, up_wire_top_y - 4);
+                fctx.fillText(dipole.length_meters.toFixed(2).toString() + " m", wire_x + 60, up_wire_top_y + 12);
                 //fctx.fillText("0.00 ft", wire_x + 60, down_wire_bot_y );
                 fctx.fillText("0.00", wire_x + 60, down_wire_bot_y + 5);
                 //drawArrow(fctx, wire_x + 10, up_wire_bot_y, -0.5*Math.PI);
                 const L = Xl / (2 * Math.PI * dipole.frequency_hz * 0.000001);
-                fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y));
-                fctx.fillText("X = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) + 16);
+                fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, d_pos - 4);
+                fctx.fillText("X = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, d_pos + 12);
                 fctx.font = frequency_font;
                 fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", 20, down_wire_bot_y - 36);
                 fctx.font = loop_dia_font;
