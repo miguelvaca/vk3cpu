@@ -16,15 +16,15 @@
             <div class="slider_container">
                 <div class="sliders">
                     <label for="frequency_slider">f:</label>
-                    <input type="range" id="frequency_slider" min="1.0" max="54.0" value="7.0" step="0.05">
+                    <input type="range" id="frequency_slider" min="0.0" max="5.0" value="1.0" step="0.02">
                 </div>
                 <div class="sliders">
-                    <label for="antenna_length_slider">length (m):</label>
-                    <input type="range" id="antenna_length_slider" min="2.0" max="40.0" value="10.0" step="0.1">
+                    <label for="antenna_length_slider">l:</label>
+                    <input type="range" id="antenna_length_slider" min="0.2" max="1.0" value="1.0" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="inductor_distance">%:</label>
-                    <input type="range" id="inductor_distance" min="10" max="80" value="50" step="1">
+                    <input type="range" id="inductor_distance" min="10" max="80" value="50" step="0.5">
                 </div>
                 <div class="sliders">
                     <label for="conductor_diameter_slider">AWG:</label>
@@ -125,8 +125,8 @@
             }
 
             // Define global storage for calculated values, so we don't recalculate the same things multiple times:
-            var inductor = {
-                loop_diameter_meters : 0.0,
+            var dipole = {
+                length_meters : 0.0,
                 cond_diameter_meters : 0.0,
                 spacing_ratio : 0.0,
                 loop_turns : 0.0,
@@ -148,27 +148,18 @@
             // Solve all the parameters, and re-draw the canvas:
             function recalculate() {
                 // Input variables:
-                inductor.loop_diameter_meters = 0.001 * antenna_length_slider.value * 25.4; // Inches to mm then to m
-                inductor.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
-                inductor.spacing_ratio = 1.0 * inductor_distance.value;
-                //inductor.loop_turns = 1.0 * loop_turns_slider.value;
-                inductor.frequency_hz = 1e6 * frequency_slider.value;
+                //dipole.length_meters = 0.001 * antenna_length_slider.value * 25.4; // Inches to mm then to m
+                dipole.frequency_hz = 1.8e6 * (2 ** frequency_slider.value);
+                dipole.length_meters = 299792458.0 * 0.95 * antenna_length_slider.value / (2.0 * dipole.frequency_hz); // 
+                dipole.length_feet = dipole.length_meters * 3.28084;
+                dipole.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
+                dipole.cond_diameter_inches = dipole.cond_diameter_meters * 39.37008; 
+                dipole.spacing_ratio = 0.01 * inductor_distance.value;
+                dipole.distance_meters = inductor_distance.value * 0.005 * dipole.length_meters;
+                dipole.distance_feet = dipole.distance_meters * 3.28084;
+
                 // Frequency independent characteristics:
-                inductor.L = getInductance(inductor.loop_diameter_meters, inductor.cond_diameter_meters, inductor.spacing_ratio, inductor.loop_turns);
-                inductor.C = multiloopCapacitance(inductor.loop_diameter_meters, inductor.cond_diameter_meters, inductor.spacing_ratio, inductor.loop_turns);
-                inductor.Rdc = dcResistance(inductor.loop_diameter_meters, inductor.cond_diameter_meters, inductor.spacing_ratio, inductor.loop_turns);
-                inductor.SRF = selfResonantFrequency(inductor.L, inductor.C);
-                // Frequency dependent characteristics:
-                inductor.Xl = inductiveReactance(inductor.frequency_hz, inductor.L);
-                inductor.Xc = capacitiveReactance(inductor.frequency_hz, inductor.C);
-                inductor.skin_depth = skinDepth(inductor.frequency_hz);
-                inductor.Rac = acResistance(inductor.loop_diameter_meters, inductor.cond_diameter_meters, inductor.spacing_ratio, inductor.loop_turns, inductor.frequency_hz);
-                //inductor.Q = qualityFactor(inductor.Xl, inductor.Rac);
-                // Calculate impedance:
-                var Zl = math.complex(inductor.Rac, inductor.Xl);
-                var Zc = math.complex(0, inductor.Xc);
-                inductor.Z = math.divide(math.multiply(Zl, Zc), math.add(Zl, Zc));
-                inductor.Q = Math.abs(inductor.Z.im) / inductor.Z.re;
+                dipole.L = 0.0;
                 // Redraw the canvas:
                 //drawDesign();
             }
@@ -290,7 +281,7 @@
                 // A = total antenna length in feet
                 // B = distance from antenna center to loading coil in feet
                 // D = diameter of the radiator in inches
-                console.log(f, A, B, D);
+                //console.log(f, A, B, D);
                 const t1 = Math.log((24*((234/f) - B))/D) - 1;
                 const t2 = (1 - (f*B)/234)**2 - 1;
                 const t3 = Math.log((24*(A/2 -B))/D) - 1;
@@ -336,14 +327,10 @@
                 afront_canvas.height = win_height-12; 
 
                 fctx.clearRect(0, 0, win_width, win_height);
-                const loop_radius = 0.11 * win_height; 
-                var cond_radius = loop_radius * (inductor.cond_diameter_meters / inductor.loop_diameter_meters);
                 const loopx = win_width/2; 
                 const loopy = win_height/4;
 
-                const loop_diameter_mm = inductor.loop_diameter_meters * 1000.0;
-                const cond_diameter_mm = inductor.cond_diameter_meters * 1000.0;
-                const loop_diameter_inches = loop_diameter_mm / 25.4;
+                const cond_diameter_mm = dipole.cond_diameter_meters * 1000.0;
                 const cond_diameter_inches = cond_diameter_mm / 25.4;
 
                 fctx.font = "bold 14px arial";
@@ -359,17 +346,13 @@
                 const down_wire_top_y = win_height * 0.5 + 5;
                 const down_wire_bot_y = win_height * 0.9;
 
-                // Draw loop diameter arrow:
-                const y_offset = loopy + loop_radius + 20;
                 var arrow_size = 10.0;
 
-                const inductorDistanceInMeters = inductor_distance.value * 0.005 * antenna_length_slider.value;
-                const Xl = getInductanceFromDimensions(inductor.frequency_hz * 1e-6, 
-                                                        antenna_length_slider.value * 3.3,
-                                                        inductorDistanceInMeters * 3.3,
-                                                        inductor.cond_diameter_meters * 39.37//
-                );
-                console.log(Xl);
+                const Xl = getInductanceFromDimensions(dipole.frequency_hz * 1e-6, 
+                                                        dipole.length_feet,
+                                                        dipole.distance_feet,
+                                                        dipole.cond_diameter_inches);
+                //console.log(Xl);
 
                 // Draw the top antenna element:
                 fctx.beginPath();
@@ -379,22 +362,30 @@
                 fctx.stroke();
 
                 fctx.textAlign = "right";
-                drawInductor(fctx, wire_x, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
-                drawArrow(fctx, wire_x - 30, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y), 0.5*Math.PI);
-                fctx.fillText(inductorDistanceInMeters.toFixed(2).toString() + " m", wire_x - 60, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y) );
+                drawInductor(fctx, wire_x, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
+                drawArrow(fctx, wire_x - 30, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y), 0.5*Math.PI);
+                fctx.fillText(dipole.distance_meters.toFixed(2).toString() + " m", wire_x - 60, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) + 18 );
+                fctx.fillText(dipole.distance_feet.toFixed(2).toString() + " ft", wire_x - 60, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) );
                 drawArrow(fctx, wire_x - 30, up_wire_bot_y, 0.5*Math.PI);
-                fctx.fillText("0.00 m", wire_x - 60, up_wire_bot_y );
+                fctx.fillText("0.00 ft", wire_x - 60, up_wire_bot_y );
+                fctx.fillText("0.00 m", wire_x - 60, up_wire_bot_y + 18);
                 drawArrow(fctx, wire_x - 30, up_wire_top_y, 0.5*Math.PI);
-                fctx.fillText((antenna_length_slider.value * 0.5).toFixed(2).toString() + " m", wire_x - 60, up_wire_top_y );
+                fctx.fillText((dipole.length_feet * 0.5).toFixed(2).toString() + " ft", wire_x - 60, up_wire_top_y );
+                fctx.fillText((dipole.length_meters * 0.5).toFixed(2).toString() + " m", wire_x - 60, up_wire_top_y + 18);
 
                 fctx.textAlign = "left";
-                fctx.fillText("l = " + (antenna_length_slider.value * 1.0).toFixed(1).toString() + " m", wire_x + 40, up_wire_top_y );
-                fctx.fillText("f = " + (frequency_slider.value * 1.0).toFixed(1).toString() + " MHz", wire_x + 40, up_wire_top_y + 18 );
+                fctx.fillText(dipole.length_feet.toFixed(2).toString() + " ft", wire_x + 60, up_wire_top_y );
+                fctx.fillText(dipole.length_meters.toFixed(2).toString() + " m", wire_x + 60, up_wire_top_y + 18);
+                fctx.fillText("0.00 ft", wire_x + 60, down_wire_bot_y );
+                fctx.fillText("0.00 m", wire_x + 60, down_wire_bot_y + 18);
                 //drawArrow(fctx, wire_x + 10, up_wire_bot_y, -0.5*Math.PI);
-                const L = Xl / (2 * Math.PI * inductor.frequency_hz * 0.000001);
-                fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y));
-                fctx.fillText("Xl = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, up_wire_bot_y - inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y) + 18);
+                const L = Xl / (2 * Math.PI * dipole.frequency_hz * 0.000001);
+                fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y));
+                fctx.fillText("Xl = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) + 18);
                 
+                fctx.textAlign = "center";
+                fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", wire_x, down_wire_bot_y + 30);
+
                 // Draw the bottom antenna element:
                 fctx.beginPath();
                 fctx.moveTo(wire_x - 15, down_wire_top_y);
@@ -402,9 +393,10 @@
                 fctx.lineTo(wire_x, down_wire_bot_y);
                 fctx.stroke();
 
-                drawInductor(fctx, wire_x, down_wire_top_y + inductor.spacing_ratio * 0.01 * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
+                drawInductor(fctx, wire_x, down_wire_top_y + dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
                 //drawArrow(fctx, wire_x + 10, down_wire_top_y, -0.5*Math.PI);
-                //drawArrow(fctx, wire_x + 10, down_wire_bot_y, -0.5*Math.PI);
+                drawArrow(fctx, wire_x + 30, down_wire_bot_y, -0.5*Math.PI);
+                drawArrow(fctx, wire_x + 30, up_wire_top_y, -0.5*Math.PI);
                                
             }
             recalculate();
