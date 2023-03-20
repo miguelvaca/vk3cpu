@@ -23,7 +23,7 @@
                     <input type="range" id="antenna_length_slider" min="0.2" max="1.0" value="1.0" step="0.01">
                 </div>
                 <div class="sliders">
-                    <label for="inductor_distance">%:</label>
+                    <label for="inductor_distance">d:</label>
                     <input type="range" id="inductor_distance" min="10" max="80" value="50" step="0.5">
                 </div>
                 <div class="sliders">
@@ -364,30 +364,30 @@
                 fctx.textAlign = "right";
                 drawInductor(fctx, wire_x, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
                 drawArrow(fctx, wire_x - 30, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y), 0.5*Math.PI);
-                fctx.fillText(dipole.distance_meters.toFixed(2).toString() + " m", wire_x - 60, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) + 18 );
+                fctx.fillText(dipole.distance_meters.toFixed(2).toString() + " m", wire_x - 60, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) + 16 );
                 fctx.fillText(dipole.distance_feet.toFixed(2).toString() + " ft", wire_x - 60, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) );
                 drawArrow(fctx, wire_x - 30, up_wire_bot_y, 0.5*Math.PI);
-                fctx.fillText("0.00 ft", wire_x - 60, up_wire_bot_y );
-                fctx.fillText("0.00 m", wire_x - 60, up_wire_bot_y + 18);
+                fctx.fillText("0.00", wire_x - 60, up_wire_bot_y + 5);
+                //fctx.fillText("0.00 m", wire_x - 60, up_wire_bot_y + 18);
                 drawArrow(fctx, wire_x - 30, up_wire_top_y, 0.5*Math.PI);
                 fctx.fillText((dipole.length_feet * 0.5).toFixed(2).toString() + " ft", wire_x - 60, up_wire_top_y );
-                fctx.fillText((dipole.length_meters * 0.5).toFixed(2).toString() + " m", wire_x - 60, up_wire_top_y + 18);
+                fctx.fillText((dipole.length_meters * 0.5).toFixed(2).toString() + " m", wire_x - 60, up_wire_top_y + 16);
 
                 fctx.textAlign = "left";
                 fctx.fillText(dipole.length_feet.toFixed(2).toString() + " ft", wire_x + 60, up_wire_top_y );
-                fctx.fillText(dipole.length_meters.toFixed(2).toString() + " m", wire_x + 60, up_wire_top_y + 18);
-                fctx.fillText("0.00 ft", wire_x + 60, down_wire_bot_y );
-                fctx.fillText("0.00 m", wire_x + 60, down_wire_bot_y + 18);
+                fctx.fillText(dipole.length_meters.toFixed(2).toString() + " m", wire_x + 60, up_wire_top_y + 16);
+                //fctx.fillText("0.00 ft", wire_x + 60, down_wire_bot_y );
+                fctx.fillText("0.00", wire_x + 60, down_wire_bot_y + 5);
                 //drawArrow(fctx, wire_x + 10, up_wire_bot_y, -0.5*Math.PI);
                 const L = Xl / (2 * Math.PI * dipole.frequency_hz * 0.000001);
                 fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y));
-                fctx.fillText("Xl = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) + 18);
+                fctx.fillText("X = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y) + 16);
                 fctx.font = frequency_font;
                 fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", 20, down_wire_bot_y - 36);
                 fctx.font = loop_dia_font;
                 fctx.fillText("l = " + (antenna_length_slider.value * 1e2).toFixed(2).toString() + " %", 20, down_wire_bot_y - 18);
                 fctx.font = spacing_font;
-                fctx.fillText("% = " + (dipole.spacing_ratio * 1e2).toFixed(2).toString() + " %", 20, down_wire_bot_y );
+                fctx.fillText("d = " + (dipole.spacing_ratio * 1e2).toFixed(2).toString() + " %", 20, down_wire_bot_y );
                 fctx.font = cond_dia_font;
 
                 //fctx.textAlign = "center";
