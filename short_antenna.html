@@ -402,6 +402,7 @@
                 fctx.beginPath();
                 fctx.moveTo(wire_x, up_wire_top_y);
                 fctx.lineTo(wire_x, up_wire_bot_y);
+                fctx.lineTo(wire_x - 15, up_wire_bot_y);
                 fctx.stroke();
 
                 fctx.textAlign = "right";
@@ -423,7 +424,8 @@
                 
                 // Draw the bottom antenna element:
                 fctx.beginPath();
-                fctx.moveTo(wire_x, down_wire_top_y);
+                fctx.moveTo(wire_x - 15, down_wire_top_y);
+                fctx.lineTo(wire_x, down_wire_top_y);
                 fctx.lineTo(wire_x, down_wire_bot_y);
                 fctx.stroke();
 
