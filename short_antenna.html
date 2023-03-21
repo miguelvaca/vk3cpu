@@ -348,11 +348,22 @@
                 var arrow_size = 10.0;
 
                 // Draw the top antenna element:
+                const last_width = fctx.lineWidth;
+                fctx.lineWidth = 3;
                 fctx.beginPath();
                 fctx.moveTo(wire_x, up_wire_top_y);
                 fctx.lineTo(wire_x, up_wire_bot_y);
                 fctx.lineTo(wire_x - 15, up_wire_bot_y);
                 fctx.stroke();
+
+                // Draw the bottom antenna element:
+                fctx.beginPath();
+                fctx.moveTo(wire_x - 15, down_wire_top_y);
+                fctx.lineTo(wire_x, down_wire_top_y);
+                fctx.lineTo(wire_x, down_wire_bot_y);
+                fctx.stroke();
+
+                fctx.lineWidth = last_width;
 
                 const d_pos = up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y);
 
@@ -393,13 +404,6 @@
 
                 //fctx.textAlign = "center";
                 //fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", wire_x, down_wire_bot_y + 30);
-
-                // Draw the bottom antenna element:
-                fctx.beginPath();
-                fctx.moveTo(wire_x - 15, down_wire_top_y);
-                fctx.lineTo(wire_x, down_wire_top_y);
-                fctx.lineTo(wire_x, down_wire_bot_y);
-                fctx.stroke();
 
                 drawInductor(fctx, wire_x, down_wire_top_y + dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
                 //drawArrow(fctx, wire_x + 10, down_wire_top_y, -0.5*Math.PI);
