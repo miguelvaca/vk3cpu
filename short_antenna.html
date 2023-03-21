@@ -304,13 +304,6 @@
                 ctx.stroke();
             } 
 
-            function getFeetAndInchesFromMeters(inMeters) {
-                //
-                var inFeet = Math.trunc(inMeters * 3.28084);
-                var inchesLeft = (inMeters - (inFeet / 3.28084)) * 39.37008;
-                return inFeet.toString() + inchesLeft.toFixed(2).toString();
-            }
-
             function getFeetAndInchesFromFeet(inFeet) {
                 //
                 var wholeFeet = Math.trunc(inFeet);
@@ -366,27 +359,31 @@
                 const d_pos = up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y);
 
                 fctx.textAlign = "right";
+
+                // Draw top inductor:
                 drawInductor(fctx, wire_x, d_pos, 0.0*Math.PI);
                 drawArrow(fctx, wire_x - 30, d_pos, 0.5*Math.PI);
                 fctx.fillText(dipole.distance_meters.toFixed(2).toString() + " m", wire_x - 60, d_pos + 12 );
-                //fctx.fillText(dipole.distance_feet.toFixed(2).toString() + " ft", wire_x - 60, d_pos - 4);
-                fctx.fillText(getFeetAndInchesFromFeet(dipole.distance_feet), wire_x - 60, d_pos - 4);
+                fctx.fillText(dipole.distance_feet.toFixed(2).toString() + " ft", wire_x - 60, d_pos - 4);
+                //fctx.fillText(getFeetAndInchesFromFeet(dipole.distance_feet), wire_x - 60, d_pos - 4);
+
+                // Draw midpoint arrow:
                 drawArrow(fctx, wire_x - 30, up_wire_bot_y, 0.5*Math.PI);
                 fctx.fillText("0.00", wire_x - 60, up_wire_bot_y + 5);
-                //fctx.fillText("0.00 m", wire_x - 60, up_wire_bot_y + 18);
-                drawArrow(fctx, wire_x - 30, up_wire_top_y, 0.5*Math.PI);
                 
-                //fctx.fillText((dipole.length_feet * 0.5).toFixed(2).toString() + " ft", wire_x - 60, up_wire_top_y - 4);
-                fctx.fillText(getFeetAndInchesFromFeet(dipole.length_feet * 0.5), wire_x - 60, up_wire_top_y - 4);
+                // Draw top-left arrow and associated text:
+                drawArrow(fctx, wire_x - 30, up_wire_top_y, 0.5*Math.PI);
+                fctx.fillText((dipole.length_feet * 0.5).toFixed(2).toString() + " ft", wire_x - 60, up_wire_top_y - 4);
+                //fctx.fillText(getFeetAndInchesFromFeet(dipole.length_feet * 0.5), wire_x - 60, up_wire_top_y - 4);
                 fctx.fillText((dipole.length_meters * 0.5).toFixed(2).toString() + " m", wire_x - 60, up_wire_top_y + 12);
 
                 fctx.textAlign = "left";
-                //fctx.fillText(dipole.length_feet.toFixed(2).toString() + " ft", wire_x + 60, up_wire_top_y - 4);
-                fctx.fillText(getFeetAndInchesFromFeet(dipole.length_feet), wire_x + 60, up_wire_top_y - 4);
+
+                fctx.fillText(dipole.length_feet.toFixed(2).toString() + " ft", wire_x + 60, up_wire_top_y - 4);
+                //fctx.fillText(getFeetAndInchesFromFeet(dipole.length_feet), wire_x + 60, up_wire_top_y - 4);
                 fctx.fillText(dipole.length_meters.toFixed(2).toString() + " m", wire_x + 60, up_wire_top_y + 12);
-                //fctx.fillText("0.00 ft", wire_x + 60, down_wire_bot_y );
                 fctx.fillText("0.00", wire_x + 60, down_wire_bot_y + 5);
-                //drawArrow(fctx, wire_x + 10, up_wire_bot_y, -0.5*Math.PI);
+
                 fctx.font = emphasis_font;
                 fctx.fillText("L = " + dipole.L.toFixed(1).toString() + " \u00B5H", wire_x + 30, d_pos - 4);
                 fctx.font = normal_font;
@@ -404,14 +401,12 @@
                 fctx.fillText("\u2300 = " + cond_diameter_inches.toFixed(4).toString() + "\" " +
                                 "(" + cond_diameter_mm.toFixed(3).toString() + " mm)", left_spacing, down_wire_bot_y);
 
-                //fctx.textAlign = "center";
-                //fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", wire_x, down_wire_bot_y + 30);
-
+                // Draw bottom inductor:
                 drawInductor(fctx, wire_x, down_wire_top_y + dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
-                //drawArrow(fctx, wire_x + 10, down_wire_top_y, -0.5*Math.PI);
-                drawArrow(fctx, wire_x + 30, down_wire_bot_y, -0.5*Math.PI);
+
+                // Draw arrows on the right side of the antenna, to depict full dipole length:
                 drawArrow(fctx, wire_x + 30, up_wire_top_y, -0.5*Math.PI);
-                               
+                drawArrow(fctx, wire_x + 30, down_wire_bot_y, -0.5*Math.PI);
             }
             recalculate();
             drawDesign();
