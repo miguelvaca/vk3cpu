@@ -296,6 +296,7 @@
 
             function drawInductor(ctx, x, y, angle) {
                 const l1 = 12.0;
+                ctx.clearRect(x-l1,y-l1,2*l1,2*l1);
                 /*
                 ctx.beginPath();
                 ctx.moveTo(x + l1*Math.cos(angle-0.25*Math.PI), y + l1*Math.sin(angle-0.25*Math.PI));
@@ -305,7 +306,25 @@
                 ctx.lineTo(x + l1*Math.cos(angle-0.25*Math.PI), y + l1*Math.sin(angle-0.25*Math.PI));
                 ctx.stroke();
                 */
-                ctx.clearRect(x-l1,y-l1,2*l1,2*l1);
+                ctx.beginPath();
+                ctx.moveTo(x + l1, y - l1);
+                ctx.lineTo(x + l1, y + l1);
+                ctx.lineTo(x - l1, y + l1);
+                ctx.lineTo(x - l1, y - l1);
+                ctx.lineTo(x + l1, y - l1);
+                ctx.stroke();
+
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(x, y - l1 - 2);
+                ctx.lineTo(x - l1 - 2, y - 0.66*l1);
+                ctx.moveTo(x + l1 + 2, y - 0.33*l1);
+                ctx.lineTo(x - l1 - 2, y + 0.33*l1);
+                ctx.moveTo(x + l1 + 2, y + 0.66*l1);
+                ctx.lineTo(x, y + l1 + 2);
+                ctx.stroke();
+                ctx.lineWidth = 1;
+                /*
                 ctx.beginPath();
                 ctx.moveTo(x , y - l1);
                 ctx.arcTo(x + l1, y - l1, x + l1, y - 0.33 * l1, 0.5*l1);
@@ -316,6 +335,7 @@
                 ctx.arcTo(x + l1, y + l1, x, y + l1, 0.5*l1);
                 ctx.lineTo(x, y + l1);
                 ctx.stroke();
+                */
             } 
 
             function drawArrow(ctx, x, y, angle) {
