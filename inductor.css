@@ -114,6 +114,7 @@ div input {
     }
 }
 
+/*
 @media screen and (min-width: 800px) {
     section.gridLayoutClass {
         display: grid;
@@ -143,7 +144,6 @@ div input {
 }
 
 
-/*
 @media (orientation: landscape) {
     section.gridLayoutClass {
         display: grid;
