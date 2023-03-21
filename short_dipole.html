@@ -395,7 +395,7 @@
                 fctx.font = loop_dia_font;
                 fctx.fillText("l = " + (antenna_length_slider.value * 1e2).toFixed(1).toString() + " %", left_spacing, down_wire_bot_y - 54);
                 fctx.font = spacing_font;
-                fctx.fillText("d = " + (dipole.spacing_ratio * 1e2).toFixed(1).toString() + " %", left_spacing, down_wire_bot_y - 36);
+                fctx.fillText("d = " + (inductor_distance_slider.value * 1.0).toFixed(1).toString() + " %", left_spacing, down_wire_bot_y - 36);
                 fctx.font = cond_dia_font;
                 fctx.fillText("AWG = " + (40-conductor_diameter_slider.value).toString(), left_spacing, down_wire_bot_y - 18);
                 fctx.fillText("\u2300 = " + cond_diameter_inches.toFixed(4).toString() + "\" " +
