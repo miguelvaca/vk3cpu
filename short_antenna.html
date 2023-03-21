@@ -38,29 +38,13 @@
             slider widgets. <br><br>
             <u>Inputs via the slider widgets:</u>
             <ul> 
-                <li>f : The frequency of operation in MHz.</li>
-                <li>l : Length in percent compared to a half-wave dipole.</li>
-                <li>d : Distance of the coil/inductor from the feedpoint to the end, in percent.</li>
-                <li>AWG : Conductor diameter slider changes AWG from 0-40. Actual diameter displayed in decimal inches and millimeters.</li>
+                <li>f : The frequency of operation in MHz. [1.8-57.6 MHz]</li>
+                <li>l : Length in percent compared to a half-wave dipole. [10-100 %]</li>
+                <li>d : Distance of the coil/inductor from the feedpoint to the end, in percent. [10-80 %]</li>
+                <li>AWG : Conductor diameter slider changes wire thickness in AWG. Actual diameter displayed in decimal inches and millimeters. [40-0 AWG]</li>
             </ul>
-            <p>Characteristics on the left are independent of frequency, while the characteristics on the right are dependent on the selected frequency. <br><br>
-            Each of the graphic representations attempt to keep the relative geometry correct, without exceeding the drawing boundary. The coil diameter
-            relative to the conductor diameter are representative. </p>
-            <u>Calculated dimensions:</u>
-            <ul>
-                <li>&#8960;o : Outer coil diameter (inches) </li>
-                <li>&#8960;i : Inner coil diameter (inches) - corresponds to the diameter of the winding former.</li>
-                <li>c : Distance between windings, measured from the conductor centers (inches).</li>
-                <li>&#8467; : Length of the coil (inches). Equal to c x N.</li>
-            </ul>
-            <u>Calculated parameters:</u>
-            <ul> <b>Frequency independent:[L]</b> 
-                <li>L : Inductance is calculated using Nagaoka's equation incorporating his coefficient.</li>
-                <li>C : Capacitance is calculated using Knight's 2016 paper on self-resonance and self-capacitance of solenoid coils.</li>
-                <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
-                <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. </li>
-                <li>wire : Length of wire required to wind the inductor. </li>
-            </ul>
+            <p>Top left is the length of a single antenna element. (Not including the coil length.) <br>
+            Top right is the length of the entire dipole. (Not including the coil length.)) </p>
             </div>
         </section>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
@@ -320,6 +304,20 @@
                 ctx.stroke();
             } 
 
+            function getFeetAndInchesFromMeters(inMeters) {
+                //
+                var inFeet = Math.trunc(inMeters * 3.28084);
+                var inchesLeft = (inMeters - (inFeet / 3.28084)) * 39.37008;
+                return inFeet.toString() + inchesLeft.toFixed(2).toString();
+            }
+
+            function getFeetAndInchesFromFeet(inFeet) {
+                //
+                var wholeFeet = Math.trunc(inFeet);
+                var inches = (inFeet - wholeFeet) * 12.0;
+                return wholeFeet.toString() + "\' " + inches.toFixed(1).toString() + "\"";
+            }
+
             const afront_canvas = document.getElementById("inductor2D");
             const fctx = afront_canvas.getContext('2d');
 
@@ -371,16 +369,20 @@
                 drawInductor(fctx, wire_x, d_pos, 0.0*Math.PI);
                 drawArrow(fctx, wire_x - 30, d_pos, 0.5*Math.PI);
                 fctx.fillText(dipole.distance_meters.toFixed(2).toString() + " m", wire_x - 60, d_pos + 12 );
-                fctx.fillText(dipole.distance_feet.toFixed(2).toString() + " ft", wire_x - 60, d_pos - 4);
+                //fctx.fillText(dipole.distance_feet.toFixed(2).toString() + " ft", wire_x - 60, d_pos - 4);
+                fctx.fillText(getFeetAndInchesFromFeet(dipole.distance_feet), wire_x - 60, d_pos - 4);
                 drawArrow(fctx, wire_x - 30, up_wire_bot_y, 0.5*Math.PI);
                 fctx.fillText("0.00", wire_x - 60, up_wire_bot_y + 5);
                 //fctx.fillText("0.00 m", wire_x - 60, up_wire_bot_y + 18);
                 drawArrow(fctx, wire_x - 30, up_wire_top_y, 0.5*Math.PI);
-                fctx.fillText((dipole.length_feet * 0.5).toFixed(2).toString() + " ft", wire_x - 60, up_wire_top_y - 4);
+                
+                //fctx.fillText((dipole.length_feet * 0.5).toFixed(2).toString() + " ft", wire_x - 60, up_wire_top_y - 4);
+                fctx.fillText(getFeetAndInchesFromFeet(dipole.length_feet * 0.5), wire_x - 60, up_wire_top_y - 4);
                 fctx.fillText((dipole.length_meters * 0.5).toFixed(2).toString() + " m", wire_x - 60, up_wire_top_y + 12);
 
                 fctx.textAlign = "left";
-                fctx.fillText(dipole.length_feet.toFixed(2).toString() + " ft", wire_x + 60, up_wire_top_y - 4);
+                //fctx.fillText(dipole.length_feet.toFixed(2).toString() + " ft", wire_x + 60, up_wire_top_y - 4);
+                fctx.fillText(getFeetAndInchesFromFeet(dipole.length_feet), wire_x + 60, up_wire_top_y - 4);
                 fctx.fillText(dipole.length_meters.toFixed(2).toString() + " m", wire_x + 60, up_wire_top_y + 12);
                 //fctx.fillText("0.00 ft", wire_x + 60, down_wire_bot_y );
                 fctx.fillText("0.00", wire_x + 60, down_wire_bot_y + 5);
