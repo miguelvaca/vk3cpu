@@ -314,7 +314,10 @@
                 ctx.lineTo(x + l1, y - l1);
                 ctx.stroke();
 
+                const last_width = ctx.lineWidth;
                 ctx.lineWidth = 4;
+                const last_cap = ctx.lineCap;
+                ctx.lineCap = 'round';
                 ctx.beginPath();
                 ctx.moveTo(x, y - l1 - 2);
                 ctx.lineTo(x - l1 - 2, y - 0.66*l1);
@@ -323,7 +326,8 @@
                 ctx.moveTo(x + l1 + 2, y + 0.66*l1);
                 ctx.lineTo(x, y + l1 + 2);
                 ctx.stroke();
-                ctx.lineWidth = 1;
+                ctx.lineWidth = last_width;
+                ctx.lineCap = last_cap;
                 /*
                 ctx.beginPath();
                 ctx.moveTo(x , y - l1);
