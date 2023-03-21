@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Loaded Dipole Antenna Calculator<br></header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Loaded Dipole Antenna Calculator<br></header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -23,8 +23,8 @@
                     <input type="range" id="antenna_length_slider" min="0.1" max="1.0" value="1.0" step="0.005">
                 </div>
                 <div class="sliders">
-                    <label for="inductor_distance">d:</label>
-                    <input type="range" id="inductor_distance" min="10" max="80" value="50" step="0.5">
+                    <label for="inductor_distance_slider">d:</label>
+                    <input type="range" id="inductor_distance_slider" min="10" max="80" value="50" step="0.5">
                 </div>
                 <div class="sliders">
                     <label for="conductor_diameter_slider">AWG:</label>
@@ -34,15 +34,14 @@
             <div id="notes" class="notes">
             <br>
             <b><u>Notes:</u></b><br>
-            RF Inductor Calculator was developed to help users predict the RF characteristics of a single-layer solenoid-style air-core inductor. <br><br>
+            This loaded dipole antenna calculator was developed to quickly estimate the inductance required for a coil-loaded dipole antenna, using 
+            slider widgets. <br><br>
             <u>Inputs via the slider widgets:</u>
             <ul> 
-                <li>&#8960;a : Conductor diameter slider changes AWG from 0-40. Actual diameter displayed in decimal inches.</li>
-                <li>&#8960;b : Coil diameter in decimal inches.</li>
-                <li>c/a : 'c' is the winding-to-winding distance, measured from the conductor mid-points. The 'a' is the conductor diameter, so 'c/a' is the spacing ratio. (c/a >= 1.1) 
-                    A low-value will increase the resistance due to the proximity effect.</li>
-                <li>N : Number of turns or windings.</li>
-                <li>f : The frequency of interest (MHz) for some of the calculations. Frequency dependent results are shown on the top-right.</li>
+                <li>f : The frequency of operation in MHz.</li>
+                <li>l : Length in percent compared to a half-wave dipole.</li>
+                <li>d : Distance of the coil/inductor from the feedpoint to the end, in percent.</li>
+                <li>AWG : Conductor diameter slider changes AWG from 0-40. Actual diameter displayed in decimal inches and millimeters.</li>
             </ul>
             <p>Characteristics on the left are independent of frequency, while the characteristics on the right are dependent on the selected frequency. <br><br>
             Each of the graphic representations attempt to keep the relative geometry correct, without exceeding the drawing boundary. The coil diameter
@@ -61,15 +60,6 @@
                 <li>Rdc : DC resistance is calculated using conductor length divided by the conductor cross-sectional area, assuming a copper conductor.</li>
                 <li>SRF : Self-resonant frequency (MHz) for the unloaded coil. </li>
                 <li>wire : Length of wire required to wind the inductor. </li>
-            </ul>
-            <ul> <b>Frequency dependent:[R]</b> (Text goes <font color="red">RED</font> when selected frequency > SRF. Inductor model is not accurate once SRF is exceeded.)
-                <li>f : Selected frequency in MHz</li>
-                <li>&#948; : Skin depth due to skin effect (&#956;m)</li>
-                <li>Rac : AC resistance is calculated using the skin effect and proximity resistance from empirical data collected by Medhurst using the spacing ratio, and length-to-diameter ratio.</li>
-                <li>X&#8343; : Inductive reactance at the given frequency. (&#937;) - pure inductive component, ignoring parasitic capacitance </li>
-                <li>Z : Complex impedance at the given frequency. (&#937;) - includes losses due to series Rac and parallel parasitic C</li>
-                <li>|Z| : Impedance magnitude at the given frequency. (&#937;)</li>
-                <li>Q : Effective Quality Factor of the inductor at the given frequency. - (|Z.im|/Z.re)</li>
             </ul>
             </div>
         </section>
@@ -133,16 +123,7 @@
                 frequency_hz : 0.0,
 
                 L : 0.0,
-                C : 0.0,
-                Rdc : 0.0,
-                SRF : 0.0,
-
                 Xl : 0.0,
-                Xc : 0.0,
-                Z : 0.0,
-                skin_depth : 0.0,
-                Rac : 0.0,
-                Q : 0.0
             };
 
             // Solve all the parameters, and re-draw the canvas:
@@ -154,18 +135,21 @@
                 dipole.length_feet = dipole.length_meters * 3.28084;
                 dipole.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
                 dipole.cond_diameter_inches = dipole.cond_diameter_meters * 39.37008; 
-                dipole.spacing_ratio = 0.01 * inductor_distance.value;
-                dipole.distance_meters = inductor_distance.value * 0.005 * dipole.length_meters;
+                dipole.spacing_ratio = 0.01 * inductor_distance_slider.value;
+                dipole.distance_meters = inductor_distance_slider.value * 0.005 * dipole.length_meters;
                 dipole.distance_feet = dipole.distance_meters * 3.28084;
 
                 // Frequency independent characteristics:
-                dipole.L = 0.0;
-                // Redraw the canvas:
-                //drawDesign();
+                dipole.Xl = getInductanceFromDimensions(dipole.frequency_hz * 1e-6, 
+                                                        dipole.length_feet,
+                                                        dipole.distance_feet,
+                                                        dipole.cond_diameter_inches);
+                dipole.L = dipole.Xl / (2 * Math.PI * dipole.frequency_hz * 0.000001);
             }
             
             // Specify fonts for changing parameters controlled by the sliders:
-            var normal_font = "12px arial";
+            var normal_font = "14px arial";
+            //var normal_font = "14px courier";
             var emphasis_font = "bold 14px arial";
             const emphasis_delay = 1200;
             
@@ -218,7 +202,7 @@
             var spacing_timer_handler = 0;
             var spacing_font = normal_font;
             
-            inductor_distance.oninput = function() {
+            inductor_distance_slider.oninput = function() {
                 recalculate();
                 if(spacing_timer_handler == 0) {
                     spacing_font = emphasis_font;
@@ -297,15 +281,8 @@
             function drawInductor(ctx, x, y, angle) {
                 const l1 = 12.0;
                 ctx.clearRect(x-l1,y-l1,2*l1,2*l1);
-                /*
-                ctx.beginPath();
-                ctx.moveTo(x + l1*Math.cos(angle-0.25*Math.PI), y + l1*Math.sin(angle-0.25*Math.PI));
-                ctx.lineTo(x + l1*Math.cos(angle+0.25*Math.PI), y + l1*Math.sin(angle+0.25*Math.PI));
-                ctx.lineTo(x + l1*Math.cos(angle+0.75*Math.PI), y + l1*Math.sin(angle+0.75*Math.PI));
-                ctx.lineTo(x + l1*Math.cos(angle+1.25*Math.PI), y + l1*Math.sin(angle+1.25*Math.PI));
-                ctx.lineTo(x + l1*Math.cos(angle-0.25*Math.PI), y + l1*Math.sin(angle-0.25*Math.PI));
-                ctx.stroke();
-                */
+
+                // Draw box outline:
                 ctx.beginPath();
                 ctx.moveTo(x + l1, y - l1);
                 ctx.lineTo(x + l1, y + l1);
@@ -314,6 +291,7 @@
                 ctx.lineTo(x + l1, y - l1);
                 ctx.stroke();
 
+                // Draw the inductor wires:
                 const last_width = ctx.lineWidth;
                 ctx.lineWidth = 4;
                 const last_cap = ctx.lineCap;
@@ -328,18 +306,6 @@
                 ctx.stroke();
                 ctx.lineWidth = last_width;
                 ctx.lineCap = last_cap;
-                /*
-                ctx.beginPath();
-                ctx.moveTo(x , y - l1);
-                ctx.arcTo(x + l1, y - l1, x + l1, y - 0.33 * l1, 0.5*l1);
-                ctx.arcTo(x + l1, y + 0.33 * l1, x, y + 0.33 * l1, 0.5*l1);
-                ctx.arcTo(x - l1, y + 0.33 * l1, x - l1, y, 0.25*l1);
-                ctx.arcTo(x - l1, y - 0.33 * l1, x , y - 0.33 * l1, 0.25*l1);
-                ctx.arcTo(x + l1, y - 0.33 * l1, x + l1, y + 0.33 * l1, 0.5*l1);
-                ctx.arcTo(x + l1, y + l1, x, y + l1, 0.5*l1);
-                ctx.lineTo(x, y + l1);
-                ctx.stroke();
-                */
             } 
 
             function drawArrow(ctx, x, y, angle) {
@@ -370,28 +336,16 @@
                 const cond_diameter_mm = dipole.cond_diameter_meters * 1000.0;
                 const cond_diameter_inches = cond_diameter_mm / 25.4;
 
-                fctx.font = "bold 14px arial";
-                fctx.textAlign = "center";
-                fctx.fillText("Wire : " + (40-conductor_diameter_slider.value).toString() + "AWG : " +
-                                "\u2300 = " + cond_diameter_inches.toFixed(4).toString() + "\" " +
-                                "(" + cond_diameter_mm.toFixed(3).toString() + " mm)", loopx, 16);
-                
                 fctx.font = normal_font;
 
                 const wire_x = win_width * 0.50;
-                const up_wire_top_y = 40;
+                const up_wire_top_y = 20;
                 const up_wire_bot_y = win_height * 0.5 - 5;
 
                 const down_wire_top_y = win_height * 0.5 + 5;
-                const down_wire_bot_y = win_height - 40;
+                const down_wire_bot_y = win_height - 20;
 
                 var arrow_size = 10.0;
-
-                const Xl = getInductanceFromDimensions(dipole.frequency_hz * 1e-6, 
-                                                        dipole.length_feet,
-                                                        dipole.distance_feet,
-                                                        dipole.cond_diameter_inches);
-                //console.log(Xl);
 
                 // Draw the top antenna element:
                 fctx.beginPath();
@@ -420,18 +374,22 @@
                 //fctx.fillText("0.00 ft", wire_x + 60, down_wire_bot_y );
                 fctx.fillText("0.00", wire_x + 60, down_wire_bot_y + 5);
                 //drawArrow(fctx, wire_x + 10, up_wire_bot_y, -0.5*Math.PI);
-                const L = Xl / (2 * Math.PI * dipole.frequency_hz * 0.000001);
                 fctx.font = emphasis_font;
-                fctx.fillText("L = " + L.toFixed(1).toString() + " \u00B5H", wire_x + 20, d_pos - 4);
+                fctx.fillText("L = " + dipole.L.toFixed(1).toString() + " \u00B5H", wire_x + 30, d_pos - 4);
                 fctx.font = normal_font;
-                fctx.fillText("X = " + Xl.toFixed(1).toString() + " \u03A9", wire_x + 20, d_pos + 12);
+                fctx.fillText("X = " + dipole.Xl.toFixed(1).toString() + " \u03A9", wire_x + 30, d_pos + 12);
                 fctx.font = frequency_font;
-                fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", 20, down_wire_bot_y - 36);
+
+                const left_spacing = 15;
+                fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", left_spacing, down_wire_bot_y - 72);
                 fctx.font = loop_dia_font;
-                fctx.fillText("l = " + (antenna_length_slider.value * 1e2).toFixed(1).toString() + " %", 20, down_wire_bot_y - 18);
+                fctx.fillText("l = " + (antenna_length_slider.value * 1e2).toFixed(1).toString() + " %", left_spacing, down_wire_bot_y - 54);
                 fctx.font = spacing_font;
-                fctx.fillText("d = " + (dipole.spacing_ratio * 1e2).toFixed(1).toString() + " %", 20, down_wire_bot_y );
+                fctx.fillText("d = " + (dipole.spacing_ratio * 1e2).toFixed(1).toString() + " %", left_spacing, down_wire_bot_y - 36);
                 fctx.font = cond_dia_font;
+                fctx.fillText("AWG = " + (40-conductor_diameter_slider.value).toString(), left_spacing, down_wire_bot_y - 18);
+                fctx.fillText("\u2300 = " + cond_diameter_inches.toFixed(4).toString() + "\" " +
+                                "(" + cond_diameter_mm.toFixed(3).toString() + " mm)", left_spacing, down_wire_bot_y);
 
                 //fctx.textAlign = "center";
                 //fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", wire_x, down_wire_bot_y + 30);
