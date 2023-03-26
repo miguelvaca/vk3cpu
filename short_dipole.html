@@ -16,7 +16,7 @@
             <div class="slider_container">
                 <div class="sliders">
                     <label for="frequency_slider">f(MHz):</label>
-                    <input type="range" id="frequency_slider" min="0.0" max="6.4" value="1.0" step="0.01">
+                    <input type="range" id="frequency_slider" min="0.0" max="5.0" value="1.0" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="antenna_length_slider">l(%):</label>
@@ -28,7 +28,7 @@
                 </div>
                 <div class="sliders">
                     <label for="conductor_diameter_slider">AWG:</label>
-                    <input type="range" id="conductor_diameter_slider" min="0" max="40" value="20" step="1">
+                    <input type="range" id="conductor_diameter_slider" min="10" max="50" value="20" step="1">
                 </div>
             </div>
             <div style="text-align:center">
@@ -43,7 +43,7 @@
                 <li>f : The frequency of operation in MHz. [1.8-57.6 MHz]</li>
                 <li>l : Length in percent compared to a half-wave dipole. Defaults to full-length half-wave dipole. [10-100 %]</li>
                 <li>d : Distance of the coil/inductor from the feedpoint to the end, in percent. Defaults to midway from feedpoint to the end. [10-80 %]</li>
-                <li>AWG : Conductor diameter slider changes wire thickness in AWG. Actual diameter displayed in decimal inches and millimeters. [40-0 AWG]</li>
+                <li>AWG : Conductor diameter slider changes wire thickness in AWG until AWG=0, then in mm for larger diameters. Actual diameter displayed in decimal inches and millimeters. [30-0 AWG, up-to 30mm]</li>
             </ul>
             <p>Top left is the length of a single antenna element. (Not including the coil length.) <br>
             Top right is the length of the entire dipole. (Not including the coil length.)) </p>
@@ -96,6 +96,16 @@
                     case  2: return 6.544;
                     case  1: return 7.348; 
                     case  0: return 8.251; 
+                    case  -1: return 9.0;
+                    case  -2: return 10.0;
+                    case  -3: return 11.0; 
+                    case  -4: return 12.0; 
+                    case  -5: return 13.0; 
+                    case  -6: return 14.0; 
+                    case  -7: return 15.0; 
+                    case  -8: return 20.0; 
+                    case  -9: return 25.0; 
+                    case  -10: return 30.0; 
                     default: return 0.0;
                 }
             }
@@ -389,6 +399,17 @@
                 fctx.fillText(dipole.distance_meters.toFixed(2).toString() + " m", wire_x - 60, d_pos + 12 );
                 fctx.fillText(dipole.distance_feet.toFixed(2).toString() + " ft", wire_x - 60, d_pos - 4);
                 //fctx.fillText(getFeetAndInchesFromFeet(dipole.distance_feet), wire_x - 60, d_pos - 4);
+                
+                // Draw midpoint arrow:
+                if((spacing_font == emphasis_font) || (antenna_length_font == emphasis_font)) {
+                    fctx.font = emphasis_font;
+                } else {
+                    fctx.font = normal_font;
+                }
+
+                drawArrow(fctx, wire_x - 30, up_wire_bot_y, 0.5*Math.PI);
+                fctx.fillText("0.00", wire_x - 60, up_wire_bot_y + 5);
+
                 fctx.font = normal_font;
 
                 if(spacing_font == emphasis_font) {
@@ -406,10 +427,6 @@
                 fctx.fillText((dipole.length_feet * 0.5).toFixed(2).toString() + " ft", wire_x - 60, up_wire_top_y - 4);
                 //fctx.fillText(getFeetAndInchesFromFeet(dipole.length_feet * 0.5), wire_x - 60, up_wire_top_y - 4);
                 fctx.fillText((dipole.length_meters * 0.5).toFixed(2).toString() + " m", wire_x - 60, up_wire_top_y + 12);
-
-                // Draw midpoint arrow:
-                drawArrow(fctx, wire_x - 30, up_wire_bot_y, 0.5*Math.PI);
-                fctx.fillText("0.00", wire_x - 60, up_wire_bot_y + 5);
                 
                 fctx.textAlign = "left";
 
@@ -435,7 +452,11 @@
                 fctx.font = spacing_font;
                 fctx.fillText("d = " + (inductor_distance_slider.value * 1.0).toFixed(1).toString() + " %", left_spacing, down_wire_bot_y - 36);
                 fctx.font = cond_dia_font;
-                fctx.fillText("AWG = " + (40-conductor_diameter_slider.value).toString(), left_spacing, down_wire_bot_y - 18);
+                if(conductor_diameter_slider.value <= 40) {
+                    fctx.fillText("AWG = " + (40-conductor_diameter_slider.value).toString(), left_spacing, down_wire_bot_y - 18);
+                } else {
+                    fctx.fillText("Diameter:", left_spacing, down_wire_bot_y - 18);
+                }
                 fctx.fillText("\u2300 = " + cond_diameter_inches.toFixed(4).toString() + "\" " +
                                 "(" + cond_diameter_mm.toFixed(3).toString() + " mm)", left_spacing, down_wire_bot_y);
                 fctx.font = normal_font;
