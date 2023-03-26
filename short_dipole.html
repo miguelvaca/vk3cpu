@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="inductor.css">
     </head>
     <body>
-        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Loaded Dipole Antenna Calculator<br></header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Loaded Dipole Calculator<br></header>
         <section class="gridLayoutClass">
             <div id="inductor-container" class="inductor-container" style="position: relative;">
                 <canvas id="inductor2D" class="inductorClass" width="350" height="350">
@@ -15,15 +15,15 @@
             </div>
             <div class="slider_container">
                 <div class="sliders">
-                    <label for="frequency_slider">f:</label>
-                    <input type="range" id="frequency_slider" min="0.0" max="5.0" value="1.0" step="0.01">
+                    <label for="frequency_slider">f(MHz):</label>
+                    <input type="range" id="frequency_slider" min="0.0" max="6.4" value="1.0" step="0.01">
                 </div>
                 <div class="sliders">
-                    <label for="antenna_length_slider">l:</label>
-                    <input type="range" id="antenna_length_slider" min="0.1" max="1.0" value="1.0" step="0.005">
+                    <label for="antenna_length_slider">l(%):</label>
+                    <input type="range" id="antenna_length_slider" min="10" max="100" value="100" step="0.5">
                 </div>
                 <div class="sliders">
-                    <label for="inductor_distance_slider">d:</label>
+                    <label for="inductor_distance_slider">d(%):</label>
                     <input type="range" id="inductor_distance_slider" min="10" max="80" value="50" step="0.5">
                 </div>
                 <div class="sliders">
@@ -104,8 +104,7 @@
             var dipole = {
                 length_meters : 0.0,
                 cond_diameter_meters : 0.0,
-                spacing_ratio : 0.0,
-                loop_turns : 0.0,
+                inductor_distance_ratio : 0.0,
                 frequency_hz : 0.0,
 
                 L : 0.0,
@@ -116,12 +115,12 @@
             function recalculate() {
                 // Input variables:
                 //dipole.length_meters = 0.001 * antenna_length_slider.value * 25.4; // Inches to mm then to m
-                dipole.frequency_hz = 1.8e6 * (2 ** frequency_slider.value);
-                dipole.length_meters = 299792458.0 * 0.95 * antenna_length_slider.value / (2.0 * dipole.frequency_hz); // 
+                dipole.frequency_hz = 1.8e6 * (2.0 ** frequency_slider.value);
+                dipole.length_meters = 299792458.0 * 0.0095 * antenna_length_slider.value / (2.0 * dipole.frequency_hz); // 
                 dipole.length_feet = dipole.length_meters * 3.28084;
                 dipole.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value); 
                 dipole.cond_diameter_inches = dipole.cond_diameter_meters * 39.37008; 
-                dipole.spacing_ratio = 0.01 * inductor_distance_slider.value;
+                dipole.inductor_distance_ratio = 0.01 * inductor_distance_slider.value;
                 dipole.distance_meters = inductor_distance_slider.value * 0.005 * dipole.length_meters;
                 dipole.distance_feet = dipole.distance_meters * 3.28084;
 
@@ -130,7 +129,7 @@
                                                         dipole.length_feet,
                                                         dipole.distance_feet,
                                                         dipole.cond_diameter_inches);
-                dipole.L = dipole.Xl / (2 * Math.PI * dipole.frequency_hz * 0.000001);
+                dipole.L = dipole.Xl / (2 * Math.PI * dipole.frequency_hz * 1e-6);
             }
             
             // Specify fonts for changing parameters controlled by the sliders:
@@ -139,24 +138,24 @@
             var emphasis_font = "bold 14px arial";
             const emphasis_delay = 1200;
             
-            var loop_dia_timer_handler = 0;
-            var loop_dia_font = normal_font;
+            var antenna_length_timer_handler = 0;
+            var antenna_length_font = normal_font;
             
             antenna_length_slider.oninput = function() {
                 recalculate();
-                if(loop_dia_timer_handler == 0) {
-                    loop_dia_font = emphasis_font;
-                    loop_dia_timer_handler = setTimeout(function(){
-                        loop_dia_font = normal_font;
+                if(antenna_length_timer_handler == 0) {
+                    antenna_length_font = emphasis_font;
+                    antenna_length_timer_handler = setTimeout(function(){
+                        antenna_length_font = normal_font;
                         drawDesign();
-                        loop_dia_timer_handler = 0;
+                        antenna_length_timer_handler = 0;
                     }, emphasis_delay);
                 } else {
-                    clearTimeout(loop_dia_timer_handler);
-                    loop_dia_timer_handler = setTimeout(function(){
-                        loop_dia_font = normal_font;
+                    clearTimeout(antenna_length_timer_handler);
+                    antenna_length_timer_handler = setTimeout(function(){
+                        antenna_length_font = normal_font;
                         drawDesign();
-                        loop_dia_timer_handler = 0;
+                        antenna_length_timer_handler = 0;
                     }, emphasis_delay);
                 }
                 drawDesign();
@@ -284,10 +283,14 @@
                 ctx.lineCap = 'round';
                 ctx.beginPath();
                 ctx.moveTo(x, y - l1 - 2);
-                ctx.lineTo(x - l1 - 2, y - 0.66*l1);
-                ctx.moveTo(x + l1 + 2, y - 0.33*l1);
-                ctx.lineTo(x - l1 - 2, y + 0.33*l1);
-                ctx.moveTo(x + l1 + 2, y + 0.66*l1);
+                ctx.lineTo(x - l1 - 2, y - 0.875*l1);
+                ctx.moveTo(x + l1 + 2, y - 0.625*l1);
+                ctx.lineTo(x - l1 - 2, y - 0.375*l1);
+                ctx.moveTo(x + l1 + 2, y - 0.125*l1);
+                ctx.lineTo(x - l1 - 2, y + 0.125*l1);
+                ctx.moveTo(x + l1 + 2, y + 0.375*l1);
+                ctx.lineTo(x - l1 - 2, y + 0.625*l1);
+                ctx.moveTo(x + l1 + 2, y + 0.875*l1);
                 ctx.lineTo(x, y + l1 + 2);
                 ctx.stroke();
                 ctx.lineWidth = last_width;
@@ -358,53 +361,87 @@
 
                 fctx.lineWidth = last_width;
 
-                const d_pos = up_wire_bot_y - dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y);
+                // Draw relative zero indicator lines:
+                if(antenna_length_font == emphasis_font) {
+                    fctx.beginPath();
+                    fctx.moveTo(50, up_wire_top_y);
+                    fctx.lineTo(20, up_wire_top_y);
+                    fctx.lineTo(20, up_wire_bot_y);
+                    fctx.lineTo(50, up_wire_bot_y);
+                    fctx.stroke();
+
+                    fctx.beginPath();
+                    fctx.moveTo(win_width - 50, up_wire_top_y);
+                    fctx.lineTo(win_width - 20, up_wire_top_y);
+                    fctx.lineTo(win_width - 20, down_wire_bot_y);
+                    fctx.lineTo(win_width - 50, down_wire_bot_y);
+                    fctx.stroke();
+                }
+
+                const d_pos = up_wire_bot_y - dipole.inductor_distance_ratio * (up_wire_bot_y - up_wire_top_y);
 
                 fctx.textAlign = "right";
 
                 // Draw top inductor:
                 drawInductor(fctx, wire_x, d_pos, 0.0*Math.PI);
                 drawArrow(fctx, wire_x - 30, d_pos, 0.5*Math.PI);
+                fctx.font = spacing_font;
                 fctx.fillText(dipole.distance_meters.toFixed(2).toString() + " m", wire_x - 60, d_pos + 12 );
                 fctx.fillText(dipole.distance_feet.toFixed(2).toString() + " ft", wire_x - 60, d_pos - 4);
                 //fctx.fillText(getFeetAndInchesFromFeet(dipole.distance_feet), wire_x - 60, d_pos - 4);
+                fctx.font = normal_font;
 
-                // Draw midpoint arrow:
-                drawArrow(fctx, wire_x - 30, up_wire_bot_y, 0.5*Math.PI);
-                fctx.fillText("0.00", wire_x - 60, up_wire_bot_y + 5);
-                
-                // Draw top-left arrow and associated text:
+                if(spacing_font == emphasis_font) {
+                    fctx.beginPath();
+                    fctx.moveTo(50, d_pos);
+                    fctx.lineTo(20, d_pos);
+                    fctx.lineTo(20, up_wire_bot_y);
+                    fctx.lineTo(50, up_wire_bot_y);
+                    fctx.stroke();
+                }
+
+                // Draw single element length arrow and associated text:
+                fctx.font = antenna_length_font;
                 drawArrow(fctx, wire_x - 30, up_wire_top_y, 0.5*Math.PI);
                 fctx.fillText((dipole.length_feet * 0.5).toFixed(2).toString() + " ft", wire_x - 60, up_wire_top_y - 4);
                 //fctx.fillText(getFeetAndInchesFromFeet(dipole.length_feet * 0.5), wire_x - 60, up_wire_top_y - 4);
                 fctx.fillText((dipole.length_meters * 0.5).toFixed(2).toString() + " m", wire_x - 60, up_wire_top_y + 12);
 
+                // Draw midpoint arrow:
+                drawArrow(fctx, wire_x - 30, up_wire_bot_y, 0.5*Math.PI);
+                fctx.fillText("0.00", wire_x - 60, up_wire_bot_y + 5);
+                
                 fctx.textAlign = "left";
 
+                // Draw antenna length text:
+                //fctx.font = antenna_length_font;
                 fctx.fillText(dipole.length_feet.toFixed(2).toString() + " ft", wire_x + 60, up_wire_top_y - 4);
                 //fctx.fillText(getFeetAndInchesFromFeet(dipole.length_feet), wire_x + 60, up_wire_top_y - 4);
                 fctx.fillText(dipole.length_meters.toFixed(2).toString() + " m", wire_x + 60, up_wire_top_y + 12);
                 fctx.fillText("0.00", wire_x + 60, down_wire_bot_y + 5);
 
-                fctx.font = emphasis_font;
-                fctx.fillText("L = " + dipole.L.toFixed(1).toString() + " \u00B5H", wire_x + 30, d_pos - 4);
+                // Display calculated results:
+                //fctx.font = emphasis_font;
                 fctx.font = normal_font;
+                fctx.fillText("L = " + dipole.L.toFixed(1).toString() + " \u00B5H", wire_x + 30, d_pos - 4);
                 fctx.fillText("X = " + dipole.Xl.toFixed(1).toString() + " \u03A9", wire_x + 30, d_pos + 12);
-                fctx.font = frequency_font;
 
+                // Input controls displays:
                 const left_spacing = 15;
+                fctx.font = frequency_font;
                 fctx.fillText("f = " + (dipole.frequency_hz * 1e-6).toFixed(2).toString() + " MHz", left_spacing, down_wire_bot_y - 72);
-                fctx.font = loop_dia_font;
-                fctx.fillText("l = " + (antenna_length_slider.value * 1e2).toFixed(1).toString() + " %", left_spacing, down_wire_bot_y - 54);
+                fctx.font = antenna_length_font;
+                fctx.fillText("l = " + (antenna_length_slider.value * 1.0).toFixed(1).toString() + " %", left_spacing, down_wire_bot_y - 54);
                 fctx.font = spacing_font;
                 fctx.fillText("d = " + (inductor_distance_slider.value * 1.0).toFixed(1).toString() + " %", left_spacing, down_wire_bot_y - 36);
                 fctx.font = cond_dia_font;
                 fctx.fillText("AWG = " + (40-conductor_diameter_slider.value).toString(), left_spacing, down_wire_bot_y - 18);
                 fctx.fillText("\u2300 = " + cond_diameter_inches.toFixed(4).toString() + "\" " +
                                 "(" + cond_diameter_mm.toFixed(3).toString() + " mm)", left_spacing, down_wire_bot_y);
+                fctx.font = normal_font;
 
                 // Draw bottom inductor:
-                drawInductor(fctx, wire_x, down_wire_top_y + dipole.spacing_ratio * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
+                drawInductor(fctx, wire_x, down_wire_top_y + dipole.inductor_distance_ratio * (up_wire_bot_y - up_wire_top_y), 0.0*Math.PI);
 
                 // Draw arrows on the right side of the antenna, to depict full dipole length:
                 drawArrow(fctx, wire_x + 30, up_wire_top_y, -0.5*Math.PI);
