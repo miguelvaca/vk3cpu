@@ -181,6 +181,24 @@
 					//console.log(this.current_type);
 				}
 
+				// Recalculate all variables:
+				recalculate() {
+					// Read all inputs and store values in wavelengths:
+
+					// Create segments of all the wires with appropriate lengths:
+
+					// Create 3D representation and reload the scene:
+				}
+
+				solve() {
+					// Fill the impedance Z matrix:
+					// Invert Z to produce admittance Y matrix:
+					// Create the V array:
+					// I = YV:
+					// Store (complex) input impedance:
+					// Solve radiation pattern:
+				}
+
 				setAntennaType(antenna_type) {
 					//console.log("setAntennaType" + antenna_type);
 					this.current_type = antenna_type;
@@ -203,7 +221,14 @@
 					//console.log(n, m, retval);
 					return retval;
 				}
-
+/*
+				distanceBetween(p1, p2) {
+					// p1 : [x1,y1,z1]; p2 : [x2,y2,z2]
+					var distance_in_lambda = 0.0;
+					distance_in_lambda = Math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2 + (p2[2] - p1[2])**2);
+					return distance_in_lambda;
+				}
+*/
 				calculateZMatrix() {
 					const w = 2.0 * Math.PI * this.frequency;
 					const k = 2.0 * Math.PI * this.frequency / 3e8; // 2*pi/lambda
@@ -213,7 +238,8 @@
 					
 					var segments = [];
 					this.wires.forEach(wire => {
-						for (let m = 1; m < wire.points.length; m+=2) {
+						// This assumes the length MUST always be a positive ODD number:
+						for (let m = 1; m < (wire.points.length-1); m+=2) {
 							//
 							var t_seg = {};
 							t_seg.start = wire.points[m-1];
@@ -226,12 +252,14 @@
 							segments.push(t_seg);
 						}
 					});
+					console.log(segments);
 
 					this.Z = [];
 					for (let m = 0; m < segments.length; m++) {
 						var row = [];
 						for (let n = 0; n < segments.length; n++) {
 							// Use Harrington's method:
+							//console.log(m, n);
 							var tmp = math.dot(math.subtract(segments[n].end, segments[n].start), math.subtract(segments[m].end, segments[m].start));
 							//var tmp = math.dot(math.subtract(wire.points[n+1], wire.points[n-1]), math.subtract(wire.points[m+1], wire.points[m-1]));
 							tmp *= w * mu0;
@@ -333,21 +361,27 @@
 								(vs[w[index]][2] -  vs[w[index+1]][2])**2 
 							);
 							// Minimum of 10 segments per half-wavelength => 0.05
-							const segments = Math.round(wire_length / 0.02);
+							const max_segment_length = 0.05;
+							const segments = Math.round(wire_length / max_segment_length);
 							ww.seg_len = wire_length / segments;
-							//const frac = 1.0 / segments;
 							for (let ii = 0; ii < segments; ii++) {
-								const frac = 1.0 * ii / segments;
-								const x = vs[w[index]][0] * (1.0 - frac) + frac *  vs[w[index+1]][0];
-								const y = vs[w[index]][1] * (1.0 - frac) + frac *  vs[w[index+1]][1];
-								const z = vs[w[index]][2] * (1.0 - frac) + frac *  vs[w[index+1]][2];
+								var frac = 1.0 * ii / segments;
+								var x = vs[w[index]][0] * (1.0 - frac) + frac *  vs[w[index+1]][0];
+								var y = vs[w[index]][1] * (1.0 - frac) + frac *  vs[w[index+1]][1];
+								var z = vs[w[index]][2] * (1.0 - frac) + frac *  vs[w[index+1]][2];
+								ww.points.push([x,y,z]);
+
+								frac = 1.0 * (ii + 0.5) / segments;
+								x = vs[w[index]][0] * (1.0 - frac) + frac *  vs[w[index+1]][0];
+								y = vs[w[index]][1] * (1.0 - frac) + frac *  vs[w[index+1]][1];
+								z = vs[w[index]][2] * (1.0 - frac) + frac *  vs[w[index+1]][2];
 								ww.points.push([x,y,z]);
 							}
 						}
 						// Add the final point:
-						const x = vs[w[w.length-1]][0];
-						const y = vs[w[w.length-1]][1];
-						const z = vs[w[w.length-1]][2];
+						x = vs[w[w.length-1]][0];
+						y = vs[w[w.length-1]][1];
+						z = vs[w[w.length-1]][2];
 						ww.points.push([x,y,z]);
 						//retval.push(ww);
 						this.wires.push(ww);
@@ -357,16 +391,16 @@
 
 				//
 				getThreeObject3D = function () {
-					const material = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 10 });
+					const material = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 1 });
 					const antenna_view = new THREE.Group();
-
+					// 
 					const ww = this.antenna_types['antennas'][this.current_type]['wires'];
 					const vv = this.antenna_types['antennas'][this.current_type]['vertex'];
 					ww.forEach(wire => {
 						//console.log(wire);
 						var vertices = new Float32Array(wire.length * 3);
 						var vidx = 0;
-						const scale_factor = 200.0;
+						const scale_factor = 200.0; // Roughly pixels per wavelength
 						// Copy the vertex locations across into a Float32Array for the geometry:
 						wire.forEach((vertex) => {
 							//console.log(vertex, vv[vertex]);
@@ -561,6 +595,8 @@
 			init();
 			animate();
 			
+			// Setup the Three.js boiler-plate code to setup the screen/window, add controls, and EM-solve and 
+			// display the default antenna.
 			function init() {
 
 				container = document.createElement( 'div' );
@@ -696,16 +732,6 @@
 				});
 				*/
 
-				/*
-				cubeFolder.add(cube.rotation, 'x', 0, Math.PI * 2)
-				cubeFolder.add(cube.rotation, 'y', 0, Math.PI * 2)
-				cubeFolder.add(cube.rotation, 'z', 0, Math.PI * 2)
-				cubeFolder.open()
-				const cameraFolder = gui.addFolder('Camera')
-				cameraFolder.add(camera.position, 'z', 0, 10)
-				cameraFolder.open()
-				*/
-
 				// Create a half-wavelength long wire, with a radius of 0.001 lambda, and segmented into 10 pieces:
 				//wire = createWire(0.5, 0.0001, 45);
 				var wire = ant.getWires()[0];
@@ -723,7 +749,7 @@
 				var V = ant.createVoltageVector();
 				console.log('V', V);
 				var I = math.multiply(admittance, V);
-				console.log(I);
+				console.log('I', I);
 				//V = math.multiply(impedance, I);
 
 				current_antenna_object = ant.getThreeObject3D();
@@ -731,6 +757,7 @@
 				scene.add(current_antenna_object);
 			}
 			
+			// 
 			function createWire(length, wire_radius, segments) {
 				// dimensions in lambda
 				var wire = {};
