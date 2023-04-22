@@ -121,7 +121,7 @@
 							},
 							'Inverted L' : { 
 								'vertex' : [
-									[0.00, 0.00, 0.00], [0.00, 0.35, 0.00], [0.00, 0.35, -0.20]
+									[0.00, 0.00, 0.00], [0.00, 0.35, 0.00], [0.00, 0.35, 0.20]
 								],
 								'wires' : [
 									[0, 1, 2]
@@ -594,7 +594,7 @@
 
 			init();
 			animate();
-			
+			 
 			// Setup the Three.js boiler-plate code to setup the screen/window, add controls, and EM-solve and 
 			// display the default antenna.
 			function init() {
@@ -706,13 +706,17 @@
 					ant.setAntennaType(value);
 
 					console.log(ant.getWires());
+
 					// Solve the z-matrix:
 					ant.calculateZMatrix();
 					console.log('Z', ant.Z);
+
 					var admittance = math.inv(ant.Z);
 					console.log('S', admittance);
+					
 					var V = ant.createVoltageVector();
 					console.log('V', V);
+					
 					var I = math.multiply(admittance, V);
 					console.log(I);
 
