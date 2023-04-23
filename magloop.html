@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V8</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V9</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -21,7 +21,7 @@
                 </div>
                 <div class="sliders">
                     <label for="loop_diameter_slider">&#8960b:</label>
-                    <input type="range" id="loop_diameter_slider" min="0.2" max="5.0" value="1.0" step="0.01">
+                    <input type="range" id="loop_diameter_slider" min="0.04" max="5.0" value="1.0" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="loop_turns_slider">N:</label>
@@ -134,6 +134,9 @@
             [2]: A. Boswell, A. J. Tyler and A. White, <b>"Performance of a Small Loop Antenna in the 3 - 10 MHz Band"</b> <i>, IEEE Antennas and Propagation Magazine, 47, 2, April 2005, pp. 5 1 -56.</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[23-Apr-23] - V9</b> <br>
+            * Changed the frequency list to include VHF (2m) and UHF (70cm) bands.<br>
+            * Reduced minimum loop diameter to 4 cm.<br>
             <b>[12-Feb-22] - V8</b> <br>
             * Changed the frequency list to include top and bottom frequencies of each band. This is to highlight the range of capacitance required between the top and bottom of each band.<br>
             * Increased max c/a ratio from 10 to 30.<br>
@@ -233,7 +236,8 @@
 
             function updateFrequencies() {
                 const hamFrequencies = [
-                    0.1357, 0.1378, 0.472, 0.479, 1.8, 1.875, 3.5, 3.8, 5.3, 5.4, 7.0, 7.3, 10.1, 10.15, 14.0, 14.35, 18.068, 18.168, 21.0, 21.45, 24.89, 24.99, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0, 54.0, 55.0, 60.0, 65.0, 69.9, 70.5
+                    0.1357, 0.1378, 0.472, 0.479, 1.8, 1.875, 3.5, 3.8, 5.3, 5.4, 7.0, 7.3, 10.1, 10.15, 14.0, 14.35, 18.068, 18.168, 21.0, 21.45, 24.89, 24.99, 28.0, 29.7, 35.0, 40.0, 45.0, 50.0, 52.0, 54.0, 55.0, 60.0, 65.0, 69.9, 70.5, 80.0, 90.0, 
+                    100.0, 110.0, 120.0, 130.0, 140.0, 144.0, 146.0, 148.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 219.0, 222.0, 225.0, 230.0, 240.0, 250.0, 275.0, 300.0, 325.0, 350.0, 375.0, 400.0, 420.0, 430.0, 440.0, 450.0
                 ];
                 
                 frequencies = [];
@@ -1793,7 +1797,8 @@
                             callbacks: {
                                 title: function(context) {
                                     var value = context[0].parsed.x;
-                                    var lut = {0.1357:'2200', 0.1378:'2200', 0.472:'600', 0.479:'600', 1.8:'160', 1.875:'160', 3.5:'80', 3.8:'80', 5.3:'60', 5.4:'60', 7.0:'40', 7.3:'40', 10.1:'30', 10.15:'30', 14.0:'20', 14.35:'20', 18.068:'18', 18.168:'18', 21.0:'15', 21.45:'15', 24.89:'12', 24.99:'12', 28.0:'10', 29.7:'10', 35.0:'', 40.0:'', 45.0:'', 50.0:'6', 52.0:'6', 54.0:'6', 69.9:'4', 70.5:'4'};
+                                    var lut = {0.1357:'2200', 0.1378:'2200', 0.472:'600', 0.479:'600', 1.8:'160', 1.875:'160', 3.5:'80', 3.8:'80', 5.3:'60', 5.4:'60', 7.0:'40', 7.3:'40', 10.1:'30', 10.15:'30', 14.0:'20', 14.35:'20', 18.068:'18', 18.168:'18', 21.0:'15', 21.45:'15', 
+                                    24.89:'12', 24.99:'12', 28.0:'10', 29.7:'10', 35.0:'', 40.0:'', 45.0:'', 50.0:'6', 52.0:'6', 54.0:'6', 69.9:'4', 70.5:'4', 144.0:'2', 146.0:'2', 148.0:'2', 420.0:'0.7', 430.0:'0.7', 440.0:'0.7', 450.0:'0.7'};
                                     var label = '' + value.toPrecision(4).toString() + ' MHz';
                                     if(lut[value]) {
                                         label += ' (';
