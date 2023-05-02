@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="toroid.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v1.1<br></header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v1.2<br></header>
         <section class="gridLayoutClass">
             <div id="chart-container" class="chart-container">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -43,7 +43,7 @@
                     <input type="range" id="conductor_diameter_slider" min="2" max="38" value="20" step="1">
                 </div>
                 <div class="sliders">
-                    <label for="loop_turns_slider">Nd:</label>
+                    <label for="loop_turns_slider">N:</label>
                     <input type="range" id="loop_turns_slider" min="0.0" max="1.0" value="0.15" step="0.005">
                 </div>
                 <div class="sliders">
@@ -155,7 +155,7 @@
             </ul>
             <br>
             <b><u>Change history:</u></b><br>
-            <b>[2-May-23] - v1.1</b> <br>
+            <b>[2-May-23] - v1.2</b> <br>
             * Added 2646102002 which I have called the "FT102B-61" <br>
             <b>[1-May-23] - v1.1</b> <br>
             * Added 2643102002 which I have called the "FT102B-43" <br>
@@ -634,6 +634,7 @@
                     var i_after = this.cores[this.material].complex_mu.freq.length-1;
                     var i = Math.floor((i_after + i_before)/2);
                 
+                    // Divide-and-conquer. Find the indices before and after the value. Use them for interpolation later.
                     while((i_before+1) < i_after) {
                         if(frequency >= this.cores[this.material].complex_mu.freq[i]) {
                             i_before = i;
@@ -652,15 +653,14 @@
                     return [mu_1, mu_2];
                 };
                 
-                this.getInductance = function (frequency) {
-                    const mu = this.getComplexPermeability(frequency);
-                    const L = mu[0] * 4.0 * Math.PI * toroid.N**2 * 1e-9 / toroid.core.CC;
+                this.getInductance = function (frequency, mu) {
+                    // const mu = this.getComplexPermeability(frequency);
+                    const L = mu[0] * 4.0 * Math.PI * this.N**2 * 1e-9 / this.core.CC;
                     return L;
                 };
 
-                this.getImpedance = function (frequency) {
-                    const mu = this.getComplexPermeability(frequency);
-                    //console.log(mu);
+                this.getImpedance = function (frequency, mu) {
+                    // const mu = this.getComplexPermeability(frequency);
                     const Lo = 4.0 * Math.PI * this.N**2 * 1e-9 / this.core.CC;
                     const Rs = 2.0 * Math.PI * frequency * Lo * mu[1];
                     const Xs = 2.0 * Math.PI * frequency * Lo * mu[0];
@@ -726,7 +726,8 @@
 
                     frequencies.forEach(freq => {
                         const mu = this.getComplexPermeability(freq);
-                        const Z = this.getImpedance(freq);
+                        const L = this.getInductance(freq, mu);
+                        const Z = this.getImpedance(freq, mu);
 
                         // Make freq in kHz from Hz:
                         freq *= 1e-3;
@@ -734,8 +735,8 @@
                         this.mu1_vs_f.push({x:freq, y:mu[0]});
                         this.mu2_vs_f.push({x:freq, y:mu[1]});
                     
-                        //this.L_vs_f.push({x:freq, y:(Math.sqrt(mu[0]**2 + mu[1]**2) * 4.0 * Math.PI * this.N**2 * 1e-3 / this.core.CC)});
-                        this.L_vs_f.push({x:freq, y:(mu[0] * 4.0 * Math.PI * this.N**2 * 1e-3 / this.core.CC)});
+                        //this.L_vs_f.push({x:freq, y:(mu[0] * 4.0 * Math.PI * this.N**2 * 1e-3 / this.core.CC)});
+                        this.L_vs_f.push({x:freq, y:L});
                     
                         this.R_vs_f.push({x:freq, y:Z.real});
                         this.X_vs_f.push({x:freq, y:Z.imag});
@@ -2471,7 +2472,8 @@
                 fctx.font = "bold 16px courier";
                 fctx.fillText((40-conductor_diameter_slider.value).toString() + " AWG", loopx, 20);
                 //fctx.fillText("N = " + controller.toroid.N.toString() + " : Nd = " + (loop_turns_slider.value*100).toFixed(0) + "%", loopx, win_height - 28);
-                fctx.fillText("Nd = " + (loop_turns_slider.value*100).toFixed(0) + "% : N = " + controller.toroid.N.toString(), loopx, win_height - 28);
+                //fctx.fillText("Nd = " + (loop_turns_slider.value*100).toFixed(0) + "% : N = " + controller.toroid.N.toString(), loopx, win_height - 28);
+                fctx.fillText("N = " + controller.toroid.N.toString(), loopx, win_height - 28);
                 
                 fctx.font = "12px arial";
                 fctx.fillText("wire = " + (controller.toroid.cond_length_meters*100.0).toFixed(1)+ " cm (" + (3.2808399*controller.toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
