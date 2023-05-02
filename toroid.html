@@ -28,20 +28,13 @@
                     <select name="toroids" id="toroid-select" onchange="setToroid()">
                         <!--option value="FT240">FT240</option>
                         <option value="FT140">FT140</option>
-                        <option value="FT114">FT114</option>
-                        <option value="FT82">FT82</option>
-                        <option value="FT50">FT50</option>
                         <option value="FT37">FT37</option-->
                     </select>
                     <select name="materials" id="material-select" onchange="setMaterial()">
                         <!--option value="75">75 [&#956;i=5000]</option>
-                        <option value="78">78 [&#956;i=2300]</option>
-                        <option value="77">77 [&#956;i=2000]</option>
                         <option value="79">79 [&#956;i=1400]</option>
                         <option value="43" selected='true'>43 [&#956;i=800]</option>
                         <option value="80">80 [&#956;i=600]</option>
-                        <option value="52">52 [&#956;i=250]</option>
-                        <option value="61">61 [&#956;i=125]</option>
                         <option value="67">67 [&#956;i=40]</option-->
                     </select>
                 </div>
@@ -1067,7 +1060,6 @@
                 };
 
                 this.getInductance = function (frequency, Bpk) {
-                    //const mu = this.getMuFromFreq(frequency);
                     // const L = this.core.Al * this.N**2 * 1e-9;
                     // New method because using Ae and le did not match Al with N^2.
                     const L = this.getMuFromFreq(frequency) * this.getMuFromBpk(Bpk) * 1e-2 * (this.core.Al / this.mat.mu_i) * this.N**2 * 1e-9;
