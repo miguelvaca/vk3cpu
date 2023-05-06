@@ -655,7 +655,7 @@
                 
                 this.getInductance = function (frequency, mu) {
                     // const mu = this.getComplexPermeability(frequency);
-                    const L = mu[0] * 4.0 * Math.PI * this.N**2 * 1e-9 / this.core.CC;
+                    const L = mu[0] * 4.0 * Math.PI * this.N**2 * 1e-3 / this.core.CC;
                     return L;
                 };
 
