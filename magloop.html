@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V9</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V10</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -116,6 +116,7 @@
                 <li>Q : The antenna Q (quality) factor.</li>
                 <li>Ia (A): The RMS loop current in amps.</li>
                 <li>Perimeter (&#955): Antenna perimeter size relative to the wavelength.</li>
+                <li>Skin depth (&#956m): Conductor skin depth in micrometers.</li>
             </ul>
             <u><b>Usage hints:</b></u>
                 <li>Tap on legend items to disable or enable an output parameter. This can be used to declutter the chart.</li>
@@ -134,6 +135,8 @@
             [2]: A. Boswell, A. J. Tyler and A. White, <b>"Performance of a Small Loop Antenna in the 3 - 10 MHz Band"</b> <i>, IEEE Antennas and Propagation Magazine, 47, 2, April 2005, pp. 5 1 -56.</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[8-May-23] - V10</b> <br>
+            * Added conductor skin depth as a new calculated parameter.<br>
             <b>[23-Apr-23] - V9</b> <br>
             * Changed the frequency list to include VHF (2m) and UHF (70cm) bands.<br>
             * Reduced minimum loop diameter to 4 cm.<br>
@@ -208,6 +211,7 @@
             var shape = "circle";               // Shape of the main loop
             var loop_turns = 1;                 // 
             var loop_mode = "series";           // Series or parallel. When loop_turns_slider.value == 0, loop_turns is 2 and loop_mode is "parallel"
+            const mu0 = Math.PI * 4e-7;
             
             var inductance = 0.0;
             var area = 0.0;                     // Loop area in square meters. 
@@ -309,7 +313,6 @@
             
             // Calculate the inductance of the coil. For single turn loops, use standard inductance equation. For multi-turn, use Nagaoka correction.
             function getInductance() {
-                const mu0 = Math.PI * 4e-7;
                 const loop_diameter_meters = loop_diameter_slider.value;
                 const cond_diameter_meters = conductor_diameter_slider.value * 1e-3;
                 const spacing_ratio = loop_spacing_slider.value;
@@ -480,7 +483,6 @@
                 const a_coil_radius = loop_diameter_slider.value * 0.5;
                 const b_conductor_radius = conductor_diameter_slider.value * 0.0005;
                 const loop_spacing_ratio = loop_spacing_slider.value;
-                const mu0 = 4.0 * Math.PI * 1e-7;
                 
                 // How much longer is the perimeter compared to the circumference if it were circular:
                 const shape_factor = perimeter / (Math.PI * loop_diameter_slider.value);
@@ -502,6 +504,16 @@
                 frequencies.forEach(freq => {
                     const R_ohmic = lossResistance(freq * 1e6);
                     retval.push({x:freq, y:R_ohmic});
+                });
+                return retval;
+            }
+
+            // Returns skin-depth in micrometers:
+            function calculateSkinDepth() {
+                var retval = [];
+                frequencies.forEach(freq => {
+                    const skin_depth = 1e6 * Math.sqrt(1e-6/(conductivity * Math.PI * freq * mu0));
+                    retval.push({x:freq, y:skin_depth});
                 });
                 return retval;
             }
@@ -626,6 +638,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
             }
 
@@ -646,6 +659,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
             }
 
@@ -665,6 +679,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
             }
 
@@ -684,6 +699,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
             }
 
@@ -703,6 +719,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
             }
 
@@ -722,6 +739,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
             }
 
@@ -770,6 +788,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
             }
 
@@ -809,6 +828,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
             }
 
@@ -846,6 +866,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
             }
 
@@ -885,6 +906,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
             }
 
@@ -1611,6 +1633,16 @@
                         borderWidth: 1,
                         yAxisID: 'sizeID',
                         tension: 0.3,
+                    },
+                    {
+                        label: 'Skin depth (\u03BCm)',
+                        fill: false,
+                        borderColor: 'rgb(75,75,75)',
+                        backgroundColor: 'rgb(75,75,75)',
+                        data: calculateSkinDepth(),
+                        borderWidth: 1,
+                        yAxisID: 'skinID',
+                        tension: 0.3,
                     }]
                 },
                 options: {
@@ -1781,6 +1813,24 @@
                             },
                             min: 0.0,
                             position: 'right',
+                        },
+                        'skinID' : {
+                            type: 'linear',
+                            display: 'auto',
+                            title: {
+                                display: true,
+                                text: '\u03B4 (\u03BCm)',
+                                color: 'rgb(90,90,90)',
+                                font: {
+                                        weight : 'bold'
+                                }
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                //max: 0.3,
+                            },
+                            min: 0.0,
+                            position: 'right',
                         }
                     },
                     plugins: {
@@ -1848,6 +1898,10 @@
                                     } else 
                                     if(label[0] == 'P'){
                                         label = justifyText("Perimeter: ", value.toFixed(3).toString() + '   ' + '\u03BB');
+                                    } else 
+                                    if(label[0] == 'S'){
+                                        var num = getMetricPrefix(value * 1e-6);
+                                        label = justifyText("Skin depth: ", num.val.toPrecision(3).toString() + '   ' + num.pfx + 'm');
                                     } else {
                                         label += value.toFixed(3).toString();
                                     }
