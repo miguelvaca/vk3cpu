@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V10.1</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V10.2</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -135,6 +135,8 @@
             [2]: A. Boswell, A. J. Tyler and A. White, <b>"Performance of a Small Loop Antenna in the 3 - 10 MHz Band"</b> <i>, IEEE Antennas and Propagation Magazine, 47, 2, April 2005, pp. 5 1 -56.</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[13-May-23] - V10.2</b> <br>
+            * Changed radiation and loss resistance to logarithmic. Capacitance limited to 5-5000pF. <br>
             <b>[8-May-23] - V10.1</b> <br>
             * Stopped autoscaling on all axes. Changed Vcap, Icap to logarithmic. This makes it easier when comparing different configurations.<br>
             <b>[8-May-23] - V10</b> <br>
@@ -1668,7 +1670,7 @@
                             }
                         },
                         'mohmsID' : {
-                            type: 'linear',
+                            type: 'logarithmic',
                             display: 'auto',
                             title: {
                                 display: true,
@@ -1678,8 +1680,8 @@
                                         weight : 'bold'
                                 }
                             },
-                            min: 0.0,
-                            max: 2.0,
+                            min: 0.001,
+                            max: 1.0,
                             position: 'left',
                         },
                         'effID' : {
@@ -1732,7 +1734,7 @@
                                 beginAtZero: true,
                             },
                             max: 50.0,
-                            min: 0.1,
+                            min: 0.05,
                             position: 'left',
                         },
                         'pfID' : {
@@ -1747,7 +1749,7 @@
                                 }
                             },
                             max: 5000.0,
-                            min: 1.0,
+                            min: 5.0,
                             ticks: {
                             },
                             position: 'left',
@@ -1785,7 +1787,7 @@
                                 beginAtZero: true,
                             },
                             min: 0.0,
-                            max: 4000.0,
+                            max: 5000.0,
                             position: 'right',
                         },
                         'ccID' : {
