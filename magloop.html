@@ -100,7 +100,7 @@
             </ul>
             <u><b>Calculated parameters:</b></u>
             <ul>
-                <li>L : Inductance in microhenries.</li>
+                <li>L : Inductance in microhenries. Equations from [3].</li>
                 <li>A : Loop area in square meters or square feet.</li>
                 <li>C : Effective capacitance of the loop in picofarads.</li>
                 <li>peri : Perimeter of the main loop in meters or feet.</li>
@@ -133,6 +133,7 @@
             <b><u>References:</u></b><br>
             [1]: B. Austin, A. Boswell and M. Perks, <b>"Loss Mechanisms in the Electrically Small Loop Antenna"</b> <i>, IEEE Antennas and Propagation Magazine, 56, 4, August 2014, pp. 143.</i> <br>
             [2]: A. Boswell, A. J. Tyler and A. White, <b>"Performance of a Small Loop Antenna in the 3 - 10 MHz Band"</b> <i>, IEEE Antennas and Propagation Magazine, 47, 2, April 2005, pp. 5 1 -56.</i> <br>
+            [3]: F W Grover, <b>"Formulas and Tables for the Calculation of the Inductance of Coils of Polygonal Form"</b> <i>Scientific Papers of the Bureau of Standards, Vol 18, p753</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
             <b>[13-May-23] - V10.2</b> <br>
@@ -360,7 +361,7 @@
                     // then N==2, so divide by 4 to go from serial to parallel inductance:
                     retval *= 0.25;
                 }
-                
+
                 return retval; // In Henries
             }
 
