@@ -725,7 +725,7 @@
                     // vars:
                     
                     const R0 = 50.0;
-                    const Rc = 0.1;     // Core losses
+                    const Rc = 0.2;     // Conductor losses
                     const Ll1 = 1e-6;   // Primary leakage inductance
                     //const Ls = mu[0] * 4.0 * Math.PI * this.Np**2 / this.core.CC;
                     const Xp = (Rs**2 + Xs**2) / Xs;                // Get parallel equivalent reactance
@@ -745,6 +745,8 @@
                     let V1 = math.complex(this.Vrms, 0);
                     let V2 = math.multiply(V1, math.divide(Zp, math.add(Zp, Zs)));
                     return [this.Vrms, V1.toPolar().r, V2.toPolar().r]; 
+                    
+
                     /*
                     let Z11 = math.add(1, math.divide(Z0,Zs)); 
                     let Z21 = math.inv(Zs);
@@ -756,15 +758,16 @@
                     let VVV = math.multiply(inv_ZZZ, vvv);
                     return [this.Vrms, VVV.get([0,0]).toPolar().r, VVV.get([1,0]).toPolar().r];
                     */
+
                     /*
                     const Z0 = 50.0;                                // Source impedance in ohms
                     const Cp = 1e-12; //(0.9 + (78.1/this.Np**2))*1e-12;     // Primary winding parasitic capacitance in F
-                    const R1 = 0.005;                                 // Resistance of primary winding in ohms
-                    const L1 = 1e-9;                                // Primary leakage inductance in H
-                    const Lp = mu[0] * 4.0 * Math.PI * this.Np**2 / this.core.CC;    // Open-circuit inductance of primary winding in H
-                    const Rp = 1000.0;                                // Shunt resistance that represents core losses in ohms
-                    const L2 = 1e-9;                                // Secondary leakage inductance, reflected into primary side, in H
-                    const R2 = 0.005;                                 // Secondary winding resistance in ohms, reflected at primary side
+                    const R1 = 0.1;                                 // Resistance of primary winding in ohms
+                    const L1 = 1e-8;                                // Primary leakage inductance in H
+                    const Xp = (Rs**2 + Xs**2) / Xs;                // Get parallel equivalent reactance
+                    const Rp = (Rs**2 + Xs**2) / Rs;                // Get parallel equivalent resistance 
+                    const L2 = 1e-8;                                // Secondary leakage inductance, reflected into primary side, in H
+                    const R2 = 0.1;                                 // Secondary winding resistance in ohms, reflected at primary side
                     const Cs = 1e-12; //(0.9 + (78.1/this.Ns**2))*1e-12 *(this.Ns/this.Np)**2;     // Secondary winding parasitic capacitance in F, reflected at primary side
                     const Zl = this.Zl*(this.Np/this.Ns)**2;        // Load impedance reflected to primary side in ohms
 
@@ -772,9 +775,9 @@
                     let Z1 = math.complex(R1, w*L1);
                     let Z2 = math.complex(R2, w*L2);
                     let ZCp = math.complex(0.0, -1.0/(w*Cp));
-                    let ZRp = math.complex(Rp, 0.0);
-                    let ZLp = math.complex(0.0, w*Lp);
-                    let Zp = math.divide(math.multiply(ZRp, ZLp), math.add(ZRp, ZLp));
+                    //let ZRp = math.complex(Rp, 0.0);
+                    //let ZLp = math.complex(0.0, Xp);
+                    let Zp = math.complex(Rp, Xp); //math.divide(math.multiply(ZRp, ZLp), math.add(ZRp, ZLp));
                     let ZCs = math.complex(0.0, -1.0/(w*Cs));
                     let Zlc = math.divide(math.multiply(ZCs,math.complex(Zl,0.0)), math.add(ZCs,math.complex(Zl,0.0)));
 
@@ -788,16 +791,15 @@
                     let Z22 = math.add(math.unaryMinus(math.inv(Z1)), math.unaryMinus(math.inv(Zp)), math.unaryMinus(math.inv(Z2)));
                     let Z32 = math.inv(Z2);
                     let Z13 = zero;
-                    let Z23 = math.inv(Z0);
+                    let Z23 = math.inv(Z2);
                     let Z33 = math.add(math.unaryMinus(math.inv(Z2)), math.unaryMinus(math.inv(Zlc)));
 
                     let ZZZ = math.matrix([[Z11, Z12, Z13], [Z21, Z22, Z23], [Z31, Z32, Z33]]);
-                    let vvv = math.matrix([[math.unaryMinus(math.divide(math.complex(this.Vrms, 0.0), math.complex(Z0,0.0)))], [zero], [zero]]);
+                    let vvv = math.matrix([[this.Vrms/Z0], [zero], [zero]]);
                     let VVV = math.multiply(math.inv(ZZZ), vvv);
-                    return [this.Vrms, VVV.get([0,0]).toPolar().r, VVV.get([1,0]).toPolar().r, VVV.get([2,0]).toPolar().r];
-                    //return VVV;
+                    return [this.Vrms, this.Vrms, VVV.get([2,0]).toPolar().r];
                     */
-
+                    //return VVV;
                 };
                 
                 this.recalculate = function (frequencies) {
@@ -836,6 +838,7 @@
                     //console.log(this.Rdc, this.L, this.C);
                     
                     // Clear the frequency dependent characteristics before appending new data:
+                    this.X_vs_f = [];
                     this.M_vs_f = [];
                     this.SWR_vs_f = [];
                     this.eff_vs_f = [];
@@ -846,7 +849,6 @@
                     this.L_vs_f = [];
                     this.Z_vs_f = [];
                     this.R_vs_f = [];
-                    this.X_vs_f = [];
                     this.Q_vs_f = [];
                     this.i_vs_f = [];
                     this.P_vs_f = [];
@@ -873,7 +875,7 @@
                         //console.log(freq, VVV);
                         //console.log(freq, eff, SWR, VVV);
 
-                        // Make freq in kHz from Hz:
+                        // Make freq in MHz from Hz:
                         freq *= 1e-6;
                     
                         this.mu1_vs_f.push({x:freq, y:mu[0]});
@@ -1492,14 +1494,14 @@
                         // Now re-configure the chart axes options:
                         this.myChart.data = {
                             datasets: [ 
-                            {
-                            label: 'M (\u03bcH)',
+                        {
+                            label: '|Zp| (\u03A9)',
                             fill: false,
                             borderColor: 'orange',
                             backgroundColor: 'orange',
-                            data: this.toroid.calculateMutualInductance(),
+                            data: this.toroid.calculateImpedance(),
                             borderWidth: 1,
-                            yAxisID: 'lID'
+                            yAxisID: 'ohmsID'
                         },
                         {
                             label: 'SWR',
@@ -1779,7 +1781,7 @@
                     // In Hz:
                     this.frequencies = [];
                     //var f = 1.0 * slider_value;
-                    for(var i = Math.floor(6.00); i <= 8.00; i+=0.01) {
+                    for(var i = Math.floor(5.00); i <= 8.00; i+=0.01) {
                         this.frequencies.push(10.0**i);
                     }
                 }
@@ -1789,7 +1791,7 @@
                         this.myChart.options.plugins.title.text 
                             = this.ferrite.mat.manufacturer + " " + this.t_size + "-" + this.t_material + " [" + this.ferrite.core.PN + "] "
                             + this.toroid.Np + ":" + this.toroid.Ns + ' #' + (40.0 - conductor_diameter_slider.value) + ' AWG';
-                        this.myChart.data.datasets[0].data  = this.ferrite.calculateMutualInductance();
+                        this.myChart.data.datasets[0].data  = this.ferrite.calculateImpedance();
                         this.myChart.data.datasets[1].data  = this.ferrite.calculateSWR();
                         this.myChart.data.datasets[2].data  = this.ferrite.calculateEfficiency();
                         this.myChart.data.datasets[3].data  = this.ferrite.calculateInsertionLoss();
@@ -1850,13 +1852,13 @@
                     data: {
                         datasets: [ 
                         {
-                            label: 'M (\u03bcH)',
+                            label: '|Zp| (\u03A9)',
                             fill: false,
                             borderColor: 'orange',
                             backgroundColor: 'orange',
-                            data: this.toroid.calculateMutualInductance(),
+                            data: this.toroid.calculateImpedance(),
                             borderWidth: 1,
-                            yAxisID: 'lID'
+                            yAxisID: 'ohmsID'
                         },
                         {
                             label: 'SWR',
@@ -2072,20 +2074,22 @@
                                 },
                                 min: 0.0,
                                 position: 'right',
-                            },/*
+                            },
                             'ohmsID': {
                                 type: 'logarithmic',
                                 display: 'auto',
                                 title: {
                                     display: true,
                                     text: '\u03A9',
-                                    color: 'black',
+                                    color: 'orange',
                                     font: {
                                         weight : 'bold'
                                     }
                                 },
+                                min: 10.0,
+                                max: 10000.0,
                                 position: 'left',
-                            },
+                            },/*
                             'qID' : {
                                 type: 'linear',
                                 display: 'auto',
@@ -2188,15 +2192,11 @@
                                 callbacks: {
                                     title: function(context) {
                                         var value = context[0].parsed.x;
-                                        var postlabel = " kHz";
+                                        var postlabel = " MHz";
                                         if(value >= 1.0e6) {
                                             value *= 1e-6;
                                             postlabel = " GHz";
-                                        } else 
-                                        if(value >= 1.0e3) {
-                                            value *= 1e-3;
-                                            postlabel = " MHz";
-                                        } 
+                                        }  
                                         var label = 'Freq = ' + value.toPrecision(4).toString() + postlabel;
                                         return label;
                                     },
@@ -2220,7 +2220,7 @@
                                             }
                                         } else if(label[1] == 'Z') {
                                             var num = getMetricPrefix(value);
-                                            label = justifyText('|Z| ', num.val.toPrecision(3).toString() + '  ' + num.pfx + '\u03A9');
+                                            label = justifyText(label.substr(0,4), num.val.toPrecision(3).toString() + '  ' + num.pfx + '\u03A9');
                                         } else if(label[0] == 'L') {
                                             var num = getMetricPrefix(value * 1e-6);
                                             label = justifyText('L ', num.val.toPrecision(3).toString() + '  ' + num.pfx + 'H');
