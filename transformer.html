@@ -743,7 +743,7 @@
 
                     let V1 = math.complex(this.Vrms, 0);
                     let V2 = math.multiply(V1, math.divide(Zp, math.add(Zp, Zs)));
-                    return [Zp, V1.toPolar().r, V2.toPolar().r]; 
+                    return [math.add(Zp, Zs), V1.toPolar().r, V2.toPolar().r]; 
                     
                     /*
                     let Z11 = math.add(1, math.divide(Z0,Zs)); 
