@@ -730,7 +730,7 @@
                     //const Ls = mu[0] * 4.0 * Math.PI * this.Np**2 / this.core.CC;
                     const Xp = (Rs**2 + Xs**2) / Xs;                // Get parallel equivalent reactance
                     const Rp = (Rs**2 + Xs**2) / Rs;                // Get parallel equivalent resistance 
-                    const Cd = 1e-12;
+                    const Cd = 1e-10 + (0.9 + (78.1/this.Np**2))*1e-12;
                     const Rl = this.Zl*(this.Np/this.Ns)**2;        // Load impedance reflected to primary side in ohms
 
                     const w = 2 * Math.PI * frequency;
@@ -761,14 +761,14 @@
 
                     /*
                     const Z0 = 50.0;                                // Source impedance in ohms
-                    const Cp = 1e-12; //(0.9 + (78.1/this.Np**2))*1e-12;     // Primary winding parasitic capacitance in F
+                    const Cp = 1e-10 + (0.9 + (78.1/this.Np**2))*1e-12;     // Primary winding parasitic capacitance in F
                     const R1 = 0.1;                                 // Resistance of primary winding in ohms
-                    const L1 = 1e-8;                                // Primary leakage inductance in H
+                    const L1 = 1e-7;                                // Primary leakage inductance in H
                     const Xp = (Rs**2 + Xs**2) / Xs;                // Get parallel equivalent reactance
                     const Rp = (Rs**2 + Xs**2) / Rs;                // Get parallel equivalent resistance 
-                    const L2 = 1e-8;                                // Secondary leakage inductance, reflected into primary side, in H
+                    const L2 = 1e-7 * (this.Np/this.Ns)**2;                                // Secondary leakage inductance, reflected into primary side, in H
                     const R2 = 0.1;                                 // Secondary winding resistance in ohms, reflected at primary side
-                    const Cs = 1e-12; //(0.9 + (78.1/this.Ns**2))*1e-12 *(this.Ns/this.Np)**2;     // Secondary winding parasitic capacitance in F, reflected at primary side
+                    const Cs = (0.9 + (78.1/this.Ns**2))*1e-12 *(this.Ns/this.Np)**2;     // Secondary winding parasitic capacitance in F, reflected at primary side
                     const Zl = this.Zl*(this.Np/this.Ns)**2;        // Load impedance reflected to primary side in ohms
 
                     const w = 2 * Math.PI * frequency;
@@ -807,7 +807,7 @@
                     this.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value)[0]; 
                     this.Pin = 10.0 ** power_slider.value;
                     this.Z0 = 50.0;
-                    this.Vrms = Math.sqrt(this.Pin * this.Z0);
+                    this.Vrms = Math.sqrt(2.0 * this.Pin * this.Z0);
                     this.Zl = 1.0 * load_impedance_slider.value; 
 
                     // Frequency independent characteristics:
@@ -2734,11 +2734,12 @@
                 // Primary winding:
                 fctx.beginPath();
                 fctx.moveTo(x1, y1);
-                fctx.lineTo(x2, y2);
+                //fctx.lineTo(x2, y2);
 
                 // This is the lead-in line coming from the bottom:
                 var angle = (-1 * theta) + (Math.PI - ((pturns>>1) * 2 * theta));
                 x2 = front_originX + (outerRadius + wireRadius) * Math.cos(angle);
+                fctx.lineTo(x2-5, y2);
                 y2 = originY + (outerRadius + wireRadius) * Math.sin(angle);
                 fctx.lineTo(x2, y2);
 
@@ -2756,7 +2757,7 @@
                 // Then to the primary exit out the top:
                 x1 = front_originX - 2*outerRadius;
                 y1 = originY - outerRadius - 10;
-                x2 = front_originX - outerRadius;
+                x2 -= 5;
                 y2 = originY - outerRadius - 10;
                 fctx.lineTo(x2, y2);
                 fctx.lineTo(x1, y1);
@@ -2777,16 +2778,64 @@
                 }
                 // Right-hand exit wires:
                 x1 = side_originX + outerRadius;
+                //x1 += 5;
                 y1 = originY - outerRadius - 10;
-                x2 = front_originX + outerRadius;
+                x2 += 5;
                 y2 = originY - outerRadius - 10;
-                fctx.moveTo(x2, y2);
+                //fctx.moveTo(x2, y2);
+                fctx.lineTo(x2, y2);
                 fctx.lineTo(x1, y1);
-                y1 = originY + outerRadius + 10;
+                
+                var angle1 = (Math.PI - ((sturns>>1) * 2 * theta));
+                x2 = front_originX + (outerRadius + wireRadius) * Math.cos(angle1);
+                y2 = originY + (outerRadius + wireRadius) * Math.sin(angle1);
+                fctx.moveTo(x2, y2);
+                x2 += 5; //front_originX + outerRadius;
                 y2 = originY + outerRadius + 10;
-                fctx.moveTo(x2, y2);
-                fctx.lineTo(x1, y1);
+                fctx.lineTo(x2, y2);
+                fctx.lineTo(x1, y2);
                 fctx.stroke();
+
+                // Draw the primary-side capacitor:
+
+                // Draw the Dimensions:
+                fctx.strokeStyle = "black"; 
+                fctx.lineWidth = 1;
+                var localx = front_originX - outerRadius - 10;
+                fctx.beginPath();
+                fctx.moveTo(localx + 10, originY - outerRadius);
+                fctx.lineTo(localx, originY - outerRadius);
+                fctx.moveTo(localx + 10, originY + outerRadius);
+                fctx.lineTo(localx, originY + outerRadius);
+                fctx.lineTo(localx, originY - outerRadius);
+                fctx.stroke();
+                
+                fctx.font = "12px arial";
+                
+                fctx.save();
+                fctx.translate(localx, originY);
+                fctx.rotate(-Math.PI * 0.5);
+                fctx.textAlign = "center";
+                fctx.fillText((controller.toroid.core.A).toFixed(1) + " mm", 0, -20);
+                fctx.fillText("(" + (controller.toroid.core.A*0.03937).toFixed(3) + "\")", 0, -6);
+                fctx.restore();
+                
+                localx = front_originX + outerRadius + 20 + width + 15;
+                fctx.beginPath();
+                fctx.moveTo(localx - 5, originY - innerRadius);
+                fctx.lineTo(localx, originY - innerRadius);
+                fctx.lineTo(localx, originY + innerRadius);
+                fctx.lineTo(localx - 5, originY + innerRadius);
+                fctx.stroke();
+                
+                fctx.save();
+                fctx.translate(localx, originY);
+                fctx.rotate(-Math.PI * 0.5);
+                fctx.textAlign = "center";
+                fctx.fillText((controller.toroid.core.B).toFixed(1) + " mm", 0, 12);
+                fctx.fillText("(" + (controller.toroid.core.B*0.03937).toFixed(3) + "\")", 0, 26);
+                fctx.restore();
+
             }
 
             function drawBalun(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
