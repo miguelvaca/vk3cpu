@@ -675,10 +675,10 @@
                     return { real:Rs , imag:Xs };
                 };
 
-                this.getVSWR = function (frequency, mu) {
+                this.getVSWR = function (Zl) {
                     // First calculate the reflection coefficient gamma. Assume Z_load and Z0 are complex numbers:
                     const Z0 = math.complex(this.Z0, 0.0);
-                    const Zl = math.complex(this.Zl * (this.Np/this.Ns)**2, 0.0);
+                    //const Zl = math.complex(this.Zl * (this.Np/this.Ns)**2, 0.0);
                     const gamma = math.divide( math.subtract(Zl, Z0) , math.add(Z0, Zl));
                     const swr = (1.0 + gamma.toPolar().r) / (1.0 - gamma.toPolar().r);
                     return swr;
@@ -712,7 +712,6 @@
 
                 this.solveTransformer = function(frequency, mu) {
                     // Solve the voltages, currents and losses:
-
                     const Zc = this.getImpedance(frequency, mu);
                     const Rs = Zc.real;
                     const Xs = Zc.imag;
@@ -744,9 +743,8 @@
 
                     let V1 = math.complex(this.Vrms, 0);
                     let V2 = math.multiply(V1, math.divide(Zp, math.add(Zp, Zs)));
-                    return [this.Vrms, V1.toPolar().r, V2.toPolar().r]; 
+                    return [Zp, V1.toPolar().r, V2.toPolar().r]; 
                     
-
                     /*
                     let Z11 = math.add(1, math.divide(Z0,Zs)); 
                     let Z21 = math.inv(Zs);
@@ -807,7 +805,7 @@
                     this.cond_diameter_meters = 0.001 * awgToMm(40.0 - conductor_diameter_slider.value)[0]; 
                     this.Pin = 10.0 ** power_slider.value;
                     this.Z0 = 50.0;
-                    this.Vrms = Math.sqrt(2.0 * this.Pin * this.Z0);
+                    this.Vrms = Math.sqrt(this.Pin * this.Z0);
                     this.Zl = 1.0 * load_impedance_slider.value; 
 
                     // Frequency independent characteristics:
@@ -826,13 +824,13 @@
                     //this.C = (0.9 + (78.1/this.N**2))*1e-12;                  // In Farads
                 
                     // Low frequency mean primary inductance based on Al:
-                    this.L = (this.Np**2) * this.core.Al * 1.0e-9;      // In Henries
+                    this.L = (this.Np**2) * this.core.Al * 1.0e-9;              // In Henries
 
                     // Mutual inductance (based on initial permeability):
-                    this.M = this.Np * this.Ns * this.core.Al * 1.0e-9;      // In Henries
+                    this.M = this.Np * this.Ns * this.core.Al * 1.0e-9;         // In Henries
                     
                     // Based on David Knight's equation:
-                    this.C = (0.9 + (78.1/this.Np**2))*1e-12;                  // In Farads
+                    this.C = (0.9 + (78.1/this.Np**2))*1e-12;                   // In Farads
                     this.SRF = 1.0/(2.0*Math.PI* Math.sqrt(this.L*this.C));
 
                     //console.log(this.Rdc, this.L, this.C);
@@ -871,7 +869,7 @@
                         const VVV = this.solveTransformer(freq, mu);
 
                         //const SWR = (math.max(VVV[0]*0.5, VVV[1]) / math.min(VVV[0]*0.5, VVV[1]));
-                        const SWR = this.getVSWR(freq, mu);
+                        const SWR = this.getVSWR(VVV[0]);
                         //console.log(freq, VVV);
                         //console.log(freq, eff, SWR, VVV);
 
@@ -1531,7 +1529,7 @@
                             yAxisID: 'ilID'
                         },
                         {
-                            label: 'Pin (mW)',
+                            label: 'Pin (W)',
                             fill: false,
                             borderColor: '#69359C',
                             backgroundColor: '#9A4EAE',
@@ -1541,7 +1539,7 @@
                             hidden: false
                         },
                         {
-                            label: 'Pout (mW)',
+                            label: 'Pout (W)',
                             fill: false,
                             borderColor: 'rgb(0,128,128)',
                             backgroundColor: 'rgb(0,118,118)',
@@ -1781,7 +1779,7 @@
                     // In Hz:
                     this.frequencies = [];
                     //var f = 1.0 * slider_value;
-                    for(var i = Math.floor(5.00); i <= 8.00; i+=0.01) {
+                    for(var i = Math.floor(6.00); i <= 8.00; i+=0.01) {
                         this.frequencies.push(10.0**i);
                     }
                 }
