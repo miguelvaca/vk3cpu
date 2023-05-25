@@ -51,7 +51,7 @@
                 </div>
                 <div class="sliders">
                     <label for="load_impedance_slider">Zl:</label>
-                    <input type="range" id="load_impedance_slider" min="5.0" max="5000.0" value="50.0" step="5.0">
+                    <input type="range" id="load_impedance_slider" min="0.0" max="3.0" value="1.0" step="0.05">
                 </div>
             </div>
             <div id="notes" class="notes">
@@ -805,7 +805,7 @@
                     this.Pin = 10.0 ** power_slider.value;
                     this.Z0 = 50.0;
                     this.Vrms = Math.sqrt(this.Pin * this.Z0);
-                    this.Zl = 1.0 * load_impedance_slider.value; 
+                    this.Zl = 5.0 * 10.0**load_impedance_slider.value; 
 
                     // Frequency independent characteristics:
                     this.N_max = Math.PI / (Math.atan2(0.5e3 * this.cond_diameter_meters, (0.5 * this.core.B - 0.5e3 * this.cond_diameter_meters)));
