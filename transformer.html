@@ -60,24 +60,22 @@
             <b><u>Notes:</u></b><br>
             The VK3CPU RF Transformer Calculator was developed to help users predict the RF characteristics of a ferrite toroid wound as a transformer. 
             It uses the manufacturer's (Fair-Rite) published data including the toroid's dimensions and complex permeability characteristics
-            to predict the component's characteristics.<br>
+            to predict the transformer's characteristics.<br>
             The calculator has 3 separate display areas. At the top is the chart display for showing frequency-dependent characteristics. Next is the
             schematic display, where a scaled image of the toroid and windings is presented to help with intuitive design. Next is the control panel
-            section, where the user can select the application type, toroid material, toroid size, wire size, number of windings and excitation voltage.<br><br>
+            section, where the user can select the wire size, toroid material, toroid size, number of primary and secondary windings, input power and load impedance.<br><br>
             <b><u>Inputs via the select widgets:</u></b>
             <ul> 
-                <li>Application : Selects the intended use of the toroid, either Inductor or Suppressor is currently supported. This limits the material selection as appropriate.</li>
                 <li>Size : Selects the size of the toroid. FT240 is 2.4" in diameter. FT80 is 0.8", etc...</li>
-                <li>Material : Manufacturers material mix code. Inductor mode shows initial permeability [&#956;i] in square brackets. (Pick lower &#956;i for higher frequency applications.) 
-                Suppressor mode displays effective suppression frequency range in square brackets.</li>
+                <li>Material : Manufacturers material mix code. Select this first. Initial permeability [&#956;i] is displayed in square brackets. (Pick lower &#956;i for higher frequency applications.) </li>
             </ul>
             <b><u>Inputs via the slider widgets:</u></b>
             <ul> 
                 <li>AWG : Select the wire gauge. Sliding L-R changes AWG from 40-0. (Defaults to 20 AWG)</li>
-                <li>N  : Winding density at the toroid inner-diameter. Controls how many single-layer turns can be achieved around the core. 
-                Maximum (100%, slider to hard-right) is reached when the turns are adjacent at the toroid's inner radius. (Defaults to 15%)</li>
-                <li>Vrms : The RMS voltage applied to the inductor (Volts). Determines the flux-density (B) and field-intensity (H) within the ferrite toroid. (Defaults to 10Vrms)</li>
-                <li>f : Shifts the frequency of interest of the chart display from left-to-right. Left towards kHz, right towards GHz. </li>
+                <li>Np  : Number of turns for the primary Winding. (Defaults to 20 turns.)</li>
+                <li>Ns  : Number of turns for the secondary Winding. (Defaults to 20 turns.) </li>
+                <li>P : The input power in watts. (Defaults to 100 W)</li>
+                <li>Zl : Load impedance in ohms. (Defaults to 50 ohms.) </li>
             </ul>
             <i>Note: Manufacturers recommend keeping the number of turns (N) to a minimum.</i><br><br>
             <b><u>Chart display:</u></b>
