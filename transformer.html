@@ -39,11 +39,11 @@
                 </div>
                 <div class="sliders">
                     <label for="primary_turns_slider">Np:</label>
-                    <input type="range" id="primary_turns_slider" min="0.0" max="1.0" value="0.15" step="0.005">
+                    <input type="range" id="primary_turns_slider" min="0.0" max="1.0" value="0.020" step="0.005">
                 </div>
                 <div class="sliders">
                     <label for="secondary_turns_slider">Ns:</label>
-                    <input type="range" id="secondary_turns_slider" min="0.0" max="1.0" value="0.15" step="0.005">
+                    <input type="range" id="secondary_turns_slider" min="0.0" max="1.0" value="0.20" step="0.005">
                 </div>
                 <div class="sliders">
                     <label for="power_slider">P:</label>
@@ -728,7 +728,7 @@
                     //const Ls = mu[0] * 4.0 * Math.PI * this.Np**2 / this.core.CC;
                     const Xp = (Rs**2 + Xs**2) / Xs;                // Get parallel equivalent reactance
                     const Rp = (Rs**2 + Xs**2) / Rs;                // Get parallel equivalent resistance 
-                    const Cd = 1e-10 + (0.9 + (78.1/this.Np**2))*1e-12;
+                    const Cd = (0.9 + (78.1/this.Np**2))*1e-12;
                     const Rl = this.Zl*(this.Np/this.Ns)**2;        // Load impedance reflected to primary side in ohms
 
                     const w = 2 * Math.PI * frequency;
@@ -2696,7 +2696,8 @@
             function drawTransformer(fctx, originX, originY, outerRadius, innerRadius, wireRadius, pturns, sturns, width, toroid_colour) {
                 let theta = Math.atan2((2*wireRadius), innerRadius - wireRadius);
                 
-                var front_originX = originX - 0.5*(1*outerRadius + 20 + width) - 10;
+                //var front_originX = originX - 0.5*(1*outerRadius + 20 + width) - 10;
+                var front_originX = originX;
                 originY -= 12;
 
                 // Draw front profile of toroid former:
@@ -2709,7 +2710,7 @@
                 fctx.lineWidth = 1.0;
                 
                 // Draw side profile of toroid:
-                var side_originX = front_originX + outerRadius + 20;
+                var side_originX = front_originX + outerRadius + 10;
                 fctx.fillStyle = "#6F6F6F"; // rgb(100, 100, 100);
                 fctx.fillRect(side_originX, originY - outerRadius, width, (outerRadius - innerRadius));
                 fctx.fillRect(side_originX, originY + innerRadius, width, (outerRadius - innerRadius));
@@ -2798,7 +2799,7 @@
                 // Draw the Dimensions:
                 fctx.strokeStyle = "black"; 
                 fctx.lineWidth = 1;
-                var localx = front_originX - outerRadius - 10;
+                var localx = front_originX - outerRadius - 20;
                 fctx.beginPath();
                 fctx.moveTo(localx + 10, originY - outerRadius);
                 fctx.lineTo(localx, originY - outerRadius);
@@ -2817,7 +2818,7 @@
                 fctx.fillText("(" + (controller.toroid.core.A*0.03937).toFixed(3) + "\")", 0, -6);
                 fctx.restore();
                 
-                localx = front_originX + outerRadius + 20 + width + 15;
+                localx = front_originX + outerRadius + 10 + width + 15;
                 fctx.beginPath();
                 fctx.moveTo(localx - 5, originY - innerRadius);
                 fctx.lineTo(localx, originY - innerRadius);
