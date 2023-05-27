@@ -38,19 +38,19 @@
                     <input type="range" id="conductor_diameter_slider" min="2" max="38" value="20" step="1">
                 </div>
                 <div class="sliders">
-                    <label for="primary_turns_slider">Np:</label>
+                    <label for="primary_turns_slider">N<sub>P</sub>:</label>
                     <input type="range" id="primary_turns_slider" min="0.0" max="1.0" value="0.020" step="0.005">
                 </div>
                 <div class="sliders">
-                    <label for="secondary_turns_slider">Ns:</label>
+                    <label for="secondary_turns_slider">N<sub>S</sub>:</label>
                     <input type="range" id="secondary_turns_slider" min="0.0" max="1.0" value="0.20" step="0.005">
                 </div>
                 <div class="sliders">
-                    <label for="power_slider">P:</label>
+                    <label for="power_slider">P<sub>in</sub>:</label>
                     <input type="range" id="power_slider" min="0.698" max="3.176" value="2.0" step="0.004">
                 </div>
                 <div class="sliders">
-                    <label for="load_impedance_slider">Zl:</label>
+                    <label for="load_impedance_slider">Z<sub>L</sub>:</label>
                     <input type="range" id="load_impedance_slider" min="0.0" max="3.0" value="1.0" step="0.05">
                 </div>
             </div>
@@ -2762,7 +2762,7 @@
                 fctx.stroke();
 
                 // Secondary winding:
-                fctx.strokeStyle = "magenta";
+                fctx.strokeStyle = "hsl(120, 100%, 15%)";
                 fctx.beginPath();
                 for(let i = 0; i < (2*sturns); i+=2) {
                     var angle1 = ((i+1) * theta) + (Math.PI - ((sturns>>1) * 2 * theta));
@@ -2775,7 +2775,8 @@
                     fctx.lineTo(x2, y2);
                 }
                 // Right-hand exit wires:
-                x1 = side_originX + outerRadius;
+                //x1 = side_originX + outerRadius;
+                x1 = side_originX + 80;
                 //x1 += 5;
                 y1 = originY - outerRadius - 10;
                 x2 += 5;
@@ -2795,6 +2796,25 @@
                 fctx.stroke();
 
                 // Draw the primary-side capacitor:
+                // Draw the load resistor:
+
+                fctx.lineWidth = 1;
+                fctx.strokeRect(side_originX + 80 -8, originY - 20, 16, 40);
+                
+                fctx.beginPath();
+                fctx.moveTo(side_originX + 80, y2);
+                fctx.lineTo(side_originX + 80, originY+20);
+                fctx.moveTo(side_originX + 80, y1);
+                fctx.lineTo(side_originX + 80, originY-20);
+                fctx.stroke();
+
+                //fctx.textAlign = "right";
+                fctx.font = "12px arial";
+                fctx.textAlign = "center";
+                fctx.fillText("Z\u2097", side_originX + 80, originY);
+                fctx.textAlign = "left";
+                fctx.fillText(controller.toroid.Zl.toFixed(0) + " Ohm", side_originX + 95, originY);
+
 
                 // Draw the Dimensions:
                 fctx.strokeStyle = "black"; 
@@ -2956,10 +2976,6 @@
                 fctx.fillText("Pin = " + controller.toroid.Pin.toFixed(2) + " W", 8, 46);
                 fctx.fillText("Vrms = " + controller.toroid.Vrms.toFixed(2) + " V", 8, 60);
                 
-                fctx.textAlign = "right";
-                fctx.fillText("Zl = " + controller.toroid.Zl.toFixed(2) + " Ohm", win_width-8, 18);
-                fctx.textAlign = "left";
-
                 //fctx.fillStyle = "lightgrey";
                 //fctx.fillText("Ceff = " + (toroid.C*1e12).toFixed(1) + " pF", 8, win_height - 28);
                 //fctx.fillText("SRF = " + (toroid.SRF*1e-6).toFixed(2) + " MHz", 8, win_height - 14);
@@ -2976,18 +2992,18 @@
                 //fctx.fillText("N = " + controller.toroid.N.toString() + " : Nd = " + (primary_turns_slider.value*100).toFixed(0) + "%", loopx, win_height - 28);
                 //fctx.fillText("Nd = " + (primary_turns_slider.value*100).toFixed(0) + "% : N = " + controller.toroid.N.toString(), loopx, win_height - 28);
                 
-                fctx.fillText("N = " + controller.toroid.Np.toString() + ':' + controller.toroid.Ns.toString(), loopx, win_height - 42);
+                fctx.fillText("N = " + controller.toroid.Np.toString() + ':' + controller.toroid.Ns.toString(), loopx, win_height - 46);
+                fctx.font = "12px arial";
                 if(controller.toroid.Np < controller.toroid.Ns) {
                     //
                     const ratio = controller.toroid.Ns**2 / controller.toroid.Np**2;
-                    fctx.fillText("Z = 1:" + ratio.toFixed(2), loopx, win_height - 28);
+                    fctx.fillText("Z = 1:" + ratio.toFixed(1), loopx, win_height - 28);
                 } else {
                     //
                     const ratio = controller.toroid.Np**2 / controller.toroid.Ns**2;
-                    fctx.fillText("Z = " + ratio.toFixed(2) + ":1", loopx, win_height - 28);
+                    fctx.fillText("Z = " + ratio.toFixed(1) + ":1", loopx, win_height - 28);
                 }
                 
-                fctx.font = "12px arial";
                 fctx.fillText("wire = " + (controller.toroid.cond_length_meters*100.0).toFixed(1)+ " cm (" + (3.2808399*controller.toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
                 //fctx.fillText("(" + (3.2808399*toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
                 
