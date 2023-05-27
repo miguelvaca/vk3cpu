@@ -2813,9 +2813,9 @@
                 fctx.textAlign = "center";
                 fctx.fillText("Z\u2097", side_originX + 80, originY);
                 fctx.textAlign = "left";
-                fctx.fillText(controller.toroid.Zl.toFixed(0) + " Ohm", side_originX + 95, originY);
-
-
+                var num = getMetricPrefix(controller.toroid.Zl);
+                fctx.fillText(num.val.toPrecision(3).toString() + ' ' + num.pfx + "\u03A9", side_originX + 95, originY);
+                
                 // Draw the Dimensions:
                 fctx.strokeStyle = "black"; 
                 fctx.lineWidth = 1;
