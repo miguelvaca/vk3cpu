@@ -226,6 +226,7 @@
                 this.Pin = 0.0; 
                 this.Vrms = 0.0; 
                 this.Zl = 0.0; 
+                this.Cin = 0.0;
                 
                 // Calculated frequency-independent variables:
                 this.cond_length_meters = 0.0;
@@ -2011,6 +2012,25 @@
                 fctx.lineTo(x1, y1);
                 fctx.stroke();
 
+                // Draw the primary-side capacitor:
+                x1 -= 35;
+                fctx.lineTo(x1, y1);
+                fctx.lineTo(x1, originY - 3);
+                fctx.moveTo(x1 - 10, originY - 3);
+                fctx.lineTo(x1 + 10, originY - 3);
+                fctx.moveTo(x1 - 10, originY + 3);
+                fctx.lineTo(x1 + 10, originY + 3);
+                fctx.moveTo(x1, originY + 3);
+                fctx.lineTo(x1, originY + outerRadius + 10);
+                x1 += 35;
+                fctx.lineTo(x1, originY + outerRadius + 10);
+                fctx.stroke();
+
+                // Write the capacitor value:
+                fctx.font = "12px arial";
+                fctx.textAlign = "right";
+                fctx.fillText((controller.toroid.Cin*1e12).toFixed(0) + " pF", x1 - 50, originY);
+
                 // Secondary winding:
                 fctx.strokeStyle = "hsl(120, 100%, 15%)";
                 fctx.beginPath();
@@ -2045,9 +2065,8 @@
                 fctx.lineTo(x1, y2);
                 fctx.stroke();
 
-                // Draw the primary-side capacitor:
+                
                 // Draw the load resistor:
-
                 fctx.lineWidth = 1;
                 fctx.strokeRect(side_originX + 80 -8, originY - 20, 16, 40);
                 
@@ -2103,7 +2122,6 @@
                 fctx.fillText((controller.toroid.core.B).toFixed(1) + " mm", 0, 12);
                 fctx.fillText("(" + (controller.toroid.core.B*0.03937).toFixed(3) + "\")", 0, 26);
                 fctx.restore();
-
             }
 
             function drawBalun(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
