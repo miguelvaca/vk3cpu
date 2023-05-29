@@ -26,7 +26,7 @@ section div.slider_container {
     width: 100%;
     height: 100%;
     */
-    height: 140px;
+    /*height: 140px;*/
     background: rgb(255, 255, 255);
     border: 1px solid rgb(0, 0, 0);
     margin: 0px;
@@ -80,7 +80,7 @@ section div.sliders {
 div label {
     background:white;
     display: inline-block;
-    width: 12%;
+    width: 40px;
     font-size: small;
     text-align: right;
 }
@@ -88,7 +88,7 @@ div label {
 div input {
     background:lightsalmon;
     display: inline-block;
-    width: 85%;
+    width:80%;
 }
 
 @media (orientation: portrait) {
@@ -99,7 +99,8 @@ div input {
         grid-template-areas: 
         "chart-container"
         "inductor-container" 
-        "slider-container";
+        "slider-container" 
+        "notes";
         justify-items: stretch;
     }
 
@@ -160,7 +161,7 @@ div input {
     section.gridLayoutClass {
         display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: 1fr 0.3fr 0.2fr 5fr;
+        /*grid-template-rows: 1fr 0.3fr 0.2fr 5fr;*/
         grid-template-areas: 
         "chart-container"
         "inductor-container" 
