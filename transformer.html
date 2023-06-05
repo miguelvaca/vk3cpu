@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="toroid.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Transformer Calc v0.1<br></header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Transformer Calc v0.1<br></header>
         <section class="gridLayoutClass">
             <div id="chart-container" class="chart-container">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -79,7 +79,7 @@
                 <li>Np  : Number of turns for the primary Winding. (Defaults to 20 turns.)</li>
                 <li>Ns  : Number of turns for the secondary Winding. (Defaults to 20 turns.) </li>
                 <li>P : The input power in watts. (Defaults to 100 W)</li>
-                <li>Zl : Load impedance in ohms. (Defaults to 50 ohms.) </li>
+                <li>Zl : Load impedance in ohms. (Defaults to 2550 ohms.) </li>
                 <li>Cin : Additional primary capacitance 0 - 200 pF. (Defaults to 0 pF.) </li>
             </ul>
             <i>Note: Manufacturers recommend keeping the number of turns (N) to a minimum.</i><br><br>
@@ -773,7 +773,7 @@
                     let Z2 = math.complex(R2, w*L2);
                     let ZCp = math.complex(0.0, -1.0/(w*Cp));
                     let Zp = math.complex(Rp, Xp); 
-                    //let ZRp = math.complex(Rp, 0.0);
+                    //let ZRp = math.complex(Rp, 0.0); 
                     //let ZLp = math.complex(0.0, Xp);
                     //let Zp = math.divide(math.multiply(ZRp, ZLp), math.add(ZRp, ZLp));
                     let ZCs = math.complex(0.0, -1.0/(w*Cs));
@@ -794,9 +794,20 @@
                     let Z33 = math.add(math.unaryMinus(math.inv(Z2)), math.unaryMinus(math.inv(Zlc)), math.unaryMinus(math.inv(ZCc)));
 
                     let ZZZ = math.matrix([[Z11, Z12, Z13], [Z21, Z22, Z23], [Z31, Z32, Z33]]);
-                    let vvv = math.matrix([[2*this.Vrms/Z0], [zero], [zero]]);
+                    let vvv = math.matrix([[this.Vrms/Z0], [zero], [zero]]);
                     let VVV = math.multiply(math.inv(ZZZ), vvv);
-                    return [VVV.get([0,0]), VVV.get([1,0]), VVV.get([2,0])]; 
+
+                    // Power dissipated in Z0:
+                    //let PZ0 = math.divide(math.square(math.subtract(this.Vrms, VVV.get([0,0]))), Z0);
+                    let PZ0 = math.subtract(this.Vrms, VVV.get([0,0])).toPolar().r**2 / Z0;
+                    // Power dissipated in Rc:
+                    let PRp = math.divide(math.square(VVV.get([1,0])), Rp); // Check this!
+                    // Power dissipated in Zl:
+                    let PZl = math.divide(math.square(VVV.get([2,0])), Zl);
+
+                    // SWR: Calculate equivalent impedance of circuit as-seen from the source. Then use gamma eqn, followed by VSWR eqn:
+
+                    return [VVV.get([0,0]), VVV.get([1,0]), VVV.get([2,0]), PZ0, PRp, PZl]; 
                 };
                 
                 this.recalculate = function (frequencies) {
@@ -889,14 +900,14 @@
                         //this.L_vs_f.push({x:freq, y:(mu[0] * 4.0 * Math.PI * this.N**2 * 1e-3 / this.core.CC)});
                         this.L_vs_f.push({x:freq, y:L*1e6}); // Convert H to uH
                         this.M_vs_f.push({x:freq, y:M*1e6}); // Convert H to uH
-                    
+                     
                         this.SWR_vs_f.push({x:freq, y:SWR});
                         this.eff_vs_f.push({x:freq, y:100.0 * eff});
                         //const IL = 20.0 * Math.log10(VVV[0]/VVV[3]);
                         //this.IL_vs_f.push({x:freq, y:IL});
 
-                        const P0 = this.Vrms**2 / this.Z0; // (VVV[0].toPolar().r**2 / this.Z0);
-                        const Pl = (VVV[2].toPolar().r**2 / (this.Zl*((this.Np/this.Ns)**2)));
+                        const P0 = VVV[3]; //this.Vrms**2 / this.Z0; // (VVV[0].toPolar().r**2 / this.Z0);
+                        const Pl = VVV[5].toPolar().r; //(VVV[2].toPolar().r**2 / (this.Zl*((this.Np/this.Ns)**2)));
                         this.P0_vs_f.push({x:freq, y:P0});
                         this.Pl_vs_f.push({x:freq, y:Pl});
                         const IL = 10.0 * Math.log10(P0/Pl);
@@ -2015,6 +2026,13 @@
                 // Draw the primary-side capacitor:
                 x1 -= 35;
                 fctx.lineTo(x1, y1);
+                fctx.stroke();
+
+                fctx.strokeStyle = "black"; 
+                fctx.lineWidth = 1;
+                fctx.beginPath();
+                fctx.moveTo(x1, y1);
+                fctx.lineTo(x1, y1);
                 fctx.lineTo(x1, originY - 3);
                 fctx.moveTo(x1 - 10, originY - 3);
                 fctx.lineTo(x1 + 10, originY - 3);
@@ -2022,6 +2040,13 @@
                 fctx.lineTo(x1 + 10, originY + 3);
                 fctx.moveTo(x1, originY + 3);
                 fctx.lineTo(x1, originY + outerRadius + 10);
+                fctx.stroke();
+                //fctx.restore();
+                fctx.lineCap = "round";
+                fctx.strokeStyle = "blue";
+                fctx.lineWidth = 2 * wireRadius;
+                fctx.beginPath();
+                fctx.moveTo(x1, originY + outerRadius + 10);
                 x1 += 35;
                 fctx.lineTo(x1, originY + outerRadius + 10);
                 fctx.stroke();
@@ -2046,7 +2071,8 @@
                 }
                 // Right-hand exit wires:
                 //x1 = side_originX + outerRadius;
-                x1 = side_originX + 80;
+                const x_res = side_originX + width + 60;
+                x1 = x_res;
                 //x1 += 5;
                 y1 = originY - outerRadius - 10;
                 x2 += 5;
@@ -2068,22 +2094,22 @@
                 
                 // Draw the load resistor:
                 fctx.lineWidth = 1;
-                fctx.strokeRect(side_originX + 80 -8, originY - 20, 16, 40);
+                fctx.strokeRect(x_res -8, originY - 20, 16, 40);
                 
                 fctx.beginPath();
-                fctx.moveTo(side_originX + 80, y2);
-                fctx.lineTo(side_originX + 80, originY+20);
-                fctx.moveTo(side_originX + 80, y1);
-                fctx.lineTo(side_originX + 80, originY-20);
+                fctx.moveTo(x_res, y2);
+                fctx.lineTo(x_res, originY+20);
+                fctx.moveTo(x_res, y1);
+                fctx.lineTo(x_res, originY-20);
                 fctx.stroke();
 
                 //fctx.textAlign = "right";
                 fctx.font = "12px arial";
                 fctx.textAlign = "center";
-                fctx.fillText("Z\u2097", side_originX + 80, originY);
+                fctx.fillText("Z\u2097", x_res, originY);
                 fctx.textAlign = "left";
                 var num = getMetricPrefix(controller.toroid.Zl);
-                fctx.fillText(num.val.toPrecision(3).toString() + ' ' + num.pfx + "\u03A9", side_originX + 95, originY);
+                fctx.fillText(num.val.toPrecision(3).toString() + ' ' + num.pfx + "\u03A9", x_res + 15, originY);
                  
                 // Draw the Dimensions:
                 fctx.strokeStyle = "black"; 
