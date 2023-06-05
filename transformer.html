@@ -2121,23 +2121,34 @@
                 
                 // Draw the load resistor:
                 fctx.lineWidth = 1;
-                fctx.strokeRect(x_res -8, originY - 20, 16, 40);
+                fctx.strokeRect(x_res -8, originY - 30, 16, 60);
                 
                 fctx.beginPath();
                 fctx.moveTo(x_res, y2);
-                fctx.lineTo(x_res, originY+20);
+                fctx.lineTo(x_res, originY+30);
                 fctx.moveTo(x_res, y1);
-                fctx.lineTo(x_res, originY-20);
+                fctx.lineTo(x_res, originY-30);
                 fctx.stroke();
 
+                fctx.save();
+                fctx.translate(x_res, originY);
+                fctx.rotate(-Math.PI * 0.5);
+                fctx.font = "12px arial";
+                fctx.textAlign = "center";
+                var num = getMetricPrefix(controller.toroid.Zl);
+                fctx.fillText(num.val.toPrecision(3).toString() + ' ' + num.pfx + "\u03A9", 0, 3);
+                fctx.restore();
+
                 //fctx.textAlign = "right";
+                /*
                 fctx.font = "12px arial";
                 fctx.textAlign = "center";
                 fctx.fillText("Z\u2097", x_res, originY);
                 fctx.textAlign = "left";
                 var num = getMetricPrefix(controller.toroid.Zl);
                 fctx.fillText(num.val.toPrecision(3).toString() + ' ' + num.pfx + "\u03A9", x_res + 15, originY);
-                 
+                */
+
                 // Draw the Dimensions:
                 fctx.strokeStyle = "black"; 
                 fctx.lineWidth = 1;
