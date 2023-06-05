@@ -2041,7 +2041,29 @@
                 fctx.moveTo(x1, originY + 3);
                 fctx.lineTo(x1, originY + outerRadius + 10);
                 fctx.stroke();
-                //fctx.restore();
+
+                // Do the voltage source and source resistance:
+                x1 -= 50;
+                fctx.beginPath();
+                fctx.moveTo(x1, originY - outerRadius - 10);
+                fctx.lineTo(x1, originY - outerRadius);
+                fctx.strokeRect(x1 - 8, originY - outerRadius, 16, 36);
+                fctx.moveTo(x1, originY + outerRadius - 20);
+                fctx.lineTo(x1, originY - outerRadius + 36);
+                fctx.moveTo(x1, originY + outerRadius);
+                fctx.lineTo(x1, originY + outerRadius + 10);
+                fctx.stroke();
+                fctx.beginPath();
+                fctx.arc(x1, originY + outerRadius - 10, 10, 0, 2*Math.PI);
+                fctx.stroke();
+                fctx.beginPath();
+                fctx.moveTo(x1, originY + outerRadius + 10);
+                x1 += 50;
+                fctx.lineTo(x1, originY + outerRadius + 10);
+                fctx.moveTo(x1-50, originY - outerRadius - 10);
+                fctx.lineTo(x1, originY - outerRadius - 10);
+                fctx.stroke();
+
                 fctx.lineCap = "round";
                 fctx.strokeStyle = "blue";
                 fctx.lineWidth = 2 * wireRadius;
@@ -2052,9 +2074,14 @@
                 fctx.stroke();
 
                 // Write the capacitor value:
+                fctx.save();
+                fctx.translate(x1 - 35, originY);
+                fctx.rotate(-Math.PI * 0.5);
                 fctx.font = "12px arial";
-                fctx.textAlign = "right";
-                fctx.fillText((controller.toroid.Cin*1e12).toFixed(0) + " pF", x1 - 50, originY);
+                fctx.textAlign = "center";
+                fctx.fillText((controller.toroid.Cin*1e12).toFixed(0) + " pF", 0, -14);
+                fctx.fillText("50", outerRadius - 18, -45);
+                fctx.restore();
 
                 // Secondary winding:
                 fctx.strokeStyle = "hsl(120, 100%, 15%)";
