@@ -242,7 +242,12 @@
                 this.IL_vs_f  = [];
                 this.P0_vs_f  = [];
                 this.Pl_vs_f  = [];
+                this.Ploss_vs_f  = [];
                 
+                this.V1_vs_f  = [];
+                this.V2_vs_f  = [];
+                this.V3_vs_f  = [];
+
                 this.L_vs_f   = [];
                 this.Z_vs_f   = [];
                 this.R_vs_f   = [];
@@ -727,7 +732,7 @@
                     const Q = Xs / Rs;
 
                     // Calculate B due to primary:
-                    var B = (this.Vrms * 1e8) / (4.44 * frequency * this.N * this.core['Ae']);
+                    var B = (this.Vrms * 1e8) / (4.44 * frequency * this.Np * this.core['Ae']);
 
                     // Model the transformer using Fair-Rite lumped equivalent of a loaded transformer as per 17th ed catalogue page 141 Fig 2.
                     // vars:
@@ -772,7 +777,8 @@
                     let Z1 = math.complex(R1, w*L1);
                     let Z2 = math.complex(R2, w*L2);
                     let ZCp = math.complex(0.0, -1.0/(w*Cp));
-                    let Zp = math.complex(Rp, Xp); 
+                    //let Zp = math.complex(Rp, Xp); 
+                    let Zp = math.complex(Rs, Xs); 
                     //let ZRp = math.complex(Rp, 0.0); 
                     //let ZLp = math.complex(0.0, Xp);
                     //let Zp = math.divide(math.multiply(ZRp, ZLp), math.add(ZRp, ZLp));
@@ -783,27 +789,27 @@
                     // Setup the 3x3 matrix. Z31 = Z13 = 0
                     //let Z11 = math.divide(math.add(math.unaryMinus(math.multiply(Zcp,Z1)), math.unaryMinus(math.multiply(Z0,Z1)), math.unaryMinus(math.multiply(Z0,Zcp))), math.multiply(Z0, Zcp, Z1));
                     const zero = math.complex(0,0);
-                    let Z11 = math.add(math.unaryMinus(math.inv(Z0)), math.unaryMinus(math.inv(ZCp)), math.unaryMinus(math.inv(Z1)), math.unaryMinus(math.inv(ZCc)));
-                    let Z21 = math.inv(Z1);
-                    let Z31 = math.inv(ZCc);
-                    let Z12 = Z21;
-                    let Z22 = math.add(math.unaryMinus(math.inv(Z1)), math.unaryMinus(math.inv(Zp)), math.unaryMinus(math.inv(Z2)));
-                    let Z32 = math.inv(Z2);
-                    let Z13 = math.inv(ZCc);
-                    let Z23 = math.inv(Z2);
-                    let Z33 = math.add(math.unaryMinus(math.inv(Z2)), math.unaryMinus(math.inv(Zlc)), math.unaryMinus(math.inv(ZCc)));
+                    let G11 = math.add(math.unaryMinus(math.inv(Z0)), math.unaryMinus(math.inv(ZCp)), math.unaryMinus(math.inv(Z1)), math.unaryMinus(math.inv(ZCc)));
+                    let G21 = math.inv(Z1);
+                    let G31 = math.inv(ZCc);
+                    let G12 = G21;
+                    let G22 = math.add(math.unaryMinus(math.inv(Z1)), math.unaryMinus(math.inv(Zp)), math.unaryMinus(math.inv(Z2)));
+                    let G32 = math.inv(Z2);
+                    let G13 = math.inv(ZCc);
+                    let G23 = math.inv(Z2);
+                    let G33 = math.add(math.unaryMinus(math.inv(Z2)), math.unaryMinus(math.inv(Zlc)), math.unaryMinus(math.inv(ZCc)));
 
-                    let ZZZ = math.matrix([[Z11, Z12, Z13], [Z21, Z22, Z23], [Z31, Z32, Z33]]);
-                    let vvv = math.matrix([[this.Vrms/Z0], [zero], [zero]]);
-                    let VVV = math.multiply(math.inv(ZZZ), vvv);
+                    let GGG = math.matrix([[G11, G12, G13], [G21, G22, G23], [G31, G32, G33]]);
+                    let iii = math.matrix([[-this.Vrms/Z0], [zero], [zero]]);
+                    let VVV = math.multiply(math.inv(GGG), iii);
 
                     // Power dissipated in Z0:
                     //let PZ0 = math.divide(math.square(math.subtract(this.Vrms, VVV.get([0,0]))), Z0);
                     let PZ0 = math.subtract(this.Vrms, VVV.get([0,0])).toPolar().r**2 / Z0;
                     // Power dissipated in Rc:
-                    let PRp = math.divide(math.square(VVV.get([1,0])), Rp); // Check this!
+                    let PRp = math.divide(VVV.get([1,0]).toPolar().r**2, Rp); // Check this!
                     // Power dissipated in Zl:
-                    let PZl = math.divide(math.square(VVV.get([2,0])), Zl);
+                    let PZl = math.divide(VVV.get([2,0]).toPolar().r**2, Zl);
 
                     // SWR: Calculate equivalent impedance of circuit as-seen from the source. Then use gamma eqn, followed by VSWR eqn:
 
@@ -855,6 +861,11 @@
                     this.IL_vs_f  = [];
                     this.P0_vs_f  = [];
                     this.Pl_vs_f  = [];
+                    this.Ploss_vs_f  = [];
+
+                    this.V1_vs_f  = [];
+                    this.V2_vs_f  = [];
+                    this.V3_vs_f  = [];
 
                     this.L_vs_f = [];
                     this.Z_vs_f = [];
@@ -886,8 +897,12 @@
                         const Z0 = math.complex(this.Z0, 0.0);
                         const Zl = math.divide(math.multiply(Z0, VVV[0]), math.subtract(VVV[0], Vin)); //math.complex(this.Zl * (this.Np/this.Ns)**2, 0.0);
                         //console.log(freq, Z0, Zl, VVV[0]);
-                        const gamma = math.divide( math.subtract(Zl, Z0) , math.add(Z0, Zl));
-                        const SWR = (1.0 + gamma.toPolar().r) / (1.0 - gamma.toPolar().r);
+                        //const gamma = math.divide( math.subtract(Zl, Z0) , math.add(Zl, Z0));
+                        let gamma = (Zl.toPolar().r - this.Z0) / (Zl.toPolar().r + this.Z0);
+                        if(gamma < 0) {
+                            gamma *= -1.0;
+                        }
+                        const SWR = (1.0 + gamma) / (1.0 - gamma);
                         //console.log(freq, VVV);
                         //console.log(freq, eff, SWR, VVV);
 
@@ -906,10 +921,16 @@
                         //const IL = 20.0 * Math.log10(VVV[0]/VVV[3]);
                         //this.IL_vs_f.push({x:freq, y:IL});
 
-                        const P0 = VVV[3]; //this.Vrms**2 / this.Z0; // (VVV[0].toPolar().r**2 / this.Z0);
-                        const Pl = VVV[5].toPolar().r; //(VVV[2].toPolar().r**2 / (this.Zl*((this.Np/this.Ns)**2)));
+                        this.V1_vs_f.push({x:freq, y:VVV[0].toPolar().r});
+                        this.V2_vs_f.push({x:freq, y:VVV[1].toPolar().r});
+                        this.V3_vs_f.push({x:freq, y:VVV[2].toPolar().r});
+
+                        const P0 = math.divide(math.square(VVV[0]) , Zl).toPolar().r; //this.Vrms**2 / this.Z0; // (VVV[0].toPolar().r**2 / this.Z0);
+                        const Pl = VVV[5]; //(VVV[2].toPolar().r**2 / (this.Zl*((this.Np/this.Ns)**2)));
+                        const Ploss = VVV[4];
                         this.P0_vs_f.push({x:freq, y:P0});
                         this.Pl_vs_f.push({x:freq, y:Pl});
+                        this.Ploss_vs_f.push({x:freq, y:Ploss});
                         const IL = 10.0 * Math.log10(P0/Pl);
                         this.IL_vs_f.push({x:freq, y:IL});
 
@@ -965,6 +986,22 @@
                 
                 this.calculatePl = function () {
                     return this.Pl_vs_f;
+                };
+                
+                this.calculatePloss = function () {
+                    return this.Ploss_vs_f;
+                };
+                
+                this.calculateV1 = function () {
+                    return this.V1_vs_f;
+                };
+                
+                this.calculateV2 = function () {
+                    return this.V2_vs_f;
+                };
+                
+                this.calculateV3 = function () {
+                    return this.V3_vs_f;
                 };
                 
                 this.calculateImpedance = function () {
@@ -1080,6 +1117,16 @@
                             borderColor: '#69359C',
                             backgroundColor: '#9A4EAE',
                             data: this.toroid.calculateP0(),
+                            borderWidth: 1,
+                            yAxisID: 'wattsID',
+                            hidden: false
+                        },
+                        {
+                            label: 'Ploss (W)',
+                            fill: false,
+                            borderColor: 'cyan',
+                            backgroundColor: 'cyan',
+                            data: this.toroid.calculatePloss(),
                             borderWidth: 1,
                             yAxisID: 'wattsID',
                             hidden: false
@@ -1222,7 +1269,8 @@
                     this.myChart.data.datasets[2].data  = this.ferrite.calculateEfficiency();
                     this.myChart.data.datasets[3].data  = this.ferrite.calculateInsertionLoss();
                     this.myChart.data.datasets[4].data  = this.ferrite.calculateP0();
-                    this.myChart.data.datasets[5].data  = this.ferrite.calculatePl();
+                    this.myChart.data.datasets[5].data  = this.ferrite.calculatePloss();
+                    this.myChart.data.datasets[6].data  = this.ferrite.calculatePl();
                     /*
                     this.myChart.data.datasets[4].data  = this.ferrite.calculateQualityFactor();
                     this.myChart.data.datasets[5].data  = this.ferrite.calculateCurrent();
@@ -1301,6 +1349,16 @@
                             fill: false,
                             borderColor: 'rgb(50,50,50)',
                             backgroundColor: 'rgb(100,100,100)',
+                            data: this.toroid.calculateP0(),
+                            borderWidth: 1,
+                            yAxisID: 'wattsID',
+                            hidden: false
+                        },
+                        {
+                            label: 'Ploss (W)',
+                            fill: false,
+                            borderColor: 'cyan',
+                            backgroundColor: 'cyan',
                             data: this.toroid.calculateP0(),
                             borderWidth: 1,
                             yAxisID: 'wattsID',
@@ -1497,6 +1555,21 @@
                                 },
                                 min: 10.0,
                                 max: 10000.0,
+                                position: 'left',
+                            },
+                            'voltsID': {
+                                type: 'linear',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: 'V',
+                                    color: 'cyan',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                min: 0.0,
+                                max: 100.0,
                                 position: 'left',
                             },/*
                             'qID' : {
