@@ -76,6 +76,14 @@
                 <li>Q : Effective Quality Factor of the inductor at the given frequency. - (|Z.im|/Z.re)</li>
             </ul>
             </div>
+            <u><b>Other VK3CPU calculators:</b>
+                <ul>
+                    <li><a href="https://miguelvaca.github.io/vk3cpu/magloop.html">Magloop - STL Antenna Calculator</a></li>
+                    <li><a href="https://miguelvaca.github.io/vk3cpu/short_dipole.html">Coil-loaded Dipole Calculator</a></li>
+                    <li><a href="https://miguelvaca.github.io/vk3cpu/toroid.html">RF Toroid Calculator</a></li>
+                    <li><a href="https://miguelvaca.github.io/vk3cpu/transformer.html">RF Transformer Calculator</a></li>
+                </ul>
+            </u><br>
         </section>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
         <script src="inductor.js"></script>
@@ -312,6 +320,18 @@
                 drawDesign();
             }
 
+            function drawArrow(ctx, x, y, angle) {
+                const l1 = 15.0;
+                const l2 = 20.0;
+                ctx.beginPath();
+                ctx.moveTo(x , y);
+                ctx.lineTo(x + l1*Math.cos(angle+0.33*Math.PI), y + l1*Math.sin(angle+0.33*Math.PI));
+                ctx.lineTo(x + l1*Math.cos(angle+0.67*Math.PI), y + l1*Math.sin(angle+0.67*Math.PI));
+                ctx.lineTo(x, y);
+                ctx.lineTo(x + l2*Math.cos(angle+0.5*Math.PI), y + l2*Math.sin(angle+0.5*Math.PI));
+                ctx.stroke();
+            } 
+
             const afront_canvas = document.getElementById("inductor2D");
             const fctx = afront_canvas.getContext('2d');
 
@@ -358,6 +378,7 @@
                 // Draw loop diameter arrow:
                 const y_offset = loopy + loop_radius + 20;
                 var arrow_size = 10.0;
+                /*
                 fctx.beginPath();
                 fctx.moveTo(loopx - loop_radius, loopy);
                 fctx.lineTo(loopx - loop_radius, y_offset);
@@ -375,6 +396,7 @@
                 fctx.lineTo(loopx + loop_radius, y_offset);
                 fctx.lineTo(loopx + loop_radius + 3.0*arrow_size, y_offset);
                 fctx.stroke();
+                */
 
                 // Write conductor diameter symbol:
                 fctx.font = cond_dia_font;
@@ -389,9 +411,11 @@
 
                 fctx.textAlign = "right";
                 fctx.font = loop_dia_font;
+                
                 // Write loop diameter symbol:
                 fctx.fillText("\u2300b = " + loop_diameter_inches.toFixed(2).toString() + "\"", loopx - loop_radius - 2.0*arrow_size, y_offset - 4);
                 fctx.fillText("(" + loop_diameter_mm.toFixed(2).toString() + "mm)", loopx - loop_radius - 2.0*arrow_size, y_offset + 12);
+                
                 fctx.font = "12px arial";
                 fctx.fillText("(A=" + (cond_diameter_mm**2).toFixed(2).toString() + " mm\u00B2)", loopx - loop_radius - 2.0*arrow_size, loopy + 28);
 
@@ -419,6 +443,7 @@
                 fctx.fillText("(" + (loop_diameter_mm-0.5*cond_diameter_mm).toFixed(2).toString() + "mm)", loopx + loop_radius + 2.0*arrow_size, inner_dia_y + 12);
 
                 // Draw outer-diameter arrows: (for using a winding former)
+                /*
                 const outer_dia_y = loopy + loop_radius + 0;
                 fctx.beginPath();
                 fctx.moveTo(loopx - loop_radius - cond_radius, loopy);
@@ -439,6 +464,7 @@
                 fctx.stroke();
                 fctx.fillText("\u2300o = " + (loop_diameter_inches+0.5*cond_diameter_inches).toFixed(3).toString() + "\"", loopx + loop_radius + 2.0*arrow_size, outer_dia_y - 4);
                 fctx.fillText("(" + (loop_diameter_mm+0.5*cond_diameter_mm).toFixed(2).toString() + "mm)", loopx + loop_radius + 2.0*arrow_size, outer_dia_y + 12);
+                */
 
                 // Write loop inductance:
                 fctx.font = "12px arial";
