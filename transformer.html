@@ -32,6 +32,12 @@
                         <option value="80">80 [&#956;i=600]</option>
                         <option value="67">67 [&#956;i=40]</option-->
                     </select>
+                    <select name="leakage" id="leakage-select" onchange="setLeakage()">
+                        <option value="Model_0">No Leakage</option>
+                        <option value="Model_1">Model 1</option>
+                        <option value="Model_2">Model 2</option>
+                        <option value="Manual">Manual</option>
+                    </select>
                 </div>
                 <div class="sliders">
                     <label for="conductor_diameter_slider">AWG:</label>
@@ -57,14 +63,33 @@
                     <label for="primary_capacitance_slider">C<sub>in</sub>:</label>
                     <input type="range" id="primary_capacitance_slider" min="0.0" max="200.0" value="100.0" step="5.0">
                 </div>
+
+
+                <div class="sliders">
+                    <label for="primary_winding_inductance_slider">Lp<sub>in</sub>:</label>
+                    <input type="range" id="primary_winding_inductance_slider" min="-1.0" max="1.0" value="0.0" step="0.01">
+                </div>
+                <div class="sliders">
+                    <label for="primary_winding_capacitance_slider">Cp<sub>in</sub>:</label>
+                    <input type="range" id="primary_winding_capacitance_slider" min="-1.0" max="1.0" value="0.0" step="0.01">
+                </div>
+                <div class="sliders">
+                    <label for="secondary_winding_capacitance_slider">Cs<sub>in</sub>:</label>
+                    <input type="range" id="secondary_winding_capacitance_slider" min="-1.0" max="1.0" value="0.0" step="0.01">
+                </div>
+                <div class="sliders">
+                    <label for="secondary_winding_inductance_slider">Ls<sub>in</sub>:</label>
+                    <input type="range" id="secondary_winding_inductance_slider" min="-1.0" max="1.0" value="0.0" step="0.01">
+                </div>
+
             </div>
             <div id="notes" class="notes">
             <b><u>UNDER DEVELOPMENT - DO NOT USE</u></b><br>
             <br> <br>
             <b><u>Notes:</u></b><br>
-            The VK3CPU RF Transformer Calculator was developed to help users predict the RF characteristics of a ferrite toroid wound as a transformer. 
+            The VK3CPU RF Transformer Calculator was developed to help users predict the characteristics of a ferrite toroid wound as a transformer. 
             It uses the manufacturer's (Fair-Rite) published data including the toroid's dimensions and complex permeability characteristics
-            to predict the transformer's characteristics.<br>
+            to predict the transformer's characteristics. It uses the lumped-equivalent circuit model as found on Fair-Rite's 17th Ed catalogue on page 141, Figure 2. <br>
             The calculator has 3 separate display areas. At the top is the chart display for showing frequency-dependent characteristics. Next is the
             schematic display, where a scaled image of the toroid and windings is presented to help with intuitive design. Next is the control panel
             section, where the user can select the wire size, toroid material, toroid size, number of primary and secondary windings, input power and load impedance.<br><br>
@@ -90,6 +115,7 @@
             <ul>
                 <li>L(&#956;H) : Inductance in microhenries. </li>
                 <li>|Z|(&#937;) : Impedance magnitude in Ohms. </li>
+                <li> IL(dB) : Insertion loss in dB. </li>
                 <li> X(&#937;) : Reactance in Ohms. </li>
                 <li> R(&#937;) : (F) - Resistance due to core losses in Ohms. </li>
                 <li> Rc(&#937;) : (PI) - Resistance due to core losses in Ohms. </li>
@@ -122,19 +148,6 @@
                 <li>Nd : The selected winding density in percent.</li>
                 <li>N : The number of turns, based on the selected Nd.</li>
                 <li>wire : Wire conductor length in centimeters and (feet).</li>
-            </ul>
-            On the right are the manufacturers data for the selected material.
-            <ul>
-                <li>&#956;i : Initial permeability @ B < 10 gauss.</li>
-                <li>B : (F) Flux density in gauss when applied with H oersted.</li>
-                <li>H : (F) Applied field strength in oersted.</li>
-                <li>Bsat : (PI) Saturation flux density in gauss.</li>
-                <li>Br : Residual flux density in gauss.</li>
-                <li>Hc : Coercive force at 0 gauss.</li>
-                <li>Tc : Curie temperature in Celsius.</li>
-                <li>ρ: Resistivity in &#937;-cm.</li>
-                <li>Type : Material composition. (NiZn, MnZn, Phenolic, Carbonyl)</li>
-                <li>P/N : Manufacturer's part number.</li>
             </ul>
             <br>
             <u><b>Other VK3CPU calculators:</b>
@@ -216,6 +229,9 @@
                 // Current selected material type:
                 this.material = '43';
                 
+                // Current leakage model:
+                this.leakage = 'Model_0';
+
                 // Current selected ferrite size:
                 this.size = 'FT240';
                 
@@ -228,6 +244,12 @@
                 this.Zl = 0.0; 
                 this.Cin = 0.0;
                 
+                // Minimum primary and secondary-side parasitic inductance and capacitance:
+                this.Cp = 1e-15;
+                this.L1 = 1e-12;
+                this.L2 = 1e-12;
+                this.Cs = 1e-15;
+
                 // Calculated frequency-independent variables:
                 this.cond_length_meters = 0.0;
                 this.Rdc = 0.0;
@@ -243,7 +265,10 @@
                 this.P0_vs_f  = [];
                 this.Pl_vs_f  = [];
                 this.Ploss_vs_f  = [];
-                
+
+                this.S11_real_vs_f = [];
+                this.S11_imag_vs_f = [];
+
                 this.V1_vs_f  = [];
                 this.V2_vs_f  = [];
                 this.V3_vs_f  = [];
@@ -494,6 +519,7 @@
                         'FT140x2' : { PN:'5943002701', A:35.55, B:23.00, C:25.4, W:66.0,  CC:5.60, le:8.90, Ae:1.58,  Ve:14.00, Al:1770.0 },
                         'FT140' : { PN:'5943002701', A:35.55, B:23.00, C:12.7, W:33.0,  CC:11.20, le:8.90, Ae:0.79,  Ve:7.00, Al:885.0 },
                         'FT125' : { PN:'5943001701', A:31.75, B:19.05, C:9.50, W:23.0,  CC:12.90, le:7.60, Ae:0.59,  Ve:4.50, Al:775.0 },
+                        'FT114x2' : { PN:'5943001001', A:29.00, B:19.00, C:15.0, W:26.0,  CC:9.90, le:7.30, Ae:0.74,  Ve:5.40, Al:1020.0 },
                         'FT114' : { PN:'5943001001', A:29.00, B:19.00, C:7.50, W:13.0,  CC:19.80, le:7.30, Ae:0.37,  Ve:2.70, Al:510.0 },
                         'FT102B' : { PN:'2643102002', A:25.90, B:12.80, C:28.60, W:55.0,  CC:3.11, le:5.60, Ae:1.80,  Ve:10.07, Al:3296.0 }, 
                         'FT82'  : { PN:'5943000601', A:21.00, B:13.20, C:6.35, W:6.40,  CC:21.30, le:5.20, Ae:0.243, Ve:1.26, Al:470.0 }, 
@@ -724,6 +750,11 @@
                     return Rac;
                 };
 
+                this.setLeakage = function(leakage_model) {
+                    // 
+                    this.leakage = leakage_model;
+                }
+
                 this.solveTransformer = function(frequency, mu) {
                     // Solve the voltages, currents and losses:
                     const Zc = this.getImpedance(frequency, mu);
@@ -734,55 +765,50 @@
                     // Calculate B due to primary:
                     var B = (this.Vrms * 1e8) / (4.44 * frequency * this.Np * this.core['Ae']);
 
-                    // Model the transformer using Fair-Rite lumped equivalent of a loaded transformer as per 17th ed catalogue page 141 Fig 2.
-                    // vars:
-                    /*
-                    const R0 = 50.0;
-                    const Rc = 0.2;     // Conductor losses
-                    const Ll1 = 1e-7;   // Primary leakage inductance
-                    //const Ls = mu[0] * 4.0 * Math.PI * this.Np**2 / this.core.CC;
-                    const Xp = (Rs**2 + Xs**2) / Xs;                // Get parallel equivalent reactance
-                    const Rp = (Rs**2 + Xs**2) / Rs;                // Get parallel equivalent resistance 
-                    const Cd = (0.9 + (78.1/this.Np**2))*1e-12;
-                    const Rl = this.Zl*(this.Np/this.Ns)**2;        // Load impedance reflected to primary side in ohms
-
-                    const w = 2 * Math.PI * frequency;
-                    let Z0 = math.complex(R0, 0);
-                    let Zs = math.complex(Rc, w*Ll1);
-                    let Y_Lp = -1/Xp;
-                    let Y_Rp = 1/Rp;
-                    let Y_Cd = w*Cd;
-                    let Y_Rl = 1/Rl;
-                    let Zp = math.inv(math.complex((Y_Rp + Y_Rl), (Y_Lp + Y_Cd)));
-
-                    let V1 = math.complex(this.Vrms, 0);
-                    let V2 = math.multiply(V1, math.divide(Zp, math.add(Zp, Zs)));
-                    return [math.add(Zp, Zs), V1.toPolar().r, V2.toPolar().r]; 
-                    */
-
-                    
-                    const Z0 = 50.0;                                // Source impedance in ohms
-                    const Cp = this.Cin + (0.9 + (78.1/this.Np**2))*1e-12;     // Primary winding parasitic capacitance in F
-                    const R1 = this.getPrimaryWireResistance(frequency); //0.1;                                 // Resistance of primary winding in ohms
-                    const L1 = 1e-7;                                // Primary leakage inductance in H
-                    const Xp = (Rs**2 + Xs**2) / Xs;                // Get parallel equivalent reactance
-                    const Rp = (Rs**2 + Xs**2) / Rs;                // Get parallel equivalent resistance 
-                    const L2 = 1e-7 * (this.Np/this.Ns)**2;         // Secondary leakage inductance, reflected into primary side, in H
+                    const Z0 = 50.0;                                                            // Source impedance in ohms
+                    const R1 = this.getPrimaryWireResistance(frequency);                        //0.1;   // Resistance of primary winding in ohms
+                    const Xp = (Rs**2 + Xs**2) / Xs;                                            // Get parallel equivalent reactance
+                    const Rp = (Rs**2 + Xs**2) / Rs;                                            // Get parallel equivalent resistance 
                     const R2 = this.getSecondaryWireResistance(frequency) * (this.Np/this.Ns)**2; //0.1;                                 // Secondary winding resistance in ohms, reflected at primary side
-                    const Cs = (0.9 + (78.1/this.Ns**2))*1e-12 *(this.Np/this.Ns)**2;     // Secondary winding parasitic capacitance in F, reflected at primary side
-                    const Zl = this.Zl*(this.Np/this.Ns)**2;        // Load impedance reflected to primary side in ohms
-                    const Cc = 1e-12;                               // Parasitic capacitance between primary and secondary windings
+                    const Zl = this.Zl*(this.Np/this.Ns)**2;                                    // Load impedance reflected to primary side in ohms
+                    const Cc = 1e-12;                                                           // Parasitic capacitance between primary and secondary windings
+
+                    switch (this.leakage) {
+                        case 'Model_0':
+                            this.Cp = this.Cin + 1e-15;
+                            this.L1 = 1e-12;
+                            this.L2 = 1e-12;
+                            this.Cs = 1e-15;
+                            break;
+                    
+                        case 'Model_1':
+                            this.Cp = this.Cin + (0.9 + (78.1/this.Np**2))*1e-12 + (1e-10 * primary_winding_capacitance_slider.value);                  // Primary winding parasitic capacitance in F
+                            this.L1 = 1e-7 + (1e-7 * primary_winding_inductance_slider.value);         // Primary leakage inductance in H
+                            this.L2 = 1e-7 + (1e-7 * secondary_winding_inductance_slider.value);       // * (this.Np/this.Ns)**2;         // Secondary leakage inductance, reflected into primary side, in H
+                            this.Cs = (0.9 + (78.1/this.Ns**2))*1e-12 *(this.Np/this.Ns)**2 + (1e-10 * secondary_winding_capacitance_slider.value);       // Secondary winding parasitic capacitance in F, reflected at primary side
+                            break;
+                    
+                        case 'Model_2':
+                            break;
+                    
+                        default:
+                            this.Cp = this.Cin + 1e-10 + (1e-10 * primary_winding_capacitance_slider.value);     // Primary winding parasitic capacitance in F
+                            this.L1 = 1e-6 + (1e-6 * primary_winding_inductance_slider.value);           // Primary leakage inductance in H
+                            this.L2 = 1e-6 + (1e-6 * secondary_winding_inductance_slider.value);         // * (this.Np/this.Ns)**2;         // Secondary leakage inductance, reflected into primary side, in H
+                            this.Cs = 1e-15 + 1e-10 + (1e-10 * secondary_winding_capacitance_slider.value);              // Secondary winding parasitic capacitance in F, reflected at primary side
+                            break;
+                    }
 
                     const w = 2 * Math.PI * frequency;
-                    let Z1 = math.complex(R1, w*L1);
-                    let Z2 = math.complex(R2, w*L2);
-                    let ZCp = math.complex(0.0, -1.0/(w*Cp));
+                    let Z1 = math.complex(R1, w*this.L1);
+                    let Z2 = math.complex(R2, w*this.L2);
+                    let ZCp = math.complex(0.0, -1.0/(w*this.Cp));
                     //let Zp = math.complex(Rp, Xp); 
                     let Zp = math.complex(Rs, Xs); 
                     //let ZRp = math.complex(Rp, 0.0); 
                     //let ZLp = math.complex(0.0, Xp);
                     //let Zp = math.divide(math.multiply(ZRp, ZLp), math.add(ZRp, ZLp));
-                    let ZCs = math.complex(0.0, -1.0/(w*Cs));
+                    let ZCs = math.complex(0.0, -1.0/(w*this.Cs));
                     let Zlc = math.divide(math.multiply(ZCs,math.complex(Zl,0.0)), math.add(ZCs,math.complex(Zl,0.0)));
                     let ZCc = math.complex(0.0, -1.0/(w*Cc));
 
@@ -812,7 +838,6 @@
                     let PZl = math.divide(VVV.get([2,0]).toPolar().r**2, Zl);
 
                     // SWR: Calculate equivalent impedance of circuit as-seen from the source. Then use gamma eqn, followed by VSWR eqn:
-
                     return [VVV.get([0,0]), VVV.get([1,0]), VVV.get([2,0]), PZ0, PRp, PZl]; 
                 };
                 
@@ -863,6 +888,9 @@
                     this.Pl_vs_f  = [];
                     this.Ploss_vs_f  = [];
 
+                    this.S11_real_vs_f = [];
+                    this.S11_imag_vs_f = [];
+
                     this.V1_vs_f  = [];
                     this.V2_vs_f  = [];
                     this.V3_vs_f  = [];
@@ -895,16 +923,19 @@
                         //const SWR = this.getVSWR(VVV[0]);
                         const Vin = math.complex(this.Vrms, 0.0);
                         const Z0 = math.complex(this.Z0, 0.0);
-                        const Zl = math.divide(math.multiply(Z0, VVV[0]), math.subtract(VVV[0], Vin)); //math.complex(this.Zl * (this.Np/this.Ns)**2, 0.0);
-                        //console.log(freq, Z0, Zl, VVV[0]);
-                        //const gamma = math.divide( math.subtract(Zl, Z0) , math.add(Zl, Z0));
-                        let gamma = (Zl.toPolar().r - this.Z0) / (Zl.toPolar().r + this.Z0);
+                        // Zcct is the impedance of the rest of the circuit, looking from
+                        const Zcct = math.divide(math.multiply(Z0, VVV[0]), math.subtract(VVV[0], Vin)); //math.complex(this.Zcct * (this.Np/this.Ns)**2, 0.0);
+
+                        //console.log(freq, Z0, Zcct, VVV[0]);
+                        //const gamma = math.divide( math.subtract(Zcct, Z0) , math.add(Zcct, Z0));
+                        let gamma = (Zcct.toPolar().r - this.Z0) / (Zcct.toPolar().r + this.Z0);
                         if(gamma < 0) {
                             gamma *= -1.0;
                         }
                         const SWR = (1.0 + gamma) / (1.0 - gamma);
                         //console.log(freq, VVV);
                         //console.log(freq, eff, SWR, VVV);
+                        let S11 = math.divide(math.abs(math.subtract(Zcct, this.Z0)), math.add(Zcct, this.Z0));
 
                         // Make freq in MHz from Hz:
                         freq *= 1e-6;
@@ -918,14 +949,17 @@
                      
                         this.SWR_vs_f.push({x:freq, y:SWR});
                         this.eff_vs_f.push({x:freq, y:100.0 * eff});
+                        //this.eff_vs_f.push({x:freq, y:100.0 * VVV[5] / (VVV[4] + VVV[5])});
                         //const IL = 20.0 * Math.log10(VVV[0]/VVV[3]);
                         //this.IL_vs_f.push({x:freq, y:IL});
+                        this.S11_real_vs_f.push({x:freq, y:math.abs(S11.toPolar().r)});
+                        this.S11_imag_vs_f.push({x:freq, y:math.abs(S11.toPolar().phi * 180.0 / Math.PI)});
 
                         this.V1_vs_f.push({x:freq, y:VVV[0].toPolar().r});
                         this.V2_vs_f.push({x:freq, y:VVV[1].toPolar().r});
                         this.V3_vs_f.push({x:freq, y:VVV[2].toPolar().r});
 
-                        const P0 = math.divide(math.square(VVV[0]) , Zl).toPolar().r; //this.Vrms**2 / this.Z0; // (VVV[0].toPolar().r**2 / this.Z0);
+                        const P0 = math.divide(math.square(VVV[0]) , Zcct).toPolar().r; //this.Vrms**2 / this.Z0; // (VVV[0].toPolar().r**2 / this.Z0);
                         const Pl = VVV[5]; //(VVV[2].toPolar().r**2 / (this.Zl*((this.Np/this.Ns)**2)));
                         const Ploss = VVV[4];
                         this.P0_vs_f.push({x:freq, y:P0});
@@ -978,6 +1012,14 @@
                 // Mutual Inductance of the Transformer:
                 this.calculateInsertionLoss = function () {
                     return this.IL_vs_f;
+                };
+                
+                this.calculateS11real = function () {
+                    return this.S11_real_vs_f;
+                };
+                
+                this.calculateS11imag = function () {
+                    return this.S11_imag_vs_f;
                 };
                 
                 this.calculateP0 = function () {
@@ -1071,7 +1113,8 @@
                         this.toroid.setMaterial(material);
                         this.t_material = material;
                         this.t_type = 'ferrite';
-                        
+
+                        /*
                         // Now re-configure the chart axes options:
                         this.myChart.data = {
                             datasets: [ 
@@ -1140,7 +1183,28 @@
                             borderWidth: 1,
                             yAxisID: 'wattsID',
                             hidden: false
-                        },/*
+                        },
+                        {
+                            label: 'S11 real(\u03A9)',
+                            fill: false,
+                            borderColor: 'orange',
+                            backgroundColor: 'orange',
+                            data: this.toroid.calculateS11real(),
+                            borderWidth: 1,
+                            yAxisID: 'ohmsID'
+                        },
+                        {
+                            label: 'S11 imag(\u03A9)',
+                            fill: false,
+                            borderColor: 'magenta',
+                            backgroundColor: 'magenta',
+                            data: this.toroid.calculateS11imag(),
+                            borderWidth: 1,
+                            yAxisID: 'ohmsID'
+                        },
+
+
+
                             {
                                 label: 'M (\u03bcH)',
                                 fill: false,
@@ -1244,21 +1308,26 @@
                                 borderWidth: 1,
                                 yAxisID: 'wattsID',
                                 hidden: false
-                            }*/]
-                        };
+                            }]
+                        };*/
                     } else {
                         console.log("Unrecognised material selected =", material);
                     }
                 };
                 
+                this.setLeakage = function (leakage_model) {
+                    // 
+                    this.toroid.setLeakage(leakage_model);
+                }
+
                 this.updateFrequencies = function (slider_value) {
                     // In Hz:
                     this.frequencies = [];
                     //var f = 1.0 * slider_value;
-                    for(var i = Math.floor(6.00); i <= 8.00; i+=0.01) {
+                    for(var i = Math.floor(5.00); i <= 8.00; i+=0.01) {
                         this.frequencies.push(10.0**i);
                     }
-                }
+                };
                 
                 this.updateChart = function () {
                     this.myChart.options.plugins.title.text 
@@ -1271,6 +1340,8 @@
                     this.myChart.data.datasets[4].data  = this.ferrite.calculateP0();
                     this.myChart.data.datasets[5].data  = this.ferrite.calculatePloss();
                     this.myChart.data.datasets[6].data  = this.ferrite.calculatePl();
+                    this.myChart.data.datasets[7].data  = this.ferrite.calculateS11real();
+                    this.myChart.data.datasets[8].data  = this.ferrite.calculateS11imag();
                     /*
                     this.myChart.data.datasets[4].data  = this.ferrite.calculateQualityFactor();
                     this.myChart.data.datasets[5].data  = this.ferrite.calculateCurrent();
@@ -1297,7 +1368,6 @@
                     return pre + ' '.repeat(whitespace) + post;
                 }
             
-
                 // Startup methods:
                 this.updateFrequencies(); // load_impedance_slider.value);
                 
@@ -1373,7 +1443,26 @@
                             borderWidth: 1,
                             yAxisID: 'wattsID',
                             hidden: false
-                        },/*,
+                        },
+                        {
+                            label: 'S11 real(\u03A9)',
+                            fill: false,
+                            borderColor: 'orange',
+                            backgroundColor: 'orange',
+                            data: this.toroid.calculateS11real(),
+                            borderWidth: 1,
+                            yAxisID: 'ohmsID'
+                        },
+                        {
+                            label: 'S11 imag(\u03A9)',
+                            fill: false,
+                            borderColor: 'magenta',
+                            backgroundColor: 'magenta',
+                            data: this.toroid.calculateS11imag(),
+                            borderWidth: 1,
+                            yAxisID: 'angleID'
+                        },
+                        /*,
                         {
                             label: 'Q',
                             fill: false,
@@ -1553,9 +1642,24 @@
                                         weight : 'bold'
                                     }
                                 },
-                                min: 10.0,
-                                max: 10000.0,
+                                min: 1.0,
+                                max: 1000.0,
                                 position: 'left',
+                            },
+                            'angleID': {
+                                type: 'linear',
+                                display: 'auto',
+                                title: {
+                                    display: true,
+                                    text: '\u03A9',
+                                    color: 'violet',
+                                    font: {
+                                        weight : 'bold'
+                                    }
+                                },
+                                min: -180.0,
+                                max: 180.0,
+                                position: 'right',
                             },
                             'voltsID': {
                                 type: 'linear',
@@ -1713,8 +1817,18 @@
                                             var num = getMetricPrefix(value * 1e-6);
                                             label = justifyText('Eff ', num.val.toPrecision(3).toString() + '  % ');
                                         } else if(label[0] == 'S') {
-                                           // var num = getMetricPrefix(value * 1e-6);
-                                            label = justifyText('SWR ', value.toPrecision(3).toString() + '    ');
+                                            if(label[1] == 'W') { 
+                                                // SWR:
+                                                // var num = getMetricPrefix(value * 1e-6);
+                                                label = justifyText('SWR ', value.toPrecision(3).toString() + '    ');
+                                            } else if(label[4] == 'r') {
+                                                // S11 real
+                                                //var num = getMetricPrefix(value * 1e-3);
+                                                label = justifyText('S11r', value.toFixed(3).toString() + '\u03A9');
+                                            } else {
+                                                // S11 imag
+                                                label = justifyText('S11i', value.toFixed(3).toString() + '\u03A9');
+                                            }
                                         } else if(label[0] == 'I') {
                                             if(label[1] == 'L') {
                                                 //var num = getMetricPrefix(value * 1e-3);
@@ -1878,6 +1992,16 @@
                 controller.updateChart();
             }
 
+            function setLeakage() {
+                // 
+                var leakage = document.getElementsByName("leakage");
+                controller.setLeakage(leakage[0].value);
+
+                console.log(leakage[0].value);
+                controller.recalculate()
+                controller.updateChart();
+            }
+
             // Limit how often we update the chart, as it is quite a slow operation. But updating the graphic
             // is very fast. So we update that with every event, but set a short timer for when we stop moving
             // the slider.
@@ -1980,6 +2104,70 @@
                     primary_capacitance_handler = 0;
                 }, emphasis_delay);
             }
+
+
+
+
+
+            var primary_winding_inductance_slider_handler = 0;
+            primary_winding_inductance_slider.oninput = function() {
+                controller.recalculate();
+                
+                if(primary_winding_inductance_slider_handler != 0) {
+                    clearTimeout(primary_winding_inductance_slider_handler);
+                } 
+                
+                primary_winding_inductance_slider_handler = setTimeout(function(){
+                    controller.updateChart();
+                    primary_winding_inductance_slider_handler = 0;
+                }, emphasis_delay);
+            }
+
+            var primary_winding_capacitance_slider_handler = 0;
+            primary_winding_capacitance_slider.oninput = function() {
+                controller.recalculate();
+                
+                if(primary_winding_capacitance_slider_handler != 0) {
+                    clearTimeout(primary_winding_capacitance_slider_handler);
+                } 
+                
+                primary_winding_capacitance_slider_handler = setTimeout(function(){
+                    controller.updateChart();
+                    primary_winding_capacitance_slider_handler = 0;
+                }, emphasis_delay);
+            }
+
+            var secondary_winding_capacitance_slider_handler = 0;
+            secondary_winding_capacitance_slider.oninput = function() {
+                controller.recalculate();
+                
+                if(secondary_winding_capacitance_slider_handler != 0) {
+                    clearTimeout(secondary_winding_capacitance_slider_handler);
+                } 
+                
+                secondary_winding_capacitance_slider_handler = setTimeout(function(){
+                    controller.updateChart();
+                    secondary_winding_capacitance_slider_handler = 0;
+                }, emphasis_delay);
+            }
+
+            var secondary_winding_inductance_slider_handler = 0;
+            secondary_winding_inductance_slider.oninput = function() {
+                controller.recalculate();
+                
+                if(secondary_winding_inductance_slider_handler != 0) {
+                    clearTimeout(secondary_winding_inductance_slider_handler);
+                } 
+                
+                secondary_winding_inductance_slider_handler = setTimeout(function(){
+                    controller.updateChart();
+                    secondary_winding_inductance_slider_handler = 0;
+                }, emphasis_delay);
+            }
+
+
+
+
 
             window.onresize = function() {
                 controller.recalculate();
