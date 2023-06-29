@@ -695,7 +695,7 @@
 
                     // Frequency independent characteristics:
                     this.N_max = Math.PI / (Math.atan2(0.5e3 * this.cond_diameter_meters, (0.5 * this.core.B - 0.5e3 * this.cond_diameter_meters)));
-                    this.N = 1 + Math.round(loop_turns_slider.value * (this.N_max - 1) * 0.25);
+                    this.N = 1 + Math.round(loop_turns_slider.value * (this.N_max - 1) * 0.50);
                 
                     //this.cond_length_meters = this.N * (2*this.core.C + this.core.A - this.core.B) * 1e-3;
                     //this.cond_length_meters = 2e-3 * Math.sqrt ( (Math.PI * 0.5 * (this.core.A + this.core.B))**2 + (this.N * (2*this.core.C + this.core.A - this.core.B))**2 ); 
