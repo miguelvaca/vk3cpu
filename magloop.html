@@ -209,7 +209,60 @@
             var imperial_radio = document.getElementById("imperial_radio");
             var shape_radio = document.getElementById("shape_radio");
             var external_losses_slider = document.getElementById("external_losses_slider");
+
+            const params_to_sliders = {
+              loop_diameter: loop_diameter_slider,
+              conductor_diameter: conductor_diameter_slider,
+              loop_turns: loop_turns_slider,
+              loop_spacing: loop_spacing_slider,
+              transmit_power: transmit_power_slider,
+              external_losses: external_losses_slider,
+            }
+            const sliders_to_params = Object.entries(params_to_sliders).map(([k, v]) => [v, k]);
+
+            const params_to_radio_names = {
+              unit: "unit_radio",
+              metal: "metal_radio",
+              shape: "shape_radio",
+            }
+            const radio_names_to_params = Object.entries(params_to_radio_names).map(([k, v]) => [v, k]);
+
+            // If there's a query param in the URL, set each slider's value to the respective params.
+            for (const [key, value] of new URLSearchParams(window.location.search)) {
+              var slider = params_to_sliders[key];
+              if (slider) {
+                slider.value = value;
+              }
+
+              var radio_name = params_to_radio_names[key];
+              if (radio_name) {
+                // Find all radio elements with this name, set each checked status to the current value.
+                var radios = document.getElementsByName(radio_name);
+                for (var i = 0; i < radios.length; i++) {
+                  radios[i].checked = (radios[i].value == value);
+                }
+              }
+            }
             
+            // Function to call after a successful recalculation
+            const updateURL = function() {
+              const usp = new URLSearchParams();
+              for (const [slider, param] of sliders_to_params) {
+                if (slider == null) continue;
+                var value = slider.value;
+                usp.set(param, value);
+              }
+
+              for (const [radio_name, param] of radio_names_to_params) {
+                var radio = document.querySelector(`input[type=radio][name=${radio_name}]:checked`);
+                usp.set(param, radio.value);
+              }
+
+              var new_url = new URL(window.location.href);
+              new_url.search = usp;
+              window.history.replaceState(null, null, new_url);
+            }
+
             // Global variables:
             var units = "metric";
             var conductivity = 58e6;            // Default is annealed copper
@@ -617,6 +670,7 @@
                 setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
+                updateURL();
             }
 
             imperial_radio.oninput = function() {
@@ -624,6 +678,7 @@
                 //console.log(units);
                 drawFrontDesign();
                 drawSideDesign();
+                updateURL();
             }
 
             copper_radio.oninput = function() {
@@ -645,6 +700,7 @@
                 myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
+                updateURL();
             }
 
             aluminium_radio.oninput = function() {
@@ -666,6 +722,7 @@
                 myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
+                updateURL();
             }
 
             circle_radio.oninput = function() {
@@ -686,6 +743,7 @@
                 myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
+                updateURL();
             }
 
             oct_radio.oninput = function() {
@@ -706,6 +764,7 @@
                 myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
+                updateURL();
             }
 
             hex_radio.oninput = function() {
@@ -726,6 +785,7 @@
                 myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
+                updateURL();
             }
 
             square_radio.oninput = function() {
@@ -746,6 +806,7 @@
                 myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
+                updateURL();
             }
 
             // Specify fonts for changing parameters controlled by the sliders:
@@ -795,6 +856,7 @@
                 myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
+                updateURL();
             }
 
             var cond_dia_timer_handler = 0;
@@ -835,6 +897,7 @@
                 myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
+                updateURL();
             }
 
             var turns_timer_handler = 0;
@@ -873,6 +936,7 @@
                 myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
+                updateURL();
             }
 
             var spacing_timer_handler = 0;
@@ -913,6 +977,7 @@
                 myChart.data.datasets[9].data = calculateAntennaSize();
                 myChart.data.datasets[10].data = calculateSkinDepth();
                 myChart.update();
+                updateURL();
             }
 
             var tx_timer_handler = 0;
@@ -940,6 +1005,7 @@
                 myChart.data.datasets[1].data = calculateCapacitorVoltage();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.update();
+                updateURL();
             }
 
             var external_losses_handler = 0;
@@ -970,6 +1036,7 @@
                 myChart.data.datasets[7].data = calculateQualityFactor();
                 myChart.data.datasets[8].data = calculateCirculatingCurrent();
                 myChart.update();
+                updateURL();
             }
 
             window.onresize = function() {
