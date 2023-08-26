@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V10.2</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V10.3</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -45,9 +45,9 @@
                     <label>Imp</label>
                     <input type="radio" name="unit_radio" id="imperial_radio" value="imperial"/>
                     <label>Cu</label>
-                    <input type="radio" name="metal_radio" id="copper_radio" value="copper" checked/>
+                    <input type="radio" name="metal_radio" id="copper_radio" value="Cu" checked/>
                     <label>Al</label>
-                    <input type="radio" name="metal_radio" id="aluminium_radio" value="aluminium"/>
+                    <input type="radio" name="metal_radio" id="aluminium_radio" value="Al"/>
                     <label>Circ</label>
                     <input type="radio" name="shape_radio" id="circle_radio" value="circle" checked/>
                     <label>Oct</label>
@@ -136,6 +136,8 @@
             [3]: F W Grover, <b>"Formulas and Tables for the Calculation of the Inductance of Coils of Polygonal Form"</b> <i>Scientific Papers of the Bureau of Standards, Vol 18, p753</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[26-Aug-23] - V10.3</b> <br>
+            * Added support for URL parameters. Some code-base clean-up. <br>
             <b>[13-May-23] - V10.2</b> <br>
             * Changed radiation and loss resistance to logarithmic. Capacitance limited to 5-5000pF. <br>
             <b>[8-May-23] - V10.1</b> <br>
@@ -263,11 +265,42 @@
               window.history.replaceState(null, null, new_url);
             }
 
+            function getUnits() {
+                var unit_radio = document.getElementsByName("unit_radio");
+                for(var i = 0; i < unit_radio.length; i++) {
+                    if(unit_radio[i].checked == true) {
+                        return unit_radio[i].value;
+                    }
+                }
+                return "null";
+            }
+
+            function getMetal() {
+                var metal_radio = document.getElementsByName("metal_radio");
+                for(var i = 0; i < metal_radio.length; i++) {
+                    if(metal_radio[i].checked == true) {
+                        return metal_radio[i].value;
+                    }
+                }
+                return "null";
+            }
+
+            function getShape() {
+                var shape_radio = document.getElementsByName("shape_radio");
+                for(var i = 0; i < shape_radio.length; i++) {
+                    if(shape_radio[i].checked == true) {
+                        return shape_radio[i].value;
+                    }
+                }
+                return "null";
+            }
+
             // Global variables:
-            var units = "metric";
+            var units = getUnits();
+            var metal = getMetal();             // Default metal is copper
             var conductivity = 58e6;            // Default is annealed copper
-            var shape = "circle";               // Shape of the main loop
-            var loop_turns = 1;                 // 
+            var shape = getShape();
+            var loop_turns = 1; 
             var loop_mode = "series";           // Series or parallel. When loop_turns_slider.value == 0, loop_turns is 2 and loop_mode is "parallel"
             const mu0 = Math.PI * 4e-7;
             
@@ -278,7 +311,6 @@
             var srf = 0.0;                      // Self-resonant frequency SRF
             var conductor_length = 0.0;         // Total conductor length
             var R_ext = 0.0;                    // External losses due to capacitor resistance and ground effects, in ohms
-            var metal = "Cu";                   // Default metal is copper
             
             const proximityResistance = {
                 // From G. S. Smith, "Radiation Efficiency of Electrically Small Multiturn Loop Antennas", IEEE Trans Antennas Propagation, September 1972
@@ -324,6 +356,15 @@
                     ? ((((perimeter* loop_turns) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns) ** 2.0)) ** 0.5)
                     : (perimeter* loop_turns);
                 R_ext = external_losses_slider.value * 0.001;
+                
+                units = getUnits();
+                shape = getShape();
+                metal = getMetal(); 
+                if(metal == "Cu") {
+                    conductivity = 58e6;            // Default is annealed copper
+                } else if(metal == "Al") {
+                    conductivity = 35e6;
+                }
             }
             
             // Returns the loop area in square meters:
@@ -664,149 +705,63 @@
                 return (1.0 / (2.0 * Math.PI * ((inductance * loop_capacitance) ** 0.5)));
             }
 
-            metric_radio.oninput = function() {
-                units = metric_radio.value;
-                //console.log(units);
+            function updateUnits() {
                 setGlobals();
                 drawFrontDesign();
                 drawSideDesign();
                 updateURL();
+            }
+
+            function updateAll() {
+                setGlobals();
+                drawFrontDesign();
+                drawSideDesign();
+                updateFrequencies();
+                myChart.data.datasets[0].data = calculateTuningCapacitor();
+                myChart.data.datasets[1].data = calculateCapacitorVoltage();
+                myChart.data.datasets[2].data = calculateBandwidth();
+                myChart.data.datasets[3].data = calculateEfficiencyFactor();
+                myChart.data.datasets[4].data = calculateRadiationResistance();
+                myChart.data.datasets[5].data = calculateLossResistance();
+                myChart.data.datasets[6].data = calculateInductiveReactance();
+                myChart.data.datasets[7].data = calculateQualityFactor();
+                myChart.data.datasets[8].data = calculateCirculatingCurrent();
+                myChart.data.datasets[9].data = calculateAntennaSize();
+                myChart.data.datasets[10].data = calculateSkinDepth();
+                myChart.update();
+                updateURL();
+            }
+
+            metric_radio.oninput = function() {
+                updateUnits();
             }
 
             imperial_radio.oninput = function() {
-                units = imperial_radio.value;
-                //console.log(units);
-                drawFrontDesign();
-                drawSideDesign();
-                updateURL();
+                updateUnits();
             }
 
             copper_radio.oninput = function() {
-                conductivity = 58e6;
-                metal = "Cu";
-                setGlobals();
-                drawFrontDesign();
-                drawSideDesign();
-                updateFrequencies();
-                myChart.data.datasets[0].data = calculateTuningCapacitor();
-                myChart.data.datasets[1].data = calculateCapacitorVoltage();
-                myChart.data.datasets[2].data = calculateBandwidth();
-                myChart.data.datasets[3].data = calculateEfficiencyFactor();
-                myChart.data.datasets[4].data = calculateRadiationResistance();
-                myChart.data.datasets[5].data = calculateLossResistance();
-                myChart.data.datasets[6].data = calculateInductiveReactance();
-                myChart.data.datasets[7].data = calculateQualityFactor();
-                myChart.data.datasets[8].data = calculateCirculatingCurrent();
-                myChart.data.datasets[9].data = calculateAntennaSize();
-                myChart.data.datasets[10].data = calculateSkinDepth();
-                myChart.update();
-                updateURL();
+                updateAll();
             }
 
             aluminium_radio.oninput = function() {
-                conductivity = 35e6;
-                metal = "Al";
-                setGlobals();
-                drawFrontDesign();
-                drawSideDesign();
-                updateFrequencies();
-                myChart.data.datasets[0].data = calculateTuningCapacitor();
-                myChart.data.datasets[1].data = calculateCapacitorVoltage();
-                myChart.data.datasets[2].data = calculateBandwidth();
-                myChart.data.datasets[3].data = calculateEfficiencyFactor();
-                myChart.data.datasets[4].data = calculateRadiationResistance();
-                myChart.data.datasets[5].data = calculateLossResistance();
-                myChart.data.datasets[6].data = calculateInductiveReactance();
-                myChart.data.datasets[7].data = calculateQualityFactor();
-                myChart.data.datasets[8].data = calculateCirculatingCurrent();
-                myChart.data.datasets[9].data = calculateAntennaSize();
-                myChart.data.datasets[10].data = calculateSkinDepth();
-                myChart.update();
-                updateURL();
+                updateAll();
             }
 
             circle_radio.oninput = function() {
-                shape = "circle";
-                setGlobals();
-                drawFrontDesign();
-                drawSideDesign();
-                updateFrequencies();
-                myChart.data.datasets[0].data = calculateTuningCapacitor();
-                myChart.data.datasets[1].data = calculateCapacitorVoltage();
-                myChart.data.datasets[2].data = calculateBandwidth();
-                myChart.data.datasets[3].data = calculateEfficiencyFactor();
-                myChart.data.datasets[4].data = calculateRadiationResistance();
-                myChart.data.datasets[5].data = calculateLossResistance();
-                myChart.data.datasets[6].data = calculateInductiveReactance();
-                myChart.data.datasets[7].data = calculateQualityFactor();
-                myChart.data.datasets[8].data = calculateCirculatingCurrent();
-                myChart.data.datasets[9].data = calculateAntennaSize();
-                myChart.data.datasets[10].data = calculateSkinDepth();
-                myChart.update();
-                updateURL();
+                updateAll();
             }
 
             oct_radio.oninput = function() {
-                shape = "octagon";
-                setGlobals();
-                drawFrontDesign();
-                drawSideDesign();
-                updateFrequencies();
-                myChart.data.datasets[0].data = calculateTuningCapacitor();
-                myChart.data.datasets[1].data = calculateCapacitorVoltage();
-                myChart.data.datasets[2].data = calculateBandwidth();
-                myChart.data.datasets[3].data = calculateEfficiencyFactor();
-                myChart.data.datasets[4].data = calculateRadiationResistance();
-                myChart.data.datasets[5].data = calculateLossResistance();
-                myChart.data.datasets[6].data = calculateInductiveReactance();
-                myChart.data.datasets[7].data = calculateQualityFactor();
-                myChart.data.datasets[8].data = calculateCirculatingCurrent();
-                myChart.data.datasets[9].data = calculateAntennaSize();
-                myChart.data.datasets[10].data = calculateSkinDepth();
-                myChart.update();
-                updateURL();
+                updateAll();
             }
 
             hex_radio.oninput = function() {
-                shape = "hexagon";
-                setGlobals();
-                drawFrontDesign();
-                drawSideDesign();
-                updateFrequencies();
-                myChart.data.datasets[0].data = calculateTuningCapacitor();
-                myChart.data.datasets[1].data = calculateCapacitorVoltage();
-                myChart.data.datasets[2].data = calculateBandwidth();
-                myChart.data.datasets[3].data = calculateEfficiencyFactor();
-                myChart.data.datasets[4].data = calculateRadiationResistance();
-                myChart.data.datasets[5].data = calculateLossResistance();
-                myChart.data.datasets[6].data = calculateInductiveReactance();
-                myChart.data.datasets[7].data = calculateQualityFactor();
-                myChart.data.datasets[8].data = calculateCirculatingCurrent();
-                myChart.data.datasets[9].data = calculateAntennaSize();
-                myChart.data.datasets[10].data = calculateSkinDepth();
-                myChart.update();
-                updateURL();
+                updateAll();
             }
 
             square_radio.oninput = function() {
-                shape = "square";
-                setGlobals();
-                drawFrontDesign();
-                drawSideDesign();
-                updateFrequencies();
-                myChart.data.datasets[0].data = calculateTuningCapacitor();
-                myChart.data.datasets[1].data = calculateCapacitorVoltage();
-                myChart.data.datasets[2].data = calculateBandwidth();
-                myChart.data.datasets[3].data = calculateEfficiencyFactor();
-                myChart.data.datasets[4].data = calculateRadiationResistance();
-                myChart.data.datasets[5].data = calculateLossResistance();
-                myChart.data.datasets[6].data = calculateInductiveReactance();
-                myChart.data.datasets[7].data = calculateQualityFactor();
-                myChart.data.datasets[8].data = calculateCirculatingCurrent();
-                myChart.data.datasets[9].data = calculateAntennaSize();
-                myChart.data.datasets[10].data = calculateSkinDepth();
-                myChart.update();
-                updateURL();
+                updateAll();
             }
 
             // Specify fonts for changing parameters controlled by the sliders:
@@ -840,23 +795,7 @@
                     }, emphasis_delay);
                 }
                 
-                setGlobals();
-                drawFrontDesign();
-                drawSideDesign();
-                updateFrequencies();
-                myChart.data.datasets[0].data = calculateTuningCapacitor();
-                myChart.data.datasets[1].data = calculateCapacitorVoltage();
-                myChart.data.datasets[2].data = calculateBandwidth();
-                myChart.data.datasets[3].data = calculateEfficiencyFactor();
-                myChart.data.datasets[4].data = calculateRadiationResistance();
-                myChart.data.datasets[5].data = calculateLossResistance();
-                myChart.data.datasets[6].data = calculateInductiveReactance();
-                myChart.data.datasets[7].data = calculateQualityFactor();
-                myChart.data.datasets[8].data = calculateCirculatingCurrent();
-                myChart.data.datasets[9].data = calculateAntennaSize();
-                myChart.data.datasets[10].data = calculateSkinDepth();
-                myChart.update();
-                updateURL();
+                updateUnits();
             }
 
             var cond_dia_timer_handler = 0;
@@ -882,22 +821,7 @@
                     }, emphasis_delay);
                 }
                 
-                setGlobals();
-                drawFrontDesign();
-                drawSideDesign();
-                myChart.data.datasets[0].data = calculateTuningCapacitor();
-                myChart.data.datasets[1].data = calculateCapacitorVoltage();
-                myChart.data.datasets[2].data = calculateBandwidth();
-                myChart.data.datasets[3].data = calculateEfficiencyFactor();
-                myChart.data.datasets[4].data = calculateRadiationResistance();
-                myChart.data.datasets[5].data = calculateLossResistance();
-                myChart.data.datasets[6].data = calculateInductiveReactance();
-                myChart.data.datasets[7].data = calculateQualityFactor();
-                myChart.data.datasets[8].data = calculateCirculatingCurrent();
-                myChart.data.datasets[9].data = calculateAntennaSize();
-                myChart.data.datasets[10].data = calculateSkinDepth();
-                myChart.update();
-                updateURL();
+                updateUnits();
             }
 
             var turns_timer_handler = 0;
@@ -920,23 +844,7 @@
                     }, emphasis_delay);
                 }
                 
-                setGlobals();
-                drawFrontDesign();
-                drawSideDesign();
-                updateFrequencies();
-                myChart.data.datasets[0].data = calculateTuningCapacitor();
-                myChart.data.datasets[1].data = calculateCapacitorVoltage();
-                myChart.data.datasets[2].data = calculateBandwidth();
-                myChart.data.datasets[3].data = calculateEfficiencyFactor();
-                myChart.data.datasets[4].data = calculateRadiationResistance();
-                myChart.data.datasets[5].data = calculateLossResistance();
-                myChart.data.datasets[6].data = calculateInductiveReactance();
-                myChart.data.datasets[7].data = calculateQualityFactor();
-                myChart.data.datasets[8].data = calculateCirculatingCurrent();
-                myChart.data.datasets[9].data = calculateAntennaSize();
-                myChart.data.datasets[10].data = calculateSkinDepth();
-                myChart.update();
-                updateURL();
+                updateUnits();
             }
 
             var spacing_timer_handler = 0;
@@ -959,25 +867,7 @@
                     }, emphasis_delay);
                 }
                 
-                setGlobals();
-                drawFrontDesign();
-                drawSideDesign();
-                if(loop_turns > 1) {
-                    updateFrequencies();
-                }
-                myChart.data.datasets[0].data = calculateTuningCapacitor();
-                myChart.data.datasets[1].data = calculateCapacitorVoltage();
-                myChart.data.datasets[2].data = calculateBandwidth();
-                myChart.data.datasets[3].data = calculateEfficiencyFactor();
-                myChart.data.datasets[4].data = calculateRadiationResistance();
-                myChart.data.datasets[5].data = calculateLossResistance();
-                myChart.data.datasets[6].data = calculateInductiveReactance();
-                myChart.data.datasets[7].data = calculateQualityFactor();
-                myChart.data.datasets[8].data = calculateCirculatingCurrent();
-                myChart.data.datasets[9].data = calculateAntennaSize();
-                myChart.data.datasets[10].data = calculateSkinDepth();
-                myChart.update();
-                updateURL();
+                updateUnits();
             }
 
             var tx_timer_handler = 0;
