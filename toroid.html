@@ -658,12 +658,14 @@
                     return [mu_1, mu_2];
                 };
                 
+                // In Henries:
                 this.getInductance = function (frequency, mu) {
                     // const mu = this.getComplexPermeability(frequency);
-                    const L = mu[0] * 4.0 * Math.PI * this.N**2 * 1e-3 / this.core.CC;
+                    const L = mu[0] * 4.0 * Math.PI * this.N**2 * 1e-9 / this.core.CC;
                     return L;
                 };
 
+                // In Ohms:
                 this.getImpedance = function (frequency, mu) {
                     // const mu = this.getComplexPermeability(frequency);
                     const Lo = 4.0 * Math.PI * this.N**2 * 1e-9 / this.core.CC;
@@ -673,6 +675,7 @@
                     return { real:Rs , imag:Xs };
                 };
                 
+                // In Ohms:
                 this.getWireResistance = function(frequency) {
                     // Calculate AC wire-resistance, using IEC 60287-1-1:
                     const Ks = 1.0; // Solid core conductor
@@ -710,6 +713,7 @@
                     //const Cpmult = 12.9*()
                     //this.C = (0.9 + (78.1/this.N**2))*1e-12;                  // In Farads
                 
+                    // Low frequency mean inductance based on Al:
                     this.L = (this.N**2) * this.core.Al * 1.0e-9;      // In Henries
                     
                     // Based on David Knight's equation:
@@ -741,7 +745,7 @@
                         this.mu2_vs_f.push({x:freq, y:mu[1]});
                     
                         //this.L_vs_f.push({x:freq, y:(mu[0] * 4.0 * Math.PI * this.N**2 * 1e-3 / this.core.CC)});
-                        this.L_vs_f.push({x:freq, y:L});
+                        this.L_vs_f.push({x:freq, y:L*1e6}); // Convery H to uH
                     
                         this.R_vs_f.push({x:freq, y:Z.real});
                         this.X_vs_f.push({x:freq, y:Z.imag});
@@ -750,9 +754,9 @@
                         const ZZ = math.complex(Z.real, Z.imag);
                         const II = math.divide(this.Vrms, ZZ).toPolar();
                     
-                        this.i_vs_f.push({x:freq, y:(II.r*1e3)});  // in mA
+                        this.i_vs_f.push({x:freq, y:(II.r*1e3)});  // Convert A to mA
                         //this.P_vs_f.push({x:freq, y:((this.Vrms**2 / Z.real)*1e3)});
-                        this.P_vs_f.push({x:freq, y:((Z.real * II.r**2)*1e3)});  // in mW
+                        this.P_vs_f.push({x:freq, y:((Z.real * II.r**2)*1e3)});  // Convert W to mW
                         this.Z_vs_f.push({x:freq, y:(ZZ.toPolar().r)});
                     
                         const H = ((0.4 * Math.PI * this.N * 1.414 * II.r) / this.core.le);
@@ -1538,8 +1542,8 @@
                 };
                 
                 this.updateFrequencies = function (slider_value) {
+                    // In Hz:
                     this.frequencies = [];
-                    //for(var i = 4.0; i <= 8.0; i+=0.01) {
                     var f = 1.0 * slider_value;
                     for(var i = Math.floor(4.00+f); i <= 5.52+f; i+=0.01) {
                         this.frequencies.push(10.0**i);
@@ -1751,7 +1755,7 @@
                                 position: 'left',
                             },
                             'ohmsID': {
-                                type: 'logarithmic',
+                                type: 'linear',
                                 display: 'auto',
                                 title: {
                                     display: true,
