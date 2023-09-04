@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="toroid.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v1.2<br></header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - RF Toroid Calculator v1.3<br></header>
         <section class="gridLayoutClass">
             <div id="chart-container" class="chart-container">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -61,7 +61,7 @@
             RF Toroid Calculator was developed to help users predict the RF characteristics of a ferrite or powdered-iron toroid wound as an inductor or suppressor. 
             It uses the manufacturer's (Fair-Rite & Micrometals) published data including the toroid's dimensions and complex permeability characteristics
             to predict the component's characteristics.<br>
-            The calculator has 4 separate display areas. At the top is the chart display for showing frequency-dependent characteristics. Next is the
+            The calculator has 3 separate display areas. At the top is the chart display for showing frequency-dependent characteristics. Next is the
             schematic display, where a scaled image of the toroid and windings is presented to help with intuitive design. Next is the control panel
             section, where the user can select the application type, toroid material, toroid size, wire size, number of windings and excitation voltage.<br><br>
             <b><u>Inputs via the select widgets:</u></b>
@@ -155,6 +155,8 @@
             </ul>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[4-Sep-23] - v1.3</b> <br>
+            * Added 5943001601 which I have called the "FT122-43" <br>
             <b>[2-May-23] - v1.2</b> <br>
             * Added 2646102002 which I have called the "FT102B-61" <br>
             <b>[1-May-23] - v1.1</b> <br>
@@ -504,6 +506,8 @@
                         'FT140x2' : { PN:'5943002701', A:35.55, B:23.00, C:25.4, W:66.0,  CC:5.60, le:8.90, Ae:1.58,  Ve:14.00, Al:1770.0 },
                         'FT140' : { PN:'5943002701', A:35.55, B:23.00, C:12.7, W:33.0,  CC:11.20, le:8.90, Ae:0.79,  Ve:7.00, Al:885.0 },
                         'FT125' : { PN:'5943001701', A:31.75, B:19.05, C:9.50, W:23.0,  CC:12.90, le:7.60, Ae:0.59,  Ve:4.50, Al:775.0 },
+                        'FT122x2' : { PN:'5943001601', A:31.10, B:19.05, C:15.80, W:36.0,  CC:8.10, le:7.60, Ae:0.94,  Ve:7.06, Al:1240.0 },
+                        'FT122' : { PN:'5943001601', A:31.10, B:19.05, C:7.90, W:18.0,  CC:16.20, le:7.60, Ae:0.47,  Ve:3.53, Al:620.0 },
                         'FT114x2' : { PN:'5943001001', A:29.00, B:19.00, C:15.0, W:26.0,  CC:9.90, le:7.30, Ae:0.74,  Ve:5.40, Al:1020.0 },
                         'FT114' : { PN:'5943001001', A:29.00, B:19.00, C:7.50, W:13.0,  CC:19.80, le:7.30, Ae:0.37,  Ve:2.70, Al:510.0 },
                         'FT102B' : { PN:'2643102002', A:25.90, B:12.80, C:28.60, W:55.0,  CC:3.11, le:5.60, Ae:1.80,  Ve:10.07, Al:3296.0 }, 

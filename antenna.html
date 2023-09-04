@@ -76,12 +76,18 @@
 			var ground_plane = 0;
 			var height_above_ground = 0;
 
-			class Antennas {
+			// Recalculate all variables. Triggered whenever the system parameter inputs are changed:
+			function recalculate() {
+				// Read all inputs and store values in wavelengths:
+
+				// Create segments of all the wires with appropriate lengths:
+
+				// Create 3D representation and reload the scene:
+			}
+
+			class AntennaTypes {
 				//
 				constructor() {
-					this.wires = [];
-					this.Z = [];
-					this.Y = [];
 					this.frequency = 3e8;
 
 					this.antenna_types = {
@@ -181,15 +187,6 @@
 					//console.log(this.current_type);
 				}
 
-				// Recalculate all variables:
-				recalculate() {
-					// Read all inputs and store values in wavelengths:
-
-					// Create segments of all the wires with appropriate lengths:
-
-					// Create 3D representation and reload the scene:
-				}
-
 				solve() {
 					// Fill the impedance Z matrix:
 					// Invert Z to produce admittance Y matrix:
@@ -204,6 +201,97 @@
 					this.current_type = antenna_type;
 				}
 
+				// Return the wire elements for solving:
+				getWires() {
+					this.wires = [];
+					// 
+					var ws = this.antenna_types['antennas'][this.current_type]['wires'];
+					var vs = this.antenna_types['antennas'][this.current_type]['vertex'];
+					
+					ws.forEach(w => {
+						// 
+						var ww = {};
+						// ww.length = ;
+						// ww.seg_len = ;
+						ww.radius = 0.0001;
+						ww.points = [];
+						for (let index = 0; index < (w.length-1); index++) {
+							const wire_length = Math.sqrt(
+								(vs[w[index]][0] -  vs[w[index+1]][0])**2 +
+								(vs[w[index]][1] -  vs[w[index+1]][1])**2 +
+								(vs[w[index]][2] -  vs[w[index+1]][2])**2 
+							);
+							// Minimum of 10 segments per half-wavelength => 0.05
+							const max_segment_length = 0.05;
+							const segments = Math.round(wire_length / max_segment_length);
+							ww.seg_len = wire_length / segments;
+							for (let ii = 0; ii < segments; ii++) {
+								var frac = 1.0 * ii / segments;
+								var x = vs[w[index]][0] * (1.0 - frac) + frac *  vs[w[index+1]][0];
+								var y = vs[w[index]][1] * (1.0 - frac) + frac *  vs[w[index+1]][1];
+								var z = vs[w[index]][2] * (1.0 - frac) + frac *  vs[w[index+1]][2];
+								ww.points.push([x,y,z]);
+
+								frac = 1.0 * (ii + 0.5) / segments;
+								x = vs[w[index]][0] * (1.0 - frac) + frac *  vs[w[index+1]][0];
+								y = vs[w[index]][1] * (1.0 - frac) + frac *  vs[w[index+1]][1];
+								z = vs[w[index]][2] * (1.0 - frac) + frac *  vs[w[index+1]][2];
+								ww.points.push([x,y,z]);
+							}
+						}
+						// Add the final point:
+						x = vs[w[w.length-1]][0];
+						y = vs[w[w.length-1]][1];
+						z = vs[w[w.length-1]][2];
+						ww.points.push([x,y,z]);
+						//retval.push(ww);
+						this.wires.push(ww);
+					});
+					return this.wires;
+				}
+
+				//
+				getThreeObject3D = function () {
+					const material = new THREE.LineBasicMaterial({ color: 0xffff00, linewidth: 1 });
+					const antenna_view = new THREE.Group();
+					// 
+					const ww = this.antenna_types['antennas'][this.current_type]['wires'];
+					const vv = this.antenna_types['antennas'][this.current_type]['vertex'];
+					ww.forEach(wire => {
+						//console.log(wire);
+						var vertices = new Float32Array(wire.length * 3);
+						var vidx = 0;
+						const scale_factor = 200.0; // Roughly pixels per wavelength
+						// Copy the vertex locations across into a Float32Array for the geometry:
+						wire.forEach((vertex) => {
+							//console.log(vertex, vv[vertex]);
+							vertices[vidx++] = (vv[vertex][0] * scale_factor);
+							vertices[vidx++] = (vv[vertex][1] * scale_factor);
+							vertices[vidx++] = (vv[vertex][2] * scale_factor);
+						});
+						// 
+						const geometry = new THREE.BufferGeometry();
+						geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+						// create a new wire with
+						const wire_line = new THREE.Line(geometry, material);
+						antenna_view.add(wire_line);
+					});
+					// Add the antenna into the scene:
+					return antenna_view;
+				};
+			}
+
+			class WireAntennaModel {
+				// constructor:
+				constructor(ws, vs) {
+					// Object variables:
+					this.wires = [];
+					this.Z = [];
+					this.Y = [];
+
+				}
+
+				// 
 				psi(seg_n, seg_m, point_n, point_m) {
 					var retval = 0.0;
 					const k = 2.0 * Math.PI; // Normalised wavelength is equal to 1.0 - otherwise 2*pi/wavelength
@@ -340,53 +428,16 @@
 					return 1.0;
 				}
 				
-				// Return the wire elements for solving:
-				getWires() {
-					this.wires = [];
-					// 
-					var ws = this.antenna_types['antennas'][this.current_type]['wires'];
-					var vs = this.antenna_types['antennas'][this.current_type]['vertex'];
-					
-					ws.forEach(w => {
-						// 
-						var ww = {};
-						// ww.length = ;
-						// ww.seg_len = ;
-						ww.radius = 0.0001;
-						ww.points = [];
-						for (let index = 0; index < (w.length-1); index++) {
-							const wire_length = Math.sqrt(
-								(vs[w[index]][0] -  vs[w[index+1]][0])**2 +
-								(vs[w[index]][1] -  vs[w[index+1]][1])**2 +
-								(vs[w[index]][2] -  vs[w[index+1]][2])**2 
-							);
-							// Minimum of 10 segments per half-wavelength => 0.05
-							const max_segment_length = 0.05;
-							const segments = Math.round(wire_length / max_segment_length);
-							ww.seg_len = wire_length / segments;
-							for (let ii = 0; ii < segments; ii++) {
-								var frac = 1.0 * ii / segments;
-								var x = vs[w[index]][0] * (1.0 - frac) + frac *  vs[w[index+1]][0];
-								var y = vs[w[index]][1] * (1.0 - frac) + frac *  vs[w[index+1]][1];
-								var z = vs[w[index]][2] * (1.0 - frac) + frac *  vs[w[index+1]][2];
-								ww.points.push([x,y,z]);
+			}
 
-								frac = 1.0 * (ii + 0.5) / segments;
-								x = vs[w[index]][0] * (1.0 - frac) + frac *  vs[w[index+1]][0];
-								y = vs[w[index]][1] * (1.0 - frac) + frac *  vs[w[index+1]][1];
-								z = vs[w[index]][2] * (1.0 - frac) + frac *  vs[w[index+1]][2];
-								ww.points.push([x,y,z]);
-							}
-						}
-						// Add the final point:
-						x = vs[w[w.length-1]][0];
-						y = vs[w[w.length-1]][1];
-						z = vs[w[w.length-1]][2];
-						ww.points.push([x,y,z]);
-						//retval.push(ww);
-						this.wires.push(ww);
-					});
-					return this.wires;
+			class WireAntennaView {
+				// constructor:
+				constructor() {
+					// 
+				}
+
+				loadAntenna(wire_segments) {
+					// 
 				}
 
 				//
@@ -656,12 +707,11 @@
 				const gui = new dat.GUI();
 
 				// Add a mode selector. View is to change perspective. Edit allows moving vertices. Solve runs the EM solver. (Maybe should be edit+solve?)
+				/*
 				gui.add(parameters, 'mode', ['view', 'edit', 'solve'])
 				.setValue('view')
 				.onChange(function(value){ console.log(value); });
-				
-				// Create the Antennas object, which holds all the antenna types and creates the visual model on-request
-				ant = new Antennas();
+				*/
 
 				// Ground-plane
 				const geometry = new THREE.CircleGeometry( 150, 32 );
@@ -694,6 +744,9 @@
 				.onChange(function(value){
 					pattern.setVisibility(value);
 				});
+
+				// Create the AntennaTypes object, which holds all the antenna types and creates the visual model on-request
+				ant = new AntennaTypes();
 
 				gui.add( parameters, 'w', ant.antenna_types['order'])
 				.setValue(ant.current_type)

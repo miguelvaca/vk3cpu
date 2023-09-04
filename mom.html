@@ -283,11 +283,21 @@
             return retval;
         }
 
+        function calculateImpedance() {
+            var retval = [];
+            var x_axis = 0.0;
+            for(var i=0; i<I.length; i++) {
+                x_axis += wire.seg_len;
+                const Z = (V[i].toPolar().r) / (I[i].toPolar().r);
+                retval.push({x:x_axis, y:Z});
+            }
+            return retval;
+        }
         /* Next is Three.js related code functions/methods: */
 
         /* Now run the code: */
 
-        // Create a half-wavelength long wire, with a radius of 0.001 lambda, and segmented into 10 pieces:
+        // Create a half-wavelength long wire, with a radius of 0.0001 lambda, and segmented into 10 pieces:
         wire = createWire(0.5, 0.0001, 45);
         //console.log(wire);
         //console.log(wire);
@@ -355,6 +365,15 @@
                     data: calculateCurrent(),
                     borderWidth: 1,
                     yAxisID: 'currentID'
+                },
+                {
+                    label: 'Impedance',
+                    fill: false,
+                    borderColor: 'black',
+                    backgroundColor: 'black',
+                    data: calculateImpedance(),
+                    borderWidth: 1,
+                    yAxisID: 'impedanceID'
                 }]
             },
             options: {
@@ -392,6 +411,17 @@
                         },
                         position: 'left',
                         id: 'currentID'
+                    },{
+                        type: 'linear',
+                        display: 'auto',
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Z',
+                            fontColor: 'black',
+                            fontStyle: 'bold'
+                        },
+                        position: 'left',
+                        id: 'impedanceID'
                     }]
                 },
                 showLines: true,
