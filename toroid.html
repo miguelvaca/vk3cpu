@@ -652,7 +652,7 @@
                 };
                 
                 this.getMaterialTypes = function () {
-                    return ["75", "31", "78", "77", "79", "43", "43_old", "46", "80", "52", "61", "67"];
+                    return ["75", "31", "78", "77", "79", "43", "43_old", "46", "80", "52", "61", "67", "68"];
                 };
                 
                 this.getSizesForMaterial = function (material) {
@@ -723,6 +723,18 @@
                     const Rac = 1/(Math.PI * cu_sigma * k * (2*r - k));
                     return Rac;
                 };
+
+                this.solveTransformer = function(inputs, frequency) {
+                    // inputs['Np'] : Primary turns
+                    // inputs['Ns'] : Secondary turns
+                    // inputs['Zl'] : Load impedance
+                    // inputs['Z0'] : Source impedance
+                    // outputs['SWR'] : Standing wave ratio
+                    // outputs['Efficiency'] : Efficiency in percent
+                    // outputs['Ploss'] : Power loss in the core
+
+                    var outputs = [];
+
                     // Calculate B due to primary:
                     var B = (this.Vrms * 1e8) / (4.44 * frequency * this.N * this.core['Ae']);
 
@@ -2006,7 +2018,7 @@
                 
                 l_inductors = {
                     sort_order : {
-                        "Ferrites" : ["75", "78", "77", "79", "43", "43_old", "80", "52", "61", "67"],
+                        "Ferrites" : ["75", "78", "77", "79", "43", "43_old", "80", "52", "61", "67", "68"],
                         "Powdered Iron" : ["2", "6", "10", "17", "0"]
                     },
                     "75":"75 [\u03bci=5000]",
@@ -2019,6 +2031,7 @@
                     "52":"52 [\u03bci=250]",
                     "61":"61 [\u03bci=125]",
                     "67":"67 [\u03bci=40]",
+                    "68":"68 [\u03bci=16]",
                      "2":"2  [\u03bci=10]",
                      "6":"6  [\u03bci=8.5]",
                     "10":"10 [\u03bci=6]",
@@ -2394,7 +2407,16 @@
                 fctx.fillText("(" + (controller.toroid.core.B*0.03937).toFixed(3) + "\")", 0, 26);
                 fctx.restore();
             }
-
+            
+            function drawWire(ctx, x1, y1, x2, y2, wireRadius, fillColor) {
+                var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                ctx.beginPath();
+                ctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                ctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                ctx.fillStyle = fillColor;
+                ctx.fill();
+            }
+            
             function drawTransformer(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
                 // Draw toroid former:
                 fctx.beginPath();
@@ -2405,6 +2427,37 @@
                 fctx.stroke();
                 fctx.lineWidth = 1.0;
 
+                // Draw left-hand entry wire:
+                var x1 = originX - innerRadius + wireRadius;
+                var y1 = originY;
+                var x2 = originX - outerRadius - 100;
+                var y2 = originY;
+                drawWire(fctx, x1, y1, x2, y2, wireRadius, "black");
+
+                // Right-hand exit wire:
+                x1 = originX + outerRadius + wireRadius;
+                y1 = originY;
+                x2 = originX + outerRadius + 100;
+                y2 = originY;
+                drawWire(fctx, x1, y1, x2, y2, wireRadius, "red");
+
+                // Draw cross-over wire:
+                let theta = Math.PI/8.0;
+                x1 = originX + (innerRadius - wireRadius) * Math.cos(Math.PI - theta);
+                y1 = originY + (innerRadius - wireRadius) * Math.sin(Math.PI - theta);
+                x2 = originX + (outerRadius + wireRadius) * Math.cos(- theta);
+                y2 = originY + (outerRadius + wireRadius) * Math.sin(- theta);
+                drawWire(fctx, x1, y1, x2, y2, wireRadius, "blue");
+
+                for(let i = 0; i < (turns-1); i++) {
+                    x1 = originX + (innerRadius - wireRadius) * Math.cos((i/(turns-1.5)) * (Math.PI - theta));
+                    y1 = originY + (innerRadius - wireRadius) * Math.sin((i/(turns-1.5)) * (Math.PI - theta));
+                    x2 = originX + (outerRadius + wireRadius) * Math.cos(((i+0.5)/(turns-1.5)) * (Math.PI - theta));
+                    y2 = originY + (outerRadius + wireRadius) * Math.sin(((i+0.5)/(turns-1.5)) * (Math.PI - theta));
+                    drawWire(fctx, x1, y1, x2, y2, wireRadius, "red");
+                }
+                
+                for(let i = 0; i < (turns-2); i++) {
                     x1 = originX + (innerRadius - wireRadius) * Math.cos(((i+1.0)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
                     y1 = originY + (innerRadius - wireRadius) * Math.sin(((i+1.0)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
                     x2 = originX + (outerRadius + wireRadius) * Math.cos(((i+0.5)/(turns-1.5)) * (Math.PI - theta) + Math.PI);
@@ -2412,6 +2465,10 @@
                     drawWire(fctx, x1, y1, x2, y2, wireRadius, "black");
                 }
             }
+
+            function drawBalun(fctx, originX, originY, outerRadius, innerRadius, wireRadius, turns) {
+                // Draw toroid former:
+                fctx.beginPath();
                 fctx.arc(originX, originY, outerRadius, 0.0, 2.0 * Math.PI, false);
                 fctx.stroke();
                 fctx.beginPath();
