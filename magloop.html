@@ -349,15 +349,6 @@
             function setGlobals() {
                 loop_turns = loop_turns_slider.value >= 1 ? parseInt(loop_turns_slider.value) : 2;
                 loop_mode = loop_turns_slider.value >= 1 ? "series" : "parallel";
-                inductance = getInductance();
-                area = getArea();
-                perimeter = getPerimeter();
-                loop_capacitance = ((loop_turns > 1) && (loop_mode == "series")) ? multiloopCapacitance() : (2.69e-12 * perimeter);
-                srf = calculateSRF();
-                conductor_length = (loop_turns_slider.value > 1) 
-                    ? ((((perimeter* loop_turns) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns) ** 2.0)) ** 0.5)
-                    : (perimeter* loop_turns);
-                R_ext = external_losses_slider.value * 0.001;
                 
                 units = getUnits();
                 shape = getShape();
@@ -367,6 +358,17 @@
                 } else if(metal == "Al") {
                     conductivity = 35e6;
                 }
+                
+                area = getArea();
+                perimeter = getPerimeter();
+                
+                inductance = getInductance();
+                loop_capacitance = ((loop_turns > 1) && (loop_mode == "series")) ? multiloopCapacitance() : (2.69e-12 * perimeter);
+                srf = calculateSRF();
+                conductor_length = (loop_turns_slider.value > 1) 
+                    ? ((((perimeter* loop_turns) ** 2.0) + ((loop_spacing_slider.value * conductor_diameter_slider.value * 1e-3 * loop_turns) ** 2.0)) ** 0.5)
+                    : (perimeter* loop_turns);
+                R_ext = external_losses_slider.value * 0.001;
             }
             
             // Returns the loop area in square meters:
