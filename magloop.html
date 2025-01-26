@@ -440,10 +440,10 @@
                 } else
                 if(shape == "octagon") {
                     const s = (100.0 * loop_diameter_meters) * 0.414213; // side length in cm
-                    const bOn2r = l / (2*1.306563*s);
+                    //const bOn2r = l / (2*1.306563*s);
+                    const bOn2r = l / (loop_diameter_meters * 108.239223);
                     //retval = 1e-6 * 0.016 * (N**2) * s * ( Math.log((2.613*s*N)/((N+1)*l)) + 0.75143 + ((0.07153*(N+1)*l) / (s*N)));  // ARRL Antennas Book 17th Ed
                     retval = 1e-6 * 0.016 * (N**2) * s * ( Math.log(1.0/bOn2r) + 0.75143 + 0.18693*bOn2r + 0.11969*bOn2r**2 - 0.08234*bOn2r**4); // F W Grover p753
-                    //retval = 1e-6 * 0.016 * (N**2) * s * ( Math.log(s/l) + 1.711976 + 0.075143*(l/s) + 0.017528*(l/s)**2 - 0.001766*(l/s)**4);
                 } else
                 if(shape == "hexagon") {
                     const s = (100.0 * loop_diameter_meters) * 0.57735; // side length in cm
