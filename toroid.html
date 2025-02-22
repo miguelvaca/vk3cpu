@@ -2001,6 +2001,8 @@
                         },
                     }
                 });
+
+
             };
             
             var controller = new Controller();
@@ -2657,6 +2659,23 @@
             setMode();
             controller.recalculate();
             controller.updateChart();
+
+            Chart.defaults.plugins.legend.onClick = function (t, e, i) {
+            const n = e.datasetIndex, o = i.chart;
+
+            if (t.native.shiftKey) {
+                // Shift + Click: Hide all datasets except the clicked one
+                o.data.datasets.forEach((dataset, index) => {
+                // dataset.hidden = index !== n;
+                index != n ? (o.hide(index)) : (o.show(index));
+                });
+                e.hidden = false;
+            } else {
+                // Default Chart.js behavior (toggle visibility of the clicked dataset)
+                o.isDatasetVisible(n) ? (o.hide(n), e.hidden = true) : (o.show(n), e.hidden = false);
+            }
+        };
+
         </script>
     </body>
 </html>
