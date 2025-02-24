@@ -2001,6 +2001,8 @@
                         },
                     }
                 });
+
+
             };
             
             var controller = new Controller();
@@ -2615,7 +2617,7 @@
                 fctx.fillText("N = " + controller.toroid.N.toString(), loopx, win_height - 28);
                 
                 fctx.font = "12px arial";
-                fctx.fillText("wire = " + (controller.toroid.cond_length_meters*100.0).toFixed(1)+ " cm (" + (3.2808399*controller.toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
+                fctx.fillText("wire = " + (controller.toroid.cond_length_meters*100.0).toFixed(1)+ " cm (" + (12*3.2808399*controller.toroid.cond_length_meters).toFixed(2)+ "\")", loopx, win_height - 14);
                 //fctx.fillText("(" + (3.2808399*toroid.cond_length_meters).toFixed(2)+ "\')", loopx, win_height - 14);
                 
                 fctx.fillText("\u2300 = " + (1e3 * controller.toroid.cond_diameter_meters).toFixed(3) + " mm" , loopx, 34);
@@ -2657,6 +2659,23 @@
             setMode();
             controller.recalculate();
             controller.updateChart();
+
+            Chart.defaults.plugins.legend.onClick = function (t, e, i) {
+            const n = e.datasetIndex, o = i.chart;
+
+            if (t.native.shiftKey) {
+                // Shift + Click: Hide all datasets except the clicked one
+                o.data.datasets.forEach((dataset, index) => {
+                // dataset.hidden = index !== n;
+                index != n ? (o.hide(index)) : (o.show(index));
+                });
+                e.hidden = false;
+            } else {
+                // Default Chart.js behavior (toggle visibility of the clicked dataset)
+                o.isDatasetVisible(n) ? (o.hide(n), e.hidden = true) : (o.show(n), e.hidden = false);
+            }
+        };
+
         </script>
     </body>
 </html>
