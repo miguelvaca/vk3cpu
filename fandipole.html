@@ -66,6 +66,7 @@
             </ul>
             It is based on [1] equations (8-60a) and (8-60b), which solve for the feedpoint resistance (Rin) and inductance (Xin)
             of a wire antenna for a given frequency. These are then used to solve for the parallel impedance of the enabled elements.
+            It assumes the wire-elements are uncoupled, so ensure you use spreaders to keep the elements well-separated.
             I developed this fan-dipole calculator to take advantage of the 
             touch-screens and high-speed of modern mobile phones, to allow users to get realtime feedback of the predicted
             behaviour of a fan-dipole antenna. <br>-- 73 de VK3CPU<br><br>
@@ -597,25 +598,26 @@
                 aside_canvas.height = win_height-2; 
                 sctx.clearRect(0, 0, win_width, win_height);
                 
-                const x_m = 150;
-                const x_ft = 200;
+                const x_m = 60;
+                const x_ft = 120;
                 const places = 2;
+                const m_2_ft = 3.28083;
                 sctx.textAlign = "right";
                 if(length1_cb.checked) { sctx.font = length1_font; } else { sctx.font = hidden_font; }
                 sctx.fillText((1.0 * length1_slider.value).toFixed(places) + ' m', x_m, 30);
-                sctx.fillText((0.3048 * length1_slider.value).toFixed(places) + ' ft', x_ft, 30);
+                sctx.fillText((m_2_ft * length1_slider.value).toFixed(places) + ' ft', x_ft, 30);
                 if(length2_cb.checked) { sctx.font = length2_font; } else { sctx.font = hidden_font; }
                 sctx.fillText((1.0 * length2_slider.value).toFixed(places) + ' m', x_m, 45);
-                sctx.fillText((0.3048 * length2_slider.value).toFixed(places) + ' ft', x_ft, 45);
+                sctx.fillText((m_2_ft * length2_slider.value).toFixed(places) + ' ft', x_ft, 45);
                 if(length3_cb.checked) { sctx.font = length3_font; } else { sctx.font = hidden_font; }
                 sctx.fillText((1.0 * length3_slider.value).toFixed(places) + ' m', x_m, 60);
-                sctx.fillText((0.3048 * length3_slider.value).toFixed(places) + ' ft', x_ft, 60);
+                sctx.fillText((m_2_ft * length3_slider.value).toFixed(places) + ' ft', x_ft, 60);
                 if(length4_cb.checked) { sctx.font = length4_font; } else { sctx.font = hidden_font; }
                 sctx.fillText((1.0 * length4_slider.value).toFixed(places) + ' m', x_m, 75);
-                sctx.fillText((0.3048 * length4_slider.value).toFixed(places) + ' ft', x_ft, 75);
+                sctx.fillText((m_2_ft * length4_slider.value).toFixed(places) + ' ft', x_ft, 75);
                 if(length5_cb.checked) { sctx.font = length5_font; } else { sctx.font = hidden_font; }
                 sctx.fillText((1.0 * length5_slider.value).toFixed(places) + ' m', x_m, 90);
-                sctx.fillText((0.3048 * length5_slider.value).toFixed(places) + ' ft', x_ft, 90);
+                sctx.fillText((m_2_ft * length5_slider.value).toFixed(places) + ' ft', x_ft, 90);
                 sctx.font = normal_font;
             }
             
