@@ -1,0 +1,310 @@
+body {
+    background: rgb(226, 226, 226);
+    margin: 0px;
+}
+
+header {
+    background: rgb(226, 226, 226);
+    color: black;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    font-size: smaller;
+    text-align: center;
+}
+
+canvas.chartCanvasClass {
+    background: rgb(255, 255, 255);
+    margin: 0px;
+    padding: 5px;
+    border: 1px solid rgb(0, 0, 0);
+    display: block; 
+    box-sizing: border-box; 
+}
+
+section div.slider_container {
+    width: 100%;
+    height: 100%;
+    background: rgb(255, 255, 255);
+    border: 1px solid rgb(0, 0, 0);
+    margin: 0px;
+    padding: 0px;
+    /*display: inline-block;*/
+    box-sizing: border-box; 
+    display: flex;
+    flex-direction: column;
+}
+
+section div.antennaFront-container {
+    width: 100%;
+    height: 100%;
+    display: block; 
+    box-sizing: border-box; 
+    margin: 0px;
+    padding: 0px;
+    background: white;
+    border: 1px solid rgb(0, 0, 0);
+    position: absolute;
+}
+
+section div.sliders {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1px;
+      padding: 2px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+}
+
+/* Hover effect for widget set */
+section div.sliders:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+section div.radios {
+    width: auto;
+    height: auto;
+    background: rgb(255, 255, 255);
+    margin: 0px;
+    padding: 0px;
+    /*display: inline-block;*/
+    box-sizing: border-box; 
+    display: flex;
+    flex-direction: row;
+}
+
+section div.sliders label {
+    flex: 0 0 30px;
+    background:white;
+    /*display: inline-block;*/
+    width: 8%;
+    font-size: small;
+    text-align: right;
+}
+
+    /* Checkbox styling */
+    section div.sliders input[type="checkbox"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #555;
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    section div.sliders input[type="checkbox"]:checked {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+
+    section div.sliders input[type="checkbox"]:checked::after {
+      content: '✔';
+      color: #fff;
+      font-size: 14px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+section div.sliders input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      background: #ddd;
+      border-radius: 5px;
+      outline: none;
+      transition: background 0.2s ease;
+}
+
+    section div.sliders input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #007bff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      transition: background 0.2s ease;
+    }
+
+    section div.sliders input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #007bff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    section div.sliders input[type="range"]:hover:not(:disabled) {
+      background: #ccc;
+    }
+
+    section div.sliders input[type="range"]::-webkit-slider-thumb:hover:not(:disabled) {
+      background: #0056b3;
+    }
+
+    section div.sliders input[type="range"]::-moz-range-thumb:hover:not(:disabled) {
+      background: #0056b3;
+    }
+
+    /* Disabled state for checkbox and range */
+    section div.sliders input[type="checkbox"]:disabled,
+    section div.sliders input[type="range"]:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+
+div input {
+    background:lightgrey;
+    display: inline-block;
+    width: 7%;
+}
+
+section div.antennaSide-container {
+    background: white;
+    width: 100%;
+    height: 100%;
+    display: block;
+    box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
+    border: 1px solid rgb(0, 0, 0);
+    position: absolute;
+}
+
+@media (orientation: portrait) {
+    section.gridLayoutClass {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr) 150px 150px 300px;
+        justify-items: stretch;
+    }
+
+    section div.chart-container {
+        grid-column-start: 1; 
+        grid-column-end: 3; 
+        grid-row-start: 1; 
+        grid-row-end: 4;
+        height: 70vh;
+        width: 100%;
+        box-sizing: border-box; 
+    }
+    
+    section div.antennaFront-container {
+        grid-column-start: 1; 
+        grid-column-end: 2; 
+        grid-row-start: 4; 
+        grid-row-end: 5;
+    }
+    
+    section div.antennaSide-container {
+        grid-column-start: 2; 
+        grid-column-end: 3; 
+        grid-row-start: 4; 
+        grid-row-end: 5;
+    }
+    
+    section div.slider_container {
+        grid-column-start: 1; 
+        grid-column-end: 3; 
+        grid-row-start: 5; 
+        grid-row-end: 6;
+    }
+
+    section div.notes {
+        grid-column-start: 1; 
+        grid-column-end: 3; 
+        grid-row-start: 6; 
+        grid-row-end: 7;
+    }
+}
+
+@media (orientation: landscape) {
+    section.gridLayoutClass {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(2, 1fr) 190px 300px;
+        justify-items: stretch;
+    }
+
+    section div.chart-container {
+        grid-column-start: 1; 
+        grid-column-end: 5; 
+        grid-row-start: 1; 
+        grid-row-end: 3;
+        height: 80vh;
+        width: 100%;
+        box-sizing: border-box; 
+    }
+    
+    section div.slider_container {
+        grid-column-start: 1; 
+        grid-column-end: 3; 
+        grid-row-start: 3; 
+        grid-row-end: 4;
+    }
+    
+    section div.antennaFront-container {
+        grid-column-start: 3; 
+        grid-column-end: 4; 
+        grid-row-start: 3; 
+        grid-row-end: 4;
+    }
+    
+    section div.antennaSide-container {
+        grid-column-start: 4; 
+        grid-column-end: 5; 
+        grid-row-start: 3; 
+        grid-row-end: 4;
+    }
+
+    section div.notes {
+        grid-column-start: 1; 
+        grid-column-end: 5; 
+        grid-row-start: 4; 
+        grid-row-end: 5;
+    }
+}    
+/*
+@media print (orientation: landscape) {
+    section.gridLayoutClass {
+        display: grid;
+        grid-template-columns: repeat(4, 300px);
+        grid-template-rows: repeat(1, 300px) 150px;
+        justify-items: stretch;
+    }
+    section div.chart-container {
+        min-height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        height: auto!important;
+        width: auto!important;
+    }
+}
+
+@media print (orientation: portrait) {
+    section.gridLayoutClass {
+        display: grid;
+        grid-template-columns: repeat(2, 200px);
+        grid-template-rows: repeat(2, 300px) 150px 120px;
+        justify-items: stretch;
+    }
+    section div.chart-container {
+        min-height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        height: auto!important;
+        width: auto!important;
+    }
+}
+*/

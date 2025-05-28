@@ -4,10 +4,10 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>VK3CPU Fan-Dipole Antenna Calculator</title>
-        <link rel="stylesheet" href="magloop.css">
+        <link rel="stylesheet" href="fandipole.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.1</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.2</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -16,28 +16,34 @@
             </div>
             <div class="slider_container">
                 <div class="sliders">
-                    <label for="angle_slider">&#952:</label>
+                    <label for="angle_cb">&#952:</label>
+                    <input type="checkbox" id="angle_cb" >
                     <input type="range" id="angle_slider" min="60" max="120" value="90" step="0.5">
                 </div>
                 <div class="sliders">
-                    <label for="length1_slider">D1:</label>
-                    <input type="range" id="length1_slider" min="0.0" max="21.0" value="20.0" step="0.05">
+                    <label for="length1_cb">D1:</label>
+                    <input type="checkbox" id="length1_cb" checked>
+                    <input type="range" id="length1_slider" min="0.0" max="22.0" value="21.75" step="0.01">
                 </div>
                 <div class="sliders">
-                    <label for="length2_slider">D2:</label>
-                    <input type="range" id="length2_slider" min="0.0" max="21.0" value="10.0" step="0.05">
+                    <label for="length2_cb">D2:</label>
+                    <input type="checkbox" id="length2_cb" checked>
+                    <input type="range" id="length2_slider" min="0.0" max="22.0" value="20.25" step="0.01">
                 </div>
                 <div class="sliders">
-                    <label for="length3_slider">D3:</label>
-                    <input type="range" id="length3_slider" min="0.0" max="21.0" value="5.0" step="0.05">
+                    <label for="length3_cb">D3:</label>
+                    <input type="checkbox" id="length3_cb" >
+                    <input type="range" id="length3_slider" min="0.0" max="22.0" value="14.67" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="length4_slider">D4:</label>
-                    <input type="range" id="length4_slider" min="0.0" max="21.0" value="2.5" step="0.05">
+                    <input type="checkbox" id="length4_cb" >
+                    <input type="range" id="length4_slider" min="0.0" max="22.0" value="10.21" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="length5_slider">D5:</label>
-                    <input type="range" id="length5_slider" min="0.0" max="21.0" value="1.25" step="0.025">
+                    <input type="checkbox" id="length5_cb" >
+                    <input type="range" id="length5_slider" min="0.0" max="22.0" value="8.13" step="0.01">
                 </div>
             </div>
             <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
@@ -51,33 +57,41 @@
             <div class="notes">
             <b><u>Notes:</u></b><br>
             The Fan-Dipole Antenna Calculator was developed to predict the characteristics of a fan-dipole antenna with 
-            5-elements, given physical dimensions entered via slider widgets. <br>
+            up-to 5-elements, given physical dimensions entered via slider widgets. <br>
             It supports:
             <ul>
-                <li>Five dipoles</li>
+                <li>Up-to Five dipole elements</li>
                 <li>Change of droop angle</li>
                 <li>metric and imperial units</li>
             </ul>
+            It is based on [1] equations (8-60a) and (8-60b), which solve for the feedpoint resistance (Rin) and inductance (Xin)
+            of a wire antenna for a given frequency. These are then used to solve for the parallel impedance of the enabled elements.
             I developed this fan-dipole calculator to take advantage of the 
             touch-screens and high-speed of modern mobile phones, to allow users to get realtime feedback of the predicted
             behaviour of a fan-dipole antenna. <br>-- 73 de VK3CPU<br><br>
             <u><b>Inputs via the slider and radio widgets:</b></u>
             <ul> 
-                <li>&#952 : Droop angle in degrees</li>
+                <li>&#952 : Droop angle in degrees [NOT YET IMPLEMENTED!]</li>
                 <li>D1 : Length of half-dipole (measured from feedpoint to wire-end)</li>
-                <li>D1 : Length of half-dipole (measured from feedpoint to wire-end)</li>
-                <li>D1 : Length of half-dipole (measured from feedpoint to wire-end)</li>
-                <li>D1 : Length of half-dipole (measured from feedpoint to wire-end)</li>
-                <li>D1 : Length of half-dipole (measured from feedpoint to wire-end)</li>
+                <li>D2 : Length of half-dipole (measured from feedpoint to wire-end)</li>
+                <li>D3 : Length of half-dipole (measured from feedpoint to wire-end)</li>
+                <li>D4 : Length of half-dipole (measured from feedpoint to wire-end)</li>
+                <li>D5 : Length of half-dipole (measured from feedpoint to wire-end)</li>
             </ul>
             <u><b>Calculated parameters:</b></u>
             <ul>
-                <li>|Z| : Feedpoint impedance in ohms.</li>
-                <li>SWR : Standing wave ratio.</li>
+                <li>VSWR : Voltage Standing Wave Ratio [1 - 5]</li>
+                <li>|Z|  : Feedpoint impedance in Ohms [0 - 100]</li>
             </ul>
             <u><b>Usage hints:</b></u>
                 <li>Tap on legend items to disable or enable an output parameter. This can be used to declutter the chart.</li>
-                <li>Tap on a chart 'dot' to display a tooltip containing calculated output parameters for that frequency or band.</li>
+                <li>Tap on a chart curve to display a tooltip containing calculated output parameters for that frequency.</li>
+            <br>
+            <u><b>TODO:</b></u>
+                <li>Implement droop angle effects.</li>
+                <li>Draw the droop angle schematic.</li>
+                <li>Draw the dipole lengths schematic.</li>
+                <li>Save the checkbox state in the URL.</li>
             <br>
             <u><b>Other VK3CPU calculators:</b>
                 <ul>
@@ -89,7 +103,7 @@
             </u>
             <br>
             <b><u>References:</u></b><br>
-            [1]: B. Balanis, A. Boswell and M. Perks, <b>"Loss Mechanisms in the Electrically Small Loop Antenna"</b> <i>, IEEE Antennas and Propagation Magazine, 56, 4, August 2014, pp. 143.</i> <br>
+            [1]: Constantine A. Balanis, <b>"Antenna Theory 3rd Ed"</b> <i>, Wiley, 2005, pp. 465.</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
 
@@ -101,6 +115,13 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.5.1/math.min.js"></script>
         <script>
+            // Global variables:
+            const mu0 = Math.PI * 4e-7;
+            var droop_angle = 90.0;
+            
+            const GAMMA = 0.5772156649015329; // Euler-Mascheroni constant
+            const CC = 299792458.0;
+            
             // GUI control widgets:
             var angle_slider = document.getElementById("angle_slider");
             var length1_slider = document.getElementById("length1_slider");
@@ -115,9 +136,29 @@
               length2: length2_slider,
               length3: length3_slider,
               length4: length4_slider,
-              length5: length5_slider,
+              length5: length5_slider
             }
             const sliders_to_params = Object.entries(params_to_sliders).map(([k, v]) => [v, k]);
+
+
+            // Get all widget sets
+            const widgetSets = document.querySelectorAll('section div.sliders');
+        
+            // Add event listener to each checkbox
+            widgetSets.forEach(set => {
+              const checkbox = set.querySelector('input[type="checkbox"]');
+              const range = set.querySelector('input[type="range"]');
+        
+              // Initialize range state based on checkbox
+              range.disabled = !checkbox.checked;
+        
+              // Toggle range disabled state when checkbox changes
+              checkbox.addEventListener('change', () => {
+                range.disabled = !checkbox.checked;
+                updateAll();
+              });
+            });
+
 
             // If there's a query param in the URL, set each slider's value to the respective params.
             for (const [key, value] of new URLSearchParams(window.location.search)) {
@@ -141,12 +182,6 @@
               window.history.replaceState(null, null, new_url);
             }
 
-            // Global variables:
-            const mu0 = Math.PI * 4e-7;
-            var droop_angle = 90.0;
-            
-            const GAMMA = 0.5772156649015329; // Euler-Mascheroni constant
-            const C = 299792458.0;
             
             let detail_level = 1; // 0 for low
             var frequencies = [];
@@ -170,11 +205,21 @@
             function setGlobals() {
                 droop_angle = angle_slider.value;
                 lengths = [];
-                lengths.push(length1_slider.value);
-                lengths.push(length2_slider.value);
-                lengths.push(length3_slider.value);
-                lengths.push(length4_slider.value);
-                lengths.push(length5_slider.value);
+                if(length1_cb.checked) {
+                    lengths.push(length1_slider.value);
+                }
+                if(length2_cb.checked) {
+                    lengths.push(length2_slider.value);
+                }
+                if(length3_cb.checked) {
+                    lengths.push(length3_slider.value);
+                }
+                if(length4_cb.checked) {
+                    lengths.push(length4_slider.value);
+                }
+                if(length5_cb.checked) {
+                    lengths.push(length5_slider.value);
+                }
             }
             
             // Standard Cosine Integral, Ci(x)
@@ -207,7 +252,6 @@
                         sum += integrand(t);
                     }
                 }
-            
                 // Compute Ci(x) = gamma + ln(x) + integral
                 return GAMMA + Math.log(x) + sum * h;
             }
@@ -245,7 +289,6 @@
                         sum += integrand(t);
                     }
                 }
-            
                 return sum * h;
             }
             
@@ -289,7 +332,7 @@
             }
 
             function radiationResistance(frequency, antenna_length) {
-                const wavelength = 299792458.0 / frequency;
+                const wavelength = CC / frequency;
                 const length_in_lambda = antenna_length / wavelength;
                 const neta = 120.0 * Math.PI;
                 const C = 0.5772;  // Eulers constant (see Balanis eq 4-68)
@@ -304,7 +347,7 @@
             }
 
             function inductiveReactance(frequency, antenna_length) {
-                const wavelength = 299792458.0 / frequency;
+                const wavelength = CC / frequency;
                 const length_in_lambda = antenna_length / wavelength;
                 const neta = 120.0 * Math.PI;
                 const C = 0.5772;   // Eulers constant (see Balanis eq 4-68)
@@ -364,16 +407,17 @@
                 drawSideDesign();
                 updateFrequencies();
                 calculateAll();
-                myChart.data.datasets[0].data = calculateImpedance();
-                myChart.data.datasets[1].data = calculateSWR();
+                myChart.data.datasets[0].data = calculateSWR();
+                myChart.data.datasets[1].data = calculateImpedance();
                 myChart.update();
                 updateURL();
             }
 
             // Specify fonts for changing parameters controlled by the sliders:
-            const normal_font = "12px arial";
+            const normal_font = "bold 12px arial";
+            const hidden_font = "italic 12px arial";
             const emphasis_font = "bold 14px arial";
-            const emphasis_delay = 600;
+            const emphasis_delay = 1000;
             
             const normal_width = 1;
             const emphasis_width = 3;
@@ -553,18 +597,25 @@
                 aside_canvas.height = win_height-2; 
                 sctx.clearRect(0, 0, win_width, win_height);
                 
-                const xx = 70;
+                const x_m = 150;
+                const x_ft = 200;
+                const places = 2;
                 sctx.textAlign = "right";
-                sctx.font = length1_font;
-                sctx.fillText((1.0 * length1_slider.value).toFixed(3) + ' m', xx, 30);
-                sctx.font = length2_font;
-                sctx.fillText((1.0 * length2_slider.value).toFixed(3) + ' m', xx, 45);
-                sctx.font = length3_font;
-                sctx.fillText((1.0 * length3_slider.value).toFixed(3) + ' m', xx, 60);
-                sctx.font = length4_font;
-                sctx.fillText((1.0 * length4_slider.value).toFixed(3) + ' m', xx, 75);
-                sctx.font = length5_font;
-                sctx.fillText((1.0 * length5_slider.value).toFixed(3) + ' m', xx, 90);
+                if(length1_cb.checked) { sctx.font = length1_font; } else { sctx.font = hidden_font; }
+                sctx.fillText((1.0 * length1_slider.value).toFixed(places) + ' m', x_m, 30);
+                sctx.fillText((0.3048 * length1_slider.value).toFixed(places) + ' ft', x_ft, 30);
+                if(length2_cb.checked) { sctx.font = length2_font; } else { sctx.font = hidden_font; }
+                sctx.fillText((1.0 * length2_slider.value).toFixed(places) + ' m', x_m, 45);
+                sctx.fillText((0.3048 * length2_slider.value).toFixed(places) + ' ft', x_ft, 45);
+                if(length3_cb.checked) { sctx.font = length3_font; } else { sctx.font = hidden_font; }
+                sctx.fillText((1.0 * length3_slider.value).toFixed(places) + ' m', x_m, 60);
+                sctx.fillText((0.3048 * length3_slider.value).toFixed(places) + ' ft', x_ft, 60);
+                if(length4_cb.checked) { sctx.font = length4_font; } else { sctx.font = hidden_font; }
+                sctx.fillText((1.0 * length4_slider.value).toFixed(places) + ' m', x_m, 75);
+                sctx.fillText((0.3048 * length4_slider.value).toFixed(places) + ' ft', x_ft, 75);
+                if(length5_cb.checked) { sctx.font = length5_font; } else { sctx.font = hidden_font; }
+                sctx.fillText((1.0 * length5_slider.value).toFixed(places) + ' m', x_m, 90);
+                sctx.fillText((0.3048 * length5_slider.value).toFixed(places) + ' ft', x_ft, 90);
                 sctx.font = normal_font;
             }
             
@@ -602,23 +653,23 @@
                 data: {
                     datasets: [
                     {
-                        label: '|Z|',
+                        label: 'SWR',
                         fill: false,
                         borderColor: 'black',
                         backgroundColor: 'black',
-                        data: calculateImpedance(),
-                        borderWidth: 1,
-                        yAxisID: 'ohmsID',
-                        tension: 0.3,
-                    },
-                    {
-                        label: 'SWR',
-                        fill: false,
-                        borderColor: 'blue',
-                        backgroundColor: 'blue',
                         data: calculateSWR(),
                         borderWidth: 1,
                         yAxisID: 'swrID',
+                        tension: 0.3,
+                    },
+                    {
+                        label: '|Z|',
+                        fill: false,
+                        borderColor: 'blue',
+                        backgroundColor: 'blue',
+                        data: calculateImpedance(),
+                        borderWidth: 1,
+                        yAxisID: 'ohmsID',
                         tension: 0.3,
                     }
                     ]
@@ -635,8 +686,10 @@
                     scales: {
                         x: {
                             type: 'linear',
+                            min: 0.0,
+                            max: 30.0,
                             position: 'bottom',
-                            display: 'auto',
+                            display: 'true',
                             title: {
                                 display: true,
                                 text: 'Frequency (MHz)',
@@ -646,7 +699,7 @@
                                 }
                             },
                             ticks: {
-                                autoSkip: false,
+                                stepSize: 1.0,
                             }
                         },
                         'ohmsID' : {
@@ -655,9 +708,9 @@
                             title: {
                                 display: true,
                                 text: '\u03A9',
-                                color: 'black',
+                                color: 'blue',
                                 font: {
-                                        weight : 'bold'
+                                    weight : 'bold'
                                 }
                             },
                             ticks: {
@@ -665,7 +718,7 @@
                             },
                             min: 0.0,
                             max: 100.0,
-                            position: 'left',
+                            position: 'right',
                         },
                         'swrID' : {
                             type: 'linear',
@@ -673,16 +726,16 @@
                             title: {
                                 display: true,
                                 text: 'VSWR',
-                                color: 'blue',
+                                color: 'black',
                                 font: {
-                                        weight : 'bold'
+                                    weight : 'bold'
                                 }
                             },
                             ticks: {
                                 beginAtZero: true,
                             },
                             min: 1.0,
-                            max: 10.0,
+                            max: 5.0,
                             position: 'left',
                         },
                     },
@@ -731,40 +784,6 @@
                                     if (label) {
                                         label += ': ';
                                     }
-                                    if(context.dataset.label == "Tuning Cap (pF)") { 
-                                        var num = getMetricPrefix(value * 1e-12);
-                                        label = justifyText("Tuning Cap: ", num.val.toPrecision(3).toString() + '  ' + num.pfx + 'F');
-                                    } else 
-                                    if(label[0] == "Q"){
-                                        label = justifyText("Q: ", Math.round(value).toString() + "    ");
-                                    } else 
-                                    if(label[0] == 'V'){
-                                        var num = getMetricPrefix(value * 1e3);
-                                        label = justifyText("Vcap: ", num.val.toPrecision(3).toString() + '  ' + num.pfx + 'V');
-                                    } else 
-                                    if(label[0] == 'B'){
-                                        var num = getMetricPrefix(value * 1e3);
-                                        label = justifyText("Bandwidth: ", num.val.toPrecision(3).toString() + ' ' + num.pfx + 'Hz');
-                                    } else 
-                                    if(label[0] == 'E'){
-                                        label = justifyText("Efficiency: ", value.toFixed(2).toString() + '  ' + ' %');
-                                    } else 
-                                    if((label[0] == 'R') && (label[2] == 'r')){
-                                        var num = getMetricPrefix(value);
-                                        label = justifyText("R-rad: ", num.val.toPrecision(3).toString() + '  ' + num.pfx + '\u03A9');
-                                    } else 
-                                    if((label[0] == 'R') && (label[2] == 'l')){
-                                        var num = getMetricPrefix(value);
-                                        label = justifyText("R-loop: ", num.val.toPrecision(3).toString() + '  ' + num.pfx + '\u03A9');
-                                    } else 
-                                    if((label[0] == 'R') && (label[1] == 'e')){
-                                        var num = getMetricPrefix(value);
-                                        label = justifyText("Reactance: ", 'j' + num.val.toPrecision(3) + '  ' + num.pfx + '\u03A9');
-                                    } else 
-                                    if(label[0] == 'I'){
-                                        var num = getMetricPrefix(value);
-                                        label = justifyText("I\u2092: ", num.val.toPrecision(3).toString() + '  ' + num.pfx + 'A');
-                                    } else 
                                     if(label[1] == 'Z'){
                                         var num = getMetricPrefix(value);
                                         label = justifyText("|Z|: ", num.val.toFixed(3).toString() + '   ' + num.pfx + '\u03A9');
