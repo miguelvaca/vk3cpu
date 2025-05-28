@@ -584,6 +584,7 @@
                 
                 fctx.font = angle_font;
                 fctx.textAlign = "left";
+                if(angle_cb.checked) { fctx.font = angle_font; } else { fctx.font = hidden_font; }
                 fctx.fillText(angle_slider.value + '\u00B0', 10, 15);
                 fctx.font = normal_font;
             }
