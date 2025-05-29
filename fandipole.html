@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="fandipole.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.2</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.3</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -123,6 +123,14 @@
             
             const GAMMA = 0.5772156649015329; // Euler-Mascheroni constant
             const CC = 299792458.0;
+                        
+            let detail_level = 1; // 0 for low
+            var frequencies = [];
+            var lengths = [];
+            var impedances = [];
+            var SWRs = [];
+            
+            var dipole = {};
             
             // GUI control widgets:
             var angle_slider = document.getElementById("angle_slider");
@@ -184,44 +192,32 @@
               window.history.replaceState(null, null, new_url);
             }
 
-            
-            let detail_level = 1; // 0 for low
-            var frequencies = [];
-            var lengths = [];
-            var impedances = [];
-            var SWRs = [];
 
             function updateFrequencies() {
                 frequencies = [];
                 if(detail_level) {
-                    for(var i=1; i<=3000; i++) {
+                    for(var i=100; i<=3000; i++) {
                         frequencies.push(i * 0.01);
                     }
                 } else {
-                    for(var i=1; i<=150; i++) {
+                    for(var i=10; i<=150; i++) {
                         frequencies.push(i * 0.20);
                     }
                 }
             }
             
             function setGlobals() {
+            
+                dipole['D1'] = {'length':length1_slider.value, 'enabled':length1_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                dipole['D2'] = {'length':length2_slider.value, 'enabled':length2_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                dipole['D3'] = {'length':length3_slider.value, 'enabled':length3_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                dipole['D4'] = {'length':length4_slider.value, 'enabled':length4_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                dipole['D5'] = {'length':length5_slider.value, 'enabled':length5_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                
                 droop_angle = angle_slider.value;
-                lengths = [];
-                if(length1_cb.checked) {
-                    lengths.push(length1_slider.value);
-                }
-                if(length2_cb.checked) {
-                    lengths.push(length2_slider.value);
-                }
-                if(length3_cb.checked) {
-                    lengths.push(length3_slider.value);
-                }
-                if(length4_cb.checked) {
-                    lengths.push(length4_slider.value);
-                }
-                if(length5_cb.checked) {
-                    lengths.push(length5_slider.value);
-                }
+                
+                impedances = [];
+                SWRs = [];
             }
             
             // Standard Cosine Integral, Ci(x)
@@ -364,42 +360,69 @@
             }
 
             function calculateAll() {
-                impedances = [];
-                SWRs = [];
+                setGlobals();
                 frequencies.forEach(freq => {
                     let total_admittance = math.complex(0,0);
-                    lengths.forEach(len => {
-                        const rr = radiationResistance(freq * 1e6, len);
-                        const xx = inductiveReactance(freq * 1e6, len);
-                        let impedance = math.complex(rr, xx);
-                        let admittance = impedance.inverse();
-                        total_admittance = math.add(total_admittance, admittance);
+                    Object.keys(dipole).forEach(key => {
+                        // console.log(key, dipole[key]);
+                        if(dipole[key]['enabled']) {
+                            const len = dipole[key]['length'];
+                            const rr = radiationResistance(freq * 1e6, len);
+                            const xx = inductiveReactance(freq * 1e6, len);
+                            dipole[key]['Rr'].push({x:freq, y:rr});
+                            dipole[key]['Xm'].push({x:freq, y:xx});
+                const wavelength = CC / (freq * 1e6);
+                const length_in_lambda = len / wavelength;
+                            const sin_kl_on_2_sqrd = 1.0 / (Math.sin(Math.PI * length_in_lambda)**2);
+                            //const sin_kl_on_2_sqrd = 1.0 / (Math.sin(Math.PI * len * freq * 1e6 / CC)**2);
+                            //const sin_kl_on_2_sqrd = 1.0 ;
+                            let impedance = math.complex(rr * sin_kl_on_2_sqrd, xx * sin_kl_on_2_sqrd);
+                            dipole[key]['Z'].push({x:freq, y:impedance.toPolar().r});
+                            let admittance = impedance.inverse();
+                            total_admittance = math.add(total_admittance, admittance);
+                        }
                     });
                     const impedance = total_admittance.inverse();
-                    const impedance_polar = impedance.toPolar();
-                    impedances.push({x:freq, y:impedance.re});
+                    //const impedance_polar = impedance.toPolar();
+                    impedances.push({x:freq, y:impedance});
                     
-                    // Now calculate gamma, then the SWR:
+                    // Now calculate the magnitude reflection coefficient gamma, then the SWR:
                     const Z0 = math.complex(50.0, 0.0);
-                    const gamma = math.divide(math.subtract(impedance, Z0), math.add(impedance, Z0));
-                    const SWR = (1 + gamma.toPolar().r)/(1 - gamma.toPolar().r);
+                    const gamma_mag = math.divide(math.subtract(impedance, Z0), math.add(impedance, Z0)).toPolar().r;
+                    const SWR = (1 + gamma_mag)/(1 - gamma_mag);
                     SWRs.push({x:freq, y:SWR});
                 });
-            }   
+            }
 
-            function calculateImpedance() {
+            function getSWR() {
                 var retval = [];
-                impedances.forEach(item => {
+                SWRs.forEach(item => {
                     retval.push(item);
                 })
                 return retval;
             }
 
-            function calculateSWR() {
+            function getImpedance() {
                 var retval = [];
-                SWRs.forEach(item => {
-                    retval.push(item);
-                })
+                impedances.forEach(item => {
+                    retval.push({x:item.x, y:item.y.toPolar().r});
+                });
+                return retval;
+            }
+
+            function getImpedanceReal() {
+                var retval = [];
+                impedances.forEach(item => {
+                    retval.push({x:item.x, y:item.y.re});
+                });
+                return retval;
+            }
+
+            function getImpedanceImag() {
+                var retval = [];
+                impedances.forEach(item => {
+                    retval.push({x:item.x, y:item.y.im});
+                });
                 return retval;
             }
 
@@ -409,8 +432,10 @@
                 drawSideDesign();
                 updateFrequencies();
                 calculateAll();
-                myChart.data.datasets[0].data = calculateSWR();
-                myChart.data.datasets[1].data = calculateImpedance();
+                myChart.data.datasets[0].data = getSWR();
+                myChart.data.datasets[1].data = getImpedance();
+                myChart.data.datasets[2].data = getImpedanceReal();
+                myChart.data.datasets[3].data = getImpedanceImag();
                 myChart.update();
                 updateURL();
             }
@@ -661,21 +686,44 @@
                         fill: false,
                         borderColor: 'black',
                         backgroundColor: 'black',
-                        data: calculateSWR(),
+                        data: getSWR(),
                         borderWidth: 1,
                         yAxisID: 'swrID',
                         tension: 0.3,
                     },
                     {
-                        label: '|Z|',
+                        label: '|Zin|',
                         fill: false,
                         borderColor: 'blue',
                         backgroundColor: 'blue',
-                        data: calculateImpedance(),
+                        data: getImpedance(),
                         borderWidth: 1,
                         yAxisID: 'ohmsID',
                         tension: 0.3,
-                    }
+                    },
+                    {
+                        label: 'Rin',
+                        hidden: true,
+                        fill: false,
+                        borderColor: 'blue',
+                        backgroundColor: 'lightblue',
+                        data: getImpedanceReal(),
+                        borderWidth: 1,
+                        borderDash: [5,5],
+                        yAxisID: 'ohmsID',
+                        tension: 0.3,
+                    },
+                    {
+                        label: 'Xin',
+                        hidden: true,
+                        fill: false,
+                        borderColor: 'red',
+                        backgroundColor: 'red',
+                        data: getImpedanceImag(),
+                        borderWidth: 1,
+                        yAxisID: 'xOhmsID',
+                        tension: 0.3,
+                    },
                     ]
                 },
                 options: {
@@ -721,7 +769,25 @@
                                 beginAtZero: true,
                             },
                             min: 0.0,
-                            max: 100.0,
+                            max: 500.0,
+                            position: 'right',
+                        },
+                        'xOhmsID' : {
+                            type: 'linear',
+                            display: 'auto',
+                            title: {
+                                display: true,
+                                text: 'j\u03A9',
+                                color: 'red',
+                                font: {
+                                    weight : 'bold'
+                                }
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                            },
+                            min: -250.0,
+                            max: 250.0,
                             position: 'right',
                         },
                         'swrID' : {
@@ -739,7 +805,7 @@
                                 beginAtZero: true,
                             },
                             min: 1.0,
-                            max: 5.0,
+                            max: 6.0,
                             position: 'left',
                         },
                     },
@@ -791,6 +857,14 @@
                                     if(label[1] == 'Z'){
                                         var num = getMetricPrefix(value);
                                         label = justifyText("|Z|: ", num.val.toFixed(3).toString() + '   ' + num.pfx + '\u03A9');
+                                    } else 
+                                    if(label[0] == 'R'){
+                                        var num = getMetricPrefix(value);
+                                        label = justifyText("Rin: ", num.val.toFixed(3).toString() + '   ' + num.pfx + '\u03A9');
+                                    } else 
+                                    if(label[0] == 'X'){
+                                        //var num = getMetricPrefix(value);
+                                        label = justifyText("Xin: ", value.toFixed(3).toString() + '   ' + 'j\u03A9');
                                     } else 
                                     if(label[0] == 'S'){
                                         var num = getMetricPrefix(value);
