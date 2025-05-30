@@ -18,32 +18,32 @@
                 <div class="sliders">
                     <label for="angle_cb">&#952:</label>
                     <input type="checkbox" id="angle_cb" >
-                    <input type="range" id="angle_slider" min="60" max="120" value="90" step="0.5">
+                    <input type="range" id="angle_slider" min="60" max="120" value="90" step="1">
                 </div>
                 <div class="sliders">
                     <label for="length1_cb">D1:</label>
                     <input type="checkbox" id="length1_cb" checked>
-                    <input type="range" id="length1_slider" min="0.0" max="22.0" value="21.75" step="0.01">
+                    <input type="range" id="length1_slider" min="0.0" max="22.0" value="20.27" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="length2_cb">D2:</label>
                     <input type="checkbox" id="length2_cb" checked>
-                    <input type="range" id="length2_slider" min="0.0" max="22.0" value="20.25" step="0.01">
+                    <input type="range" id="length2_slider" min="0.0" max="22.0" value="14.27" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="length3_cb">D3:</label>
                     <input type="checkbox" id="length3_cb" >
-                    <input type="range" id="length3_slider" min="0.0" max="22.0" value="14.67" step="0.01">
+                    <input type="range" id="length3_slider" min="0.0" max="22.0" value="10.05" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="length4_slider">D4:</label>
                     <input type="checkbox" id="length4_cb" >
-                    <input type="range" id="length4_slider" min="0.0" max="22.0" value="10.21" step="0.01">
+                    <input type="range" id="length4_slider" min="0.0" max="22.0" value="6.91" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="length5_slider">D5:</label>
                     <input type="checkbox" id="length5_cb" >
-                    <input type="range" id="length5_slider" min="0.0" max="22.0" value="8.13" step="0.01">
+                    <input type="range" id="length5_slider" min="0.0" max="22.0" value="5.01" step="0.01">
                 </div>
             </div>
             <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
@@ -64,9 +64,11 @@
                 <li>Change of droop angle</li>
                 <li>metric and imperial units</li>
             </ul>
-            It is based on [1] equations (8-60a) and (8-60b), which solve for the feedpoint resistance (Rin) and inductance (Xin)
-            of a wire antenna for a given frequency. These are then used to solve for the parallel impedance of the enabled elements.
+            It is based on [1] closed-form equations (8-60a) and (8-60b), which solve for the feedpoint resistance (Rin) and inductance (Xin)
+            of a center-fed wire antenna for a given frequency. These are then used to solve for the parallel impedance of the enabled elements.
             It assumes the wire-elements are uncoupled, so ensure you use spreaders to keep the elements well-separated.
+            The intent is to use this tool to quickly select your dipole lengths. You could then use an electromagnetic solver 
+            such as EZNEC or MMANA-GAL for more accurate modeling including environmental effects such as height-above-ground.
             I developed this fan-dipole calculator to take advantage of the 
             touch-screens and high-speed of modern mobile phones, to allow users to get realtime feedback of the predicted
             behaviour of a fan-dipole antenna. <br>-- 73 de VK3CPU<br><br>
@@ -625,26 +627,33 @@
                 aside_canvas.height = win_height-2; 
                 sctx.clearRect(0, 0, win_width, win_height);
                 
-                const x_m = 60;
-                const x_ft = 120;
+                const x_m = 100;
+                const x_ft = 150;
+                const y_offset = 25;
+                const y_spacing = 15;
                 const places = 2;
                 const m_2_ft = 3.28083;
+                
+                sctx.textAlign = "center";
+                sctx.font = emphasis_font;
+                sctx.fillText('Dipole Lengths', 75, 20);
+                
                 sctx.textAlign = "right";
                 if(length1_cb.checked) { sctx.font = length1_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * length1_slider.value).toFixed(places) + ' m', x_m, 30);
-                sctx.fillText((m_2_ft * length1_slider.value).toFixed(places) + ' ft', x_ft, 30);
+                sctx.fillText((1.0 * length1_slider.value).toFixed(places) + ' m  < D1 >', x_m, y_offset + y_spacing);
+                sctx.fillText((m_2_ft * length1_slider.value).toFixed(places) + ' ft', x_ft, y_offset + y_spacing);
                 if(length2_cb.checked) { sctx.font = length2_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * length2_slider.value).toFixed(places) + ' m', x_m, 45);
-                sctx.fillText((m_2_ft * length2_slider.value).toFixed(places) + ' ft', x_ft, 45);
+                sctx.fillText((1.0 * length2_slider.value).toFixed(places) + ' m  < D2 >', x_m, y_offset + 2*y_spacing);
+                sctx.fillText((m_2_ft * length2_slider.value).toFixed(places) + ' ft', x_ft, y_offset + 2*y_spacing);
                 if(length3_cb.checked) { sctx.font = length3_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * length3_slider.value).toFixed(places) + ' m', x_m, 60);
-                sctx.fillText((m_2_ft * length3_slider.value).toFixed(places) + ' ft', x_ft, 60);
+                sctx.fillText((1.0 * length3_slider.value).toFixed(places) + ' m  < D3 >', x_m, y_offset + 3*y_spacing);
+                sctx.fillText((m_2_ft * length3_slider.value).toFixed(places) + ' ft', x_ft, y_offset + 3*y_spacing);
                 if(length4_cb.checked) { sctx.font = length4_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * length4_slider.value).toFixed(places) + ' m', x_m, 75);
-                sctx.fillText((m_2_ft * length4_slider.value).toFixed(places) + ' ft', x_ft, 75);
+                sctx.fillText((1.0 * length4_slider.value).toFixed(places) + ' m  < D4 >', x_m, y_offset + 4*y_spacing);
+                sctx.fillText((m_2_ft * length4_slider.value).toFixed(places) + ' ft', x_ft, y_offset + 4*y_spacing);
                 if(length5_cb.checked) { sctx.font = length5_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * length5_slider.value).toFixed(places) + ' m', x_m, 90);
-                sctx.fillText((m_2_ft * length5_slider.value).toFixed(places) + ' ft', x_ft, 90);
+                sctx.fillText((1.0 * length5_slider.value).toFixed(places) + ' m  < D5 >', x_m, y_offset + 5*y_spacing);
+                sctx.fillText((m_2_ft * length5_slider.value).toFixed(places) + ' ft', x_ft, y_offset + 5*y_spacing);
                 sctx.font = normal_font;
             }
             
@@ -682,7 +691,7 @@
                 data: {
                     datasets: [
                     {
-                        label: 'SWR',
+                        label: 'VSWR',
                         fill: false,
                         borderColor: 'black',
                         backgroundColor: 'black',
