@@ -57,11 +57,12 @@
             <div class="notes">
             <b><u>Notes:</u></b><br>
             The Fan-Dipole Antenna Calculator was developed to predict the characteristics of a fan-dipole antenna with 
-            up-to 5-elements, given physical dimensions entered via slider widgets. <br>
+            up-to 5-elements, given physical dimensions entered via slider widgets. It allows you to see what the effects
+            of additional dipoles will do to the feedpoint impedance (and therefore the VSWR) for your antenna. <br>
             It supports:
             <ul>
                 <li>Up-to Five dipole elements</li>
-                <li>Change of droop angle</li>
+                <li>Change of droop angle (FUTURE)</li>
                 <li>metric and imperial units</li>
             </ul>
             It is based on [1] closed-form equations (8-60a) and (8-60b), which solve for the feedpoint resistance (Rin) and inductance (Xin)
@@ -129,7 +130,7 @@
             let detail_level = 1; // 0 for low
             var frequencies = [];
             var lengths = [];
-            var impedances = [];
+            var feedpoint_impedances = [];
             var SWRs = [];
             
             var dipole = {};
@@ -218,7 +219,7 @@
                 
                 droop_angle = angle_slider.value;
                 
-                impedances = [];
+                feedpoint_impedances = [];
                 SWRs = [];
             }
             
@@ -386,7 +387,7 @@
                     });
                     const impedance = total_admittance.inverse();
                     //const impedance_polar = impedance.toPolar();
-                    impedances.push({x:freq, y:impedance});
+                    feedpoint_impedances.push({x:freq, y:impedance});
                     
                     // Now calculate the magnitude reflection coefficient gamma, then the SWR:
                     const Z0 = math.complex(50.0, 0.0);
@@ -406,23 +407,23 @@
 
             function getImpedance() {
                 var retval = [];
-                impedances.forEach(item => {
+                feedpoint_impedances.forEach(item => {
                     retval.push({x:item.x, y:item.y.toPolar().r});
                 });
                 return retval;
             }
 
-            function getImpedanceReal() {
+            function getFeedpointImpedanceReal() {
                 var retval = [];
-                impedances.forEach(item => {
+                feedpoint_impedances.forEach(item => {
                     retval.push({x:item.x, y:item.y.re});
                 });
                 return retval;
             }
 
-            function getImpedanceImag() {
+            function getFeedpointImpedanceImag() {
                 var retval = [];
-                impedances.forEach(item => {
+                feedpoint_impedances.forEach(item => {
                     retval.push({x:item.x, y:item.y.im});
                 });
                 return retval;
@@ -436,8 +437,8 @@
                 calculateAll();
                 myChart.data.datasets[0].data = getSWR();
                 myChart.data.datasets[1].data = getImpedance();
-                myChart.data.datasets[2].data = getImpedanceReal();
-                myChart.data.datasets[3].data = getImpedanceImag();
+                myChart.data.datasets[2].data = getFeedpointImpedanceReal();
+                myChart.data.datasets[3].data = getFeedpointImpedanceImag();
                 myChart.update();
                 updateURL();
             }
@@ -716,7 +717,7 @@
                         fill: false,
                         borderColor: 'blue',
                         backgroundColor: 'lightblue',
-                        data: getImpedanceReal(),
+                        data: getFeedpointImpedanceReal(),
                         borderWidth: 1,
                         borderDash: [5,5],
                         yAxisID: 'ohmsID',
@@ -728,7 +729,7 @@
                         fill: false,
                         borderColor: 'red',
                         backgroundColor: 'red',
-                        data: getImpedanceImag(),
+                        data: getFeedpointImpedanceImag(),
                         borderWidth: 1,
                         yAxisID: 'xOhmsID',
                         tension: 0.3,
