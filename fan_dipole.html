@@ -18,7 +18,7 @@
                 <div class="sliders">
                     <label for="angle_cb">&#952:</label>
                     <input type="checkbox" id="angle_cb" >
-                    <input type="range" id="angle_slider" min="60" max="120" value="90" step="1">
+                    <input type="range" id="angle_slider" min="0" max="45" value="0" step="1">
                 </div>
                 <div class="sliders">
                     <label for="length1_cb">D1:</label>
@@ -602,6 +602,69 @@
                 drawSideDesign();
             }
 
+            function drawWire(ctx, x1, y1, x2, y2, wireRadius, fillColor) {
+                var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                ctx.beginPath();
+                ctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
+                ctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
+                ctx.fillStyle = fillColor;
+                ctx.fill();
+            }
+
+            function drawAntenna(ctx, vertex_x, vertex_y, length, angle_deg) {
+                const gap = 10;
+                ctx.save();
+                ctx.font = normal_font;
+                ctx.translate(vertex_x, vertex_y);
+                
+                // Draw junction box:
+                ctx.beginPath();
+                ctx.moveTo(-gap, -3*gap); 
+                ctx.lineTo( gap, -3*gap);
+                ctx.lineTo( gap, +3*gap);
+                ctx.lineTo(-gap, +3*gap);
+                ctx.lineTo(-gap, -3*gap); 
+                ctx.stroke();
+                fctx.textAlign = "center";
+                ctx.fillText(180 - (2*angle_deg), 0, 3*gap+14);
+                
+                const cos_angle = Math.cos(angle_deg*Math.PI/180);
+                const sin_angle = Math.sin(angle_deg*Math.PI/180);
+                const d1_length = length * length1_slider.value / 22;
+                const d2_length = length * length2_slider.value / 22;
+                const d3_length = length * length3_slider.value / 22;
+                const d4_length = length * length4_slider.value / 22;
+                const d5_length = length * length5_slider.value / 22;
+                
+                // Draw right side:
+                ctx.beginPath();
+                ctx.moveTo(10,-2*gap); ctx.lineTo(10+d1_length*cos_angle, -2*gap+d1_length*sin_angle);
+                ctx.moveTo(10,-1*gap); ctx.lineTo(10+d2_length*cos_angle, -1*gap+d2_length*sin_angle);
+                ctx.moveTo(10, 0*gap); ctx.lineTo(10+d3_length*cos_angle,  0*gap+d3_length*sin_angle);
+                ctx.moveTo(10, 1*gap); ctx.lineTo(10+d4_length*cos_angle,  1*gap+d4_length*sin_angle);
+                ctx.moveTo(10, 2*gap); ctx.lineTo(10+d5_length*cos_angle,  2*gap+d5_length*sin_angle);
+                ctx.stroke();
+                
+                // Draw left side:
+                ctx.beginPath();
+                ctx.moveTo(-10,-2*gap); ctx.lineTo(-10-d1_length*cos_angle, -2*gap+d1_length*sin_angle);
+                ctx.moveTo(-10,-1*gap); ctx.lineTo(-10-d2_length*cos_angle, -1*gap+d2_length*sin_angle);
+                ctx.moveTo(-10, 0*gap); ctx.lineTo(-10-d3_length*cos_angle,  0*gap+d3_length*sin_angle);
+                ctx.moveTo(-10, 1*gap); ctx.lineTo(-10-d4_length*cos_angle,  1*gap+d4_length*sin_angle);
+                ctx.moveTo(-10, 2*gap); ctx.lineTo(-10-d5_length*cos_angle,  2*gap+d5_length*sin_angle);
+                ctx.stroke();
+                /*
+                ctx.textAlign = "center";
+                const s = (100.0 * loop_diameter_slider.value) * 0.57735; // side length in cm
+                if(units == "metric") {
+                    ctx.fillText(s.toPrecision(3).toString() + " cm", 0, 0);
+                } else {
+                    ctx.fillText((s*0.03281).toPrecision(3).toString() + "\'", 0, 0);
+                }
+                */
+                ctx.restore();
+            }
+
             const afront_canvas = document.getElementById("antennaFront2D");
             const fctx = afront_canvas.getContext('2d');
 
@@ -618,6 +681,9 @@
                 if(angle_cb.checked) { fctx.font = angle_font; } else { fctx.font = hidden_font; }
                 fctx.fillText(angle_slider.value + '\u00B0', 10, 15);
                 fctx.font = normal_font;
+                
+                drawAntenna(fctx, afront_canvas.width*0.5, afront_canvas.height*0.3, 120, angle_slider.value);
+                //drawWire(fctx, afront_canvas.width*0.5, 10, );
             }
             
             const aside_canvas = document.getElementById("antennaSide2D");
