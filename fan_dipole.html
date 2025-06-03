@@ -372,8 +372,11 @@
                         // console.log(key, dipole[key]);
                         if(dipole[key]['enabled']) {
                             const len = dipole[key]['length'];
-                            const rr = radiationResistance(freq * 1e6, len);
+                            let rr = radiationResistance(freq * 1e6, len);
                             const xx = inductiveReactance(freq * 1e6, len);
+                            if(angle_cb.checked) {
+                                rr = rr * Math.cos(Math.PI - angle_slider.value*Math.PI/180)**2;
+                            }
                             dipole[key]['Rr'].push({x:freq, y:rr});
                             dipole[key]['Xm'].push({x:freq, y:xx});
                 const wavelength = CC / (freq * 1e6);
