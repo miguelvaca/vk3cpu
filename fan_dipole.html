@@ -62,8 +62,8 @@
             It supports:
             <ul>
                 <li>Up-to Five dipole elements</li>
-                <li>Change of droop angle (FUTURE)</li>
-                <li>metric and imperial units</li>
+                <li>Estimated effects of changing droop angle</li>
+                <li>Metric and Imperial units</li>
             </ul>
             It is based on [1] closed-form equations (8-60a) and (8-60b), which solve for the feedpoint resistance (Rin) and inductance (Xin)
             of a center-fed wire antenna for a given frequency. These are then used to solve for the parallel impedance of the enabled elements.
@@ -84,7 +84,7 @@
             </ul>
             <u><b>Calculated parameters:</b></u>
             <ul>
-                <li>VSWR : Voltage Standing Wave Ratio  [1 - 5]</li>
+                <li>VSWR : Voltage Standing Wave Ratio  [1 - 6]</li>
                 <li>|Z|  : Feedpoint impedance in Ohms  [0 - 500]</li>
                 <li>Rin  : Feedpoint resistance in Ohms [0 - 500]</li>
                 <li>Xin  : Feedpoint inductance in Ohms [0 - 500]</li>
@@ -113,8 +113,9 @@
             [1]: Constantine A. Balanis, <b>"Antenna Theory 3rd Ed"</b> <i>, Wiley, 2005, pp. 465.</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
-
-            <b>[27-May-25]</b> <br>
+            <b>[3-June-25] v0.4</b> <br>
+            * Enable angle adjustment factor.<br>
+            <b>[27-May-25] v0.1</b> <br>
             * Draft check-in.<br>
             <br>
             </div>
