@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="fandipole.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.3</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.4</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -23,27 +23,27 @@
                 <div class="sliders">
                     <label for="length1_cb">D1:</label>
                     <input type="checkbox" id="length1_cb" checked>
-                    <input type="range" id="length1_slider" min="0.0" max="22.0" value="20.27" step="0.01">
+                    <input type="range" id="length1_slider" min="1.0" max="22.0" value="20.27" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="length2_cb">D2:</label>
                     <input type="checkbox" id="length2_cb" checked>
-                    <input type="range" id="length2_slider" min="0.0" max="22.0" value="14.27" step="0.01">
+                    <input type="range" id="length2_slider" min="1.0" max="22.0" value="14.27" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="length3_cb">D3:</label>
                     <input type="checkbox" id="length3_cb" >
-                    <input type="range" id="length3_slider" min="0.0" max="22.0" value="10.05" step="0.01">
+                    <input type="range" id="length3_slider" min="1.0" max="22.0" value="10.05" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="length4_slider">D4:</label>
                     <input type="checkbox" id="length4_cb" >
-                    <input type="range" id="length4_slider" min="0.0" max="22.0" value="6.91" step="0.01">
+                    <input type="range" id="length4_slider" min="1.0" max="22.0" value="6.91" step="0.01">
                 </div>
                 <div class="sliders">
                     <label for="length5_slider">D5:</label>
                     <input type="checkbox" id="length5_cb" >
-                    <input type="range" id="length5_slider" min="0.0" max="22.0" value="5.01" step="0.01">
+                    <input type="range" id="length5_slider" min="1.0" max="22.0" value="5.01" step="0.01">
                 </div>
             </div>
             <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
@@ -613,6 +613,7 @@
 
             function drawAntenna(ctx, vertex_x, vertex_y, length, angle_deg) {
                 const gap = 10;
+                
                 ctx.save();
                 ctx.font = normal_font;
                 ctx.translate(vertex_x, vertex_y);
@@ -626,10 +627,11 @@
                 ctx.lineTo(-gap, -3*gap); 
                 ctx.stroke();
                 fctx.textAlign = "center";
-                ctx.fillText(180 - (2*angle_deg), 0, 3*gap+14);
+                ctx.fillText(180 - (2*angle_deg) + '\u00B0', 0, 3*gap+14);
                 
                 const cos_angle = Math.cos(angle_deg*Math.PI/180);
                 const sin_angle = Math.sin(angle_deg*Math.PI/180);
+                
                 const d1_length = length * length1_slider.value / 22;
                 const d2_length = length * length2_slider.value / 22;
                 const d3_length = length * length3_slider.value / 22;
@@ -638,12 +640,39 @@
                 
                 // Draw right side:
                 ctx.beginPath();
-                ctx.moveTo(10,-2*gap); ctx.lineTo(10+d1_length*cos_angle, -2*gap+d1_length*sin_angle);
+                ctx.moveTo(10,-2*gap); ctx.lineTo(10+d1_length*cos_angle, -2*gap+d1_length*sin_angle); 
                 ctx.moveTo(10,-1*gap); ctx.lineTo(10+d2_length*cos_angle, -1*gap+d2_length*sin_angle);
                 ctx.moveTo(10, 0*gap); ctx.lineTo(10+d3_length*cos_angle,  0*gap+d3_length*sin_angle);
                 ctx.moveTo(10, 1*gap); ctx.lineTo(10+d4_length*cos_angle,  1*gap+d4_length*sin_angle);
                 ctx.moveTo(10, 2*gap); ctx.lineTo(10+d5_length*cos_angle,  2*gap+d5_length*sin_angle);
+                ctx.strokeStyle = 'blue'; 
                 ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(10+d1_length*cos_angle, -2*gap+d1_length*sin_angle); ctx.lineTo(10+length*cos_angle + 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle); 
+                ctx.moveTo(10+d2_length*cos_angle, -1*gap+d2_length*sin_angle); ctx.lineTo(10+length*cos_angle + 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle);
+                ctx.moveTo(10+d3_length*cos_angle,  0*gap+d3_length*sin_angle); ctx.lineTo(10+length*cos_angle + 2*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 2*gap*cos_angle*cos_angle);
+                ctx.moveTo(10+d4_length*cos_angle,  1*gap+d4_length*sin_angle); ctx.lineTo(10+length*cos_angle + 1*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 1*gap*cos_angle*cos_angle);
+                ctx.moveTo(10+d5_length*cos_angle,  2*gap+d5_length*sin_angle); ctx.lineTo(10+length*cos_angle,  2*gap+length*sin_angle);
+                ctx.strokeStyle = 'grey'; 
+                ctx.stroke();
+
+                const radius = 4;
+                ctx.strokeStyle = 'blue'; 
+                ctx.beginPath();ctx.arc(10+d1_length*cos_angle, -2*gap+d1_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                ctx.beginPath();ctx.arc(10+d2_length*cos_angle, -1*gap+d2_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                ctx.beginPath();ctx.arc(10+d3_length*cos_angle,  0*gap+d3_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                ctx.beginPath();ctx.arc(10+d4_length*cos_angle,  1*gap+d4_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                ctx.beginPath();ctx.arc(10+d5_length*cos_angle,  2*gap+d5_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                
+                ctx.fillStyle = 'grey';
+
+                ctx.beginPath();
+                ctx.moveTo(10+length*cos_angle,  2*gap+length*sin_angle);
+                ctx.lineTo(10+length*cos_angle + 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle); 
+                ctx.lineTo(10+(2*gap+length)*cos_angle + 2*gap*cos_angle*sin_angle, 2*gap+(2*gap+length)*sin_angle - 2*gap*cos_angle*cos_angle); 
+                ctx.lineTo(10+length*cos_angle,  2*gap+length*sin_angle);
+                ctx.fill();
                 
                 // Draw left side:
                 ctx.beginPath();
@@ -652,16 +681,32 @@
                 ctx.moveTo(-10, 0*gap); ctx.lineTo(-10-d3_length*cos_angle,  0*gap+d3_length*sin_angle);
                 ctx.moveTo(-10, 1*gap); ctx.lineTo(-10-d4_length*cos_angle,  1*gap+d4_length*sin_angle);
                 ctx.moveTo(-10, 2*gap); ctx.lineTo(-10-d5_length*cos_angle,  2*gap+d5_length*sin_angle);
+                ctx.strokeStyle = 'blue'; 
                 ctx.stroke();
-                /*
-                ctx.textAlign = "center";
-                const s = (100.0 * loop_diameter_slider.value) * 0.57735; // side length in cm
-                if(units == "metric") {
-                    ctx.fillText(s.toPrecision(3).toString() + " cm", 0, 0);
-                } else {
-                    ctx.fillText((s*0.03281).toPrecision(3).toString() + "\'", 0, 0);
-                }
-                */
+
+                ctx.beginPath();
+                ctx.moveTo(-10-d1_length*cos_angle, -2*gap+d1_length*sin_angle); ctx.lineTo(-10-length*cos_angle - 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle); 
+                ctx.moveTo(-10-d2_length*cos_angle, -1*gap+d2_length*sin_angle); ctx.lineTo(-10-length*cos_angle - 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle);
+                ctx.moveTo(-10-d3_length*cos_angle,  0*gap+d3_length*sin_angle); ctx.lineTo(-10-length*cos_angle - 2*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 2*gap*cos_angle*cos_angle);
+                ctx.moveTo(-10-d4_length*cos_angle,  1*gap+d4_length*sin_angle); ctx.lineTo(-10-length*cos_angle - 1*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 1*gap*cos_angle*cos_angle);
+                ctx.moveTo(-10-d5_length*cos_angle,  2*gap+d5_length*sin_angle); ctx.lineTo(-10-length*cos_angle,  2*gap+length*sin_angle);
+                ctx.strokeStyle = 'grey'; 
+                ctx.stroke();
+                
+                ctx.strokeStyle = 'blue'; 
+                ctx.beginPath();ctx.arc(-10-d1_length*cos_angle, -2*gap+d1_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                ctx.beginPath();ctx.arc(-10-d2_length*cos_angle, -1*gap+d2_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                ctx.beginPath();ctx.arc(-10-d3_length*cos_angle,  0*gap+d3_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                ctx.beginPath();ctx.arc(-10-d4_length*cos_angle,  1*gap+d4_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                ctx.beginPath();ctx.arc(-10-d5_length*cos_angle,  2*gap+d5_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(-10-length*cos_angle,  2*gap+length*sin_angle);
+                ctx.lineTo(-10-length*cos_angle - 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle); 
+                ctx.lineTo(-10-(2*gap+length)*cos_angle - 2*gap*cos_angle*sin_angle, 2*gap+(2*gap+length)*sin_angle - 2*gap*cos_angle*cos_angle); 
+                ctx.lineTo(-10-length*cos_angle,  2*gap+length*sin_angle);
+                ctx.fill();
+
                 ctx.restore();
             }
 
@@ -673,16 +718,20 @@
                 const win_height = document.getElementById("antenna-front-container").offsetHeight; 
                 afront_canvas.width = win_width-2; 
                 afront_canvas.height = win_height-2; 
-
                 fctx.clearRect(0, 0, win_width, win_height);
+                
+                let angle_deg = angle_slider.value;
+                if(!angle_cb.checked) {
+                    angle_deg = 0;
+                }
                 
                 fctx.font = angle_font;
                 fctx.textAlign = "left";
-                if(angle_cb.checked) { fctx.font = angle_font; } else { fctx.font = hidden_font; }
-                fctx.fillText(angle_slider.value + '\u00B0', 10, 15);
+                //if(angle_cb.checked) { fctx.font = angle_font; } else { fctx.font = hidden_font; }
+                fctx.fillText(angle_deg + '\u00B0', 10, 15);
                 fctx.font = normal_font;
                 
-                drawAntenna(fctx, afront_canvas.width*0.5, afront_canvas.height*0.3, 120, angle_slider.value);
+                drawAntenna(fctx, afront_canvas.width*0.5, afront_canvas.height*0.3, 110, angle_deg);
                 //drawWire(fctx, afront_canvas.width*0.5, 10, );
             }
             
