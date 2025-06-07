@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="fandipole.css">
     </head>
     <body>
-        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.4</header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.5</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -224,7 +224,6 @@
                         dipole_count += 1;
                     }
                 }
-                console.log(dipole_count);
                 
                 droop_angle = angle_slider.value;
                 
@@ -756,7 +755,7 @@
                 sctx.clearRect(0, 0, win_width, win_height);
                 
                 const x_m = 100;
-                const x_ft = 150;
+                const x_ft = 160;
                 const y_offset = 25;
                 const y_spacing = 15;
                 const places = 2;
@@ -764,23 +763,23 @@
                 
                 sctx.textAlign = "center";
                 sctx.font = emphasis_font;
-                sctx.fillText('Dipole Lengths', 75, 20);
+                sctx.fillText('Dipole Lengths', 85, 20);
                 
                 sctx.textAlign = "right";
                 if(length1_cb.checked) { sctx.font = length1_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * dipole['D1'].length).toFixed(places) + ' m  < D1 >', x_m, y_offset + y_spacing);
+                sctx.fillText((1.0 * dipole['D1'].length).toFixed(places) + ' m   D1 ', x_m, y_offset + y_spacing);
                 sctx.fillText((m_2_ft * dipole['D1'].length).toFixed(places) + ' ft', x_ft, y_offset + y_spacing);
                 if(length2_cb.checked) { sctx.font = length2_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * dipole['D2'].length).toFixed(places) + ' m  < D2 >', x_m, y_offset + 2*y_spacing);
+                sctx.fillText((1.0 * dipole['D2'].length).toFixed(places) + ' m   D2 ', x_m, y_offset + 2*y_spacing);
                 sctx.fillText((m_2_ft * dipole['D2'].length).toFixed(places) + ' ft', x_ft, y_offset + 2*y_spacing);
                 if(length3_cb.checked) { sctx.font = length3_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * dipole['D3'].length).toFixed(places) + ' m  < D3 >', x_m, y_offset + 3*y_spacing);
+                sctx.fillText((1.0 * dipole['D3'].length).toFixed(places) + ' m   D3 ', x_m, y_offset + 3*y_spacing);
                 sctx.fillText((m_2_ft * dipole['D3'].length).toFixed(places) + ' ft', x_ft, y_offset + 3*y_spacing);
                 if(length4_cb.checked) { sctx.font = length4_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * dipole['D4'].length).toFixed(places) + ' m  < D4 >', x_m, y_offset + 4*y_spacing);
+                sctx.fillText((1.0 * dipole['D4'].length).toFixed(places) + ' m   D4 ', x_m, y_offset + 4*y_spacing);
                 sctx.fillText((m_2_ft * dipole['D4'].length).toFixed(places) + ' ft', x_ft, y_offset + 4*y_spacing);
                 if(length5_cb.checked) { sctx.font = length5_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * dipole['D5'].length).toFixed(places) + ' m  < D5 >', x_m, y_offset + 5*y_spacing);
+                sctx.fillText((1.0 * dipole['D5'].length).toFixed(places) + ' m   D5 ', x_m, y_offset + 5*y_spacing);
                 sctx.fillText((m_2_ft * dipole['D5'].length).toFixed(places) + ' ft', x_ft, y_offset + 5*y_spacing);
                 sctx.font = normal_font;
             }
