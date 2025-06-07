@@ -134,6 +134,7 @@
             var SWRs = [];
             
             var dipole = {};
+            var dipole_count = 0;
             
             // GUI control widgets:
             var angle_slider = document.getElementById("angle_slider");
@@ -150,9 +151,9 @@
               length3: length3_slider,
               length4: length4_slider,
               length5: length5_slider
-            }
+            };
+            
             const sliders_to_params = Object.entries(params_to_sliders).map(([k, v]) => [v, k]);
-
 
             // Get all widget sets
             const widgetSets = document.querySelectorAll('section div.sliders');
@@ -193,7 +194,7 @@
               var new_url = new URL(window.location.href);
               new_url.search = usp;
               window.history.replaceState(null, null, new_url);
-            }
+            };
 
 
             function updateFrequencies() {
@@ -216,6 +217,14 @@
                 dipole['D3'] = {'length':length3_slider.value, 'enabled':length3_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
                 dipole['D4'] = {'length':length4_slider.value, 'enabled':length4_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
                 dipole['D5'] = {'length':length5_slider.value, 'enabled':length5_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                
+                dipole_count = 0;
+                for(var k in dipole) {
+                    if(dipole[k].enabled) {
+                        dipole_count += 1;
+                    }
+                }
+                console.log(dipole_count);
                 
                 droop_angle = angle_slider.value;
                 
@@ -363,7 +372,7 @@
             }
 
             function calculateAll() {
-                setGlobals();
+                //setGlobals();
                 frequencies.forEach(freq => {
                     let total_admittance = math.complex(0,0);
                     Object.keys(dipole).forEach(key => {
@@ -373,12 +382,12 @@
                             let rr = radiationResistance(freq * 1e6, len);
                             const xx = inductiveReactance(freq * 1e6, len);
                             if(angle_cb.checked) {
-                                rr = rr * Math.cos(Math.PI - angle_slider.value*Math.PI/180)**2;
+                                rr = rr * Math.cos(Math.PI - droop_angle*Math.PI/180)**2;
                             }
                             dipole[key]['Rr'].push({x:freq, y:rr});
                             dipole[key]['Xm'].push({x:freq, y:xx});
-                const wavelength = CC / (freq * 1e6);
-                const length_in_lambda = len / wavelength;
+                            const wavelength = CC / (freq * 1e6);
+                            const length_in_lambda = len / wavelength;
                             const sin_kl_on_2_sqrd = 1.0 / (Math.sin(Math.PI * length_in_lambda)**2);
                             //const sin_kl_on_2_sqrd = 1.0 / (Math.sin(Math.PI * len * freq * 1e6 / CC)**2);
                             //const sin_kl_on_2_sqrd = 1.0 ;
@@ -633,11 +642,11 @@
                 const cos_angle = Math.cos(angle_deg*Math.PI/180);
                 const sin_angle = Math.sin(angle_deg*Math.PI/180);
                 
-                const d1_length = length * length1_slider.value / 22;
-                const d2_length = length * length2_slider.value / 22;
-                const d3_length = length * length3_slider.value / 22;
-                const d4_length = length * length4_slider.value / 22;
-                const d5_length = length * length5_slider.value / 22;
+                const d1_length = length * dipole['D1'].length / 22;
+                const d2_length = length * dipole['D2'].length / 22;
+                const d3_length = length * dipole['D3'].length / 22;
+                const d4_length = length * dipole['D4'].length / 22;
+                const d5_length = length * dipole['D5'].length / 22;
                 
                 // Draw right side:
                 ctx.beginPath();
@@ -721,7 +730,7 @@
                 afront_canvas.height = win_height-2; 
                 fctx.clearRect(0, 0, win_width, win_height);
                 
-                let angle_deg = angle_slider.value;
+                let angle_deg = droop_angle;
                 if(!angle_cb.checked) {
                     angle_deg = 0;
                 }
@@ -732,7 +741,7 @@
                 fctx.fillText(angle_deg + '\u00B0', 10, 15);
                 fctx.font = normal_font;
                 
-                drawAntenna(fctx, afront_canvas.width*0.5, afront_canvas.height*0.3, 110, angle_deg);
+                drawAntenna(fctx, afront_canvas.width*0.5, afront_canvas.height*0.3, afront_canvas.width*0.3, angle_deg);
                 //drawWire(fctx, afront_canvas.width*0.5, 10, );
             }
             
@@ -759,20 +768,20 @@
                 
                 sctx.textAlign = "right";
                 if(length1_cb.checked) { sctx.font = length1_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * length1_slider.value).toFixed(places) + ' m  < D1 >', x_m, y_offset + y_spacing);
-                sctx.fillText((m_2_ft * length1_slider.value).toFixed(places) + ' ft', x_ft, y_offset + y_spacing);
+                sctx.fillText((1.0 * dipole['D1'].length).toFixed(places) + ' m  < D1 >', x_m, y_offset + y_spacing);
+                sctx.fillText((m_2_ft * dipole['D1'].length).toFixed(places) + ' ft', x_ft, y_offset + y_spacing);
                 if(length2_cb.checked) { sctx.font = length2_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * length2_slider.value).toFixed(places) + ' m  < D2 >', x_m, y_offset + 2*y_spacing);
-                sctx.fillText((m_2_ft * length2_slider.value).toFixed(places) + ' ft', x_ft, y_offset + 2*y_spacing);
+                sctx.fillText((1.0 * dipole['D2'].length).toFixed(places) + ' m  < D2 >', x_m, y_offset + 2*y_spacing);
+                sctx.fillText((m_2_ft * dipole['D2'].length).toFixed(places) + ' ft', x_ft, y_offset + 2*y_spacing);
                 if(length3_cb.checked) { sctx.font = length3_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * length3_slider.value).toFixed(places) + ' m  < D3 >', x_m, y_offset + 3*y_spacing);
-                sctx.fillText((m_2_ft * length3_slider.value).toFixed(places) + ' ft', x_ft, y_offset + 3*y_spacing);
+                sctx.fillText((1.0 * dipole['D3'].length).toFixed(places) + ' m  < D3 >', x_m, y_offset + 3*y_spacing);
+                sctx.fillText((m_2_ft * dipole['D3'].length).toFixed(places) + ' ft', x_ft, y_offset + 3*y_spacing);
                 if(length4_cb.checked) { sctx.font = length4_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * length4_slider.value).toFixed(places) + ' m  < D4 >', x_m, y_offset + 4*y_spacing);
-                sctx.fillText((m_2_ft * length4_slider.value).toFixed(places) + ' ft', x_ft, y_offset + 4*y_spacing);
+                sctx.fillText((1.0 * dipole['D4'].length).toFixed(places) + ' m  < D4 >', x_m, y_offset + 4*y_spacing);
+                sctx.fillText((m_2_ft * dipole['D4'].length).toFixed(places) + ' ft', x_ft, y_offset + 4*y_spacing);
                 if(length5_cb.checked) { sctx.font = length5_font; } else { sctx.font = hidden_font; }
-                sctx.fillText((1.0 * length5_slider.value).toFixed(places) + ' m  < D5 >', x_m, y_offset + 5*y_spacing);
-                sctx.fillText((m_2_ft * length5_slider.value).toFixed(places) + ' ft', x_ft, y_offset + 5*y_spacing);
+                sctx.fillText((1.0 * dipole['D5'].length).toFixed(places) + ' m  < D5 >', x_m, y_offset + 5*y_spacing);
+                sctx.fillText((m_2_ft * dipole['D5'].length).toFixed(places) + ' ft', x_ft, y_offset + 5*y_spacing);
                 sctx.font = normal_font;
             }
             
@@ -780,9 +789,9 @@
             setGlobals();
             // Update the frequencies, now that we have the sliders available:
             updateFrequencies();
-            calculateAll();
             drawFrontDesign();
             drawSideDesign();
+            calculateAll();
 
             const chartCanvas = document.getElementById("chartCanvas");
             const chartCanvasContext = chartCanvas.getContext('2d');
