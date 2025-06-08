@@ -58,7 +58,7 @@
             <b><u>Notes:</u></b><br>
             The Fan-Dipole Antenna Calculator was developed to predict the characteristics of a fan-dipole antenna with 
             up-to 5-elements, given physical dimensions entered via slider widgets. It allows you to see what the effects
-            of additional dipoles will do to the feedpoint impedance (and therefore the VSWR) for your antenna. <br>
+            of additional dipoles will do to the feedpoint impedance (and therefore the VSWR based on 50 ohm feed) for your antenna. <br>
             It supports:
             <ul>
                 <li>Up-to Five dipole elements</li>
@@ -110,6 +110,8 @@
             [1]: Constantine A. Balanis, <b>"Antenna Theory 3rd Ed"</b> <i>, Wiley, 2005, pp. 465.</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[3-June-25] v0.5</b> <br>
+            * Fix some layout issues.<br>
             <b>[3-June-25] v0.4</b> <br>
             * Enable angle adjustment factor.<br>
             <b>[27-May-25] v0.1</b> <br>
@@ -204,7 +206,7 @@
                         frequencies.push(i * 0.01);
                     }
                 } else {
-                    for(var i=10; i<=150; i++) {
+                    for(var i=5; i<=150; i++) {
                         frequencies.push(i * 0.20);
                     }
                 }
