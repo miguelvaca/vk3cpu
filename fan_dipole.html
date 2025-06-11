@@ -612,7 +612,7 @@
                 drawFrontDesign();
                 drawSideDesign();
             }
-
+/*
             function drawWire(ctx, x1, y1, x2, y2, wireRadius, fillColor) {
                 var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
                 ctx.beginPath();
@@ -620,6 +620,20 @@
                 ctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
                 ctx.fillStyle = fillColor;
                 ctx.fill();
+            }
+*/
+            function drawWire(ctx, x1, y1, x2, y2, enabled) {
+//                var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                if(enabled) {
+                    ctx.strokeStyle = "blue";
+                    ctx.arc(x2, y2, 4, 0, 2*Math.PI);
+                } else {
+                    ctx.strokeStyle = "grey";
+                }
+                ctx.stroke();
             }
 
             function drawAntenna(ctx, vertex_x, vertex_y, length, angle_deg) {
@@ -650,32 +664,19 @@
                 const d5_length = length * dipole['D5'].length / 22;
                 
                 // Draw right side:
-                ctx.beginPath();
-                ctx.moveTo(10,-2*gap); ctx.lineTo(10+d1_length*cos_angle, -2*gap+d1_length*sin_angle); 
-                ctx.moveTo(10,-1*gap); ctx.lineTo(10+d2_length*cos_angle, -1*gap+d2_length*sin_angle);
-                ctx.moveTo(10, 0*gap); ctx.lineTo(10+d3_length*cos_angle,  0*gap+d3_length*sin_angle);
-                ctx.moveTo(10, 1*gap); ctx.lineTo(10+d4_length*cos_angle,  1*gap+d4_length*sin_angle);
-                ctx.moveTo(10, 2*gap); ctx.lineTo(10+d5_length*cos_angle,  2*gap+d5_length*sin_angle);
-                ctx.strokeStyle = 'blue'; 
-                ctx.stroke();
+                drawWire(ctx, 10,-2*gap, 10+d1_length*cos_angle, -2*gap+d1_length*sin_angle, dipole['D1'].enabled);
+                drawWire(ctx, 10,-1*gap, 10+d2_length*cos_angle, -1*gap+d1_length*sin_angle, dipole['D2'].enabled);
+                drawWire(ctx, 10, 0*gap, 10+d3_length*cos_angle,  0*gap+d1_length*sin_angle, dipole['D3'].enabled);
+                drawWire(ctx, 10, 1*gap, 10+d4_length*cos_angle,  1*gap+d1_length*sin_angle, dipole['D4'].enabled);
+                drawWire(ctx, 10, 2*gap, 10+d5_length*cos_angle,  2*gap+d1_length*sin_angle, dipole['D5'].enabled);
                 
-                ctx.beginPath();
-                ctx.moveTo(10+d1_length*cos_angle, -2*gap+d1_length*sin_angle); ctx.lineTo(10+length*cos_angle + 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle); 
-                ctx.moveTo(10+d2_length*cos_angle, -1*gap+d2_length*sin_angle); ctx.lineTo(10+length*cos_angle + 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle);
-                ctx.moveTo(10+d3_length*cos_angle,  0*gap+d3_length*sin_angle); ctx.lineTo(10+length*cos_angle + 2*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 2*gap*cos_angle*cos_angle);
-                ctx.moveTo(10+d4_length*cos_angle,  1*gap+d4_length*sin_angle); ctx.lineTo(10+length*cos_angle + 1*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 1*gap*cos_angle*cos_angle);
-                ctx.moveTo(10+d5_length*cos_angle,  2*gap+d5_length*sin_angle); ctx.lineTo(10+length*cos_angle,  2*gap+length*sin_angle);
-                ctx.strokeStyle = 'grey'; 
-                ctx.stroke();
+                drawWire(ctx, 10+d1_length*cos_angle, -2*gap+d1_length*sin_angle, 10+length*cos_angle + 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle, false);
+                drawWire(ctx, 10+d2_length*cos_angle, -1*gap+d1_length*sin_angle, 10+length*cos_angle + 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle, false);
+                drawWire(ctx, 10+d3_length*cos_angle,  0*gap+d1_length*sin_angle, 10+length*cos_angle + 2*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 2*gap*cos_angle*cos_angle, false);
+                drawWire(ctx, 10+d4_length*cos_angle,  1*gap+d1_length*sin_angle, 10+length*cos_angle + 1*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 1*gap*cos_angle*cos_angle, false);
+                drawWire(ctx, 10+d5_length*cos_angle,  2*gap+d1_length*sin_angle, 10+length*cos_angle,  2*gap+length*sin_angle, false);
 
                 const radius = 4;
-                ctx.strokeStyle = 'blue'; 
-                ctx.beginPath();ctx.arc(10+d1_length*cos_angle, -2*gap+d1_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
-                ctx.beginPath();ctx.arc(10+d2_length*cos_angle, -1*gap+d2_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
-                ctx.beginPath();ctx.arc(10+d3_length*cos_angle,  0*gap+d3_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
-                ctx.beginPath();ctx.arc(10+d4_length*cos_angle,  1*gap+d4_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
-                ctx.beginPath();ctx.arc(10+d5_length*cos_angle,  2*gap+d5_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
-                
                 ctx.fillStyle = 'grey';
 
                 ctx.beginPath();
@@ -686,30 +687,18 @@
                 ctx.fill();
                 
                 // Draw left side:
-                ctx.beginPath();
-                ctx.moveTo(-10,-2*gap); ctx.lineTo(-10-d1_length*cos_angle, -2*gap+d1_length*sin_angle);
-                ctx.moveTo(-10,-1*gap); ctx.lineTo(-10-d2_length*cos_angle, -1*gap+d2_length*sin_angle);
-                ctx.moveTo(-10, 0*gap); ctx.lineTo(-10-d3_length*cos_angle,  0*gap+d3_length*sin_angle);
-                ctx.moveTo(-10, 1*gap); ctx.lineTo(-10-d4_length*cos_angle,  1*gap+d4_length*sin_angle);
-                ctx.moveTo(-10, 2*gap); ctx.lineTo(-10-d5_length*cos_angle,  2*gap+d5_length*sin_angle);
-                ctx.strokeStyle = 'blue'; 
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.moveTo(-10-d1_length*cos_angle, -2*gap+d1_length*sin_angle); ctx.lineTo(-10-length*cos_angle - 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle); 
-                ctx.moveTo(-10-d2_length*cos_angle, -1*gap+d2_length*sin_angle); ctx.lineTo(-10-length*cos_angle - 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle);
-                ctx.moveTo(-10-d3_length*cos_angle,  0*gap+d3_length*sin_angle); ctx.lineTo(-10-length*cos_angle - 2*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 2*gap*cos_angle*cos_angle);
-                ctx.moveTo(-10-d4_length*cos_angle,  1*gap+d4_length*sin_angle); ctx.lineTo(-10-length*cos_angle - 1*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 1*gap*cos_angle*cos_angle);
-                ctx.moveTo(-10-d5_length*cos_angle,  2*gap+d5_length*sin_angle); ctx.lineTo(-10-length*cos_angle,  2*gap+length*sin_angle);
-                ctx.strokeStyle = 'grey'; 
-                ctx.stroke();
+                drawWire(ctx, -10,-2*gap, -10-d1_length*cos_angle, -2*gap+d1_length*sin_angle, dipole['D1'].enabled);
+                drawWire(ctx, -10,-1*gap, -10-d2_length*cos_angle, -1*gap+d1_length*sin_angle, dipole['D2'].enabled);
+                drawWire(ctx, -10, 0*gap, -10-d3_length*cos_angle,  0*gap+d1_length*sin_angle, dipole['D3'].enabled);
+                drawWire(ctx, -10, 1*gap, -10-d4_length*cos_angle,  1*gap+d1_length*sin_angle, dipole['D4'].enabled);
+                drawWire(ctx, -10, 2*gap, -10-d5_length*cos_angle,  2*gap+d1_length*sin_angle, dipole['D5'].enabled);
                 
-                ctx.strokeStyle = 'blue'; 
-                ctx.beginPath();ctx.arc(-10-d1_length*cos_angle, -2*gap+d1_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
-                ctx.beginPath();ctx.arc(-10-d2_length*cos_angle, -1*gap+d2_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
-                ctx.beginPath();ctx.arc(-10-d3_length*cos_angle,  0*gap+d3_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
-                ctx.beginPath();ctx.arc(-10-d4_length*cos_angle,  1*gap+d4_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
-                ctx.beginPath();ctx.arc(-10-d5_length*cos_angle,  2*gap+d5_length*sin_angle, radius, 0, 2*Math.PI); ctx.stroke();
+                drawWire(ctx, -10-d1_length*cos_angle, -2*gap+d1_length*sin_angle, -10-length*cos_angle - 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle, false); 
+                drawWire(ctx, -10-d2_length*cos_angle, -1*gap+d2_length*sin_angle, -10-length*cos_angle - 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle, false);
+                drawWire(ctx, -10-d3_length*cos_angle,  0*gap+d3_length*sin_angle, -10-length*cos_angle - 2*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 2*gap*cos_angle*cos_angle, false);
+                drawWire(ctx, -10-d4_length*cos_angle,  1*gap+d4_length*sin_angle, -10-length*cos_angle - 1*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 1*gap*cos_angle*cos_angle, false);
+                drawWire(ctx, -10-d5_length*cos_angle,  2*gap+d5_length*sin_angle, -10-length*cos_angle,  2*gap+length*sin_angle, false);
+
                 
                 ctx.beginPath();
                 ctx.moveTo(-10-length*cos_angle,  2*gap+length*sin_angle);
