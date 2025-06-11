@@ -665,16 +665,16 @@
                 
                 // Draw right side:
                 drawWire(ctx, 10,-2*gap, 10+d1_length*cos_angle, -2*gap+d1_length*sin_angle, dipole['D1'].enabled);
-                drawWire(ctx, 10,-1*gap, 10+d2_length*cos_angle, -1*gap+d1_length*sin_angle, dipole['D2'].enabled);
-                drawWire(ctx, 10, 0*gap, 10+d3_length*cos_angle,  0*gap+d1_length*sin_angle, dipole['D3'].enabled);
-                drawWire(ctx, 10, 1*gap, 10+d4_length*cos_angle,  1*gap+d1_length*sin_angle, dipole['D4'].enabled);
-                drawWire(ctx, 10, 2*gap, 10+d5_length*cos_angle,  2*gap+d1_length*sin_angle, dipole['D5'].enabled);
+                drawWire(ctx, 10,-1*gap, 10+d2_length*cos_angle, -1*gap+d2_length*sin_angle, dipole['D2'].enabled);
+                drawWire(ctx, 10, 0*gap, 10+d3_length*cos_angle,  0*gap+d3_length*sin_angle, dipole['D3'].enabled);
+                drawWire(ctx, 10, 1*gap, 10+d4_length*cos_angle,  1*gap+d4_length*sin_angle, dipole['D4'].enabled);
+                drawWire(ctx, 10, 2*gap, 10+d5_length*cos_angle,  2*gap+d5_length*sin_angle, dipole['D5'].enabled);
                 
                 drawWire(ctx, 10+d1_length*cos_angle, -2*gap+d1_length*sin_angle, 10+length*cos_angle + 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle, false);
-                drawWire(ctx, 10+d2_length*cos_angle, -1*gap+d1_length*sin_angle, 10+length*cos_angle + 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle, false);
-                drawWire(ctx, 10+d3_length*cos_angle,  0*gap+d1_length*sin_angle, 10+length*cos_angle + 2*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 2*gap*cos_angle*cos_angle, false);
-                drawWire(ctx, 10+d4_length*cos_angle,  1*gap+d1_length*sin_angle, 10+length*cos_angle + 1*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 1*gap*cos_angle*cos_angle, false);
-                drawWire(ctx, 10+d5_length*cos_angle,  2*gap+d1_length*sin_angle, 10+length*cos_angle,  2*gap+length*sin_angle, false);
+                drawWire(ctx, 10+d2_length*cos_angle, -1*gap+d2_length*sin_angle, 10+length*cos_angle + 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle, false);
+                drawWire(ctx, 10+d3_length*cos_angle,  0*gap+d3_length*sin_angle, 10+length*cos_angle + 2*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 2*gap*cos_angle*cos_angle, false);
+                drawWire(ctx, 10+d4_length*cos_angle,  1*gap+d4_length*sin_angle, 10+length*cos_angle + 1*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 1*gap*cos_angle*cos_angle, false);
+                drawWire(ctx, 10+d5_length*cos_angle,  2*gap+d5_length*sin_angle, 10+length*cos_angle,  2*gap+length*sin_angle, false);
 
                 const radius = 4;
                 ctx.fillStyle = 'grey';
@@ -688,10 +688,10 @@
                 
                 // Draw left side:
                 drawWire(ctx, -10,-2*gap, -10-d1_length*cos_angle, -2*gap+d1_length*sin_angle, dipole['D1'].enabled);
-                drawWire(ctx, -10,-1*gap, -10-d2_length*cos_angle, -1*gap+d1_length*sin_angle, dipole['D2'].enabled);
-                drawWire(ctx, -10, 0*gap, -10-d3_length*cos_angle,  0*gap+d1_length*sin_angle, dipole['D3'].enabled);
-                drawWire(ctx, -10, 1*gap, -10-d4_length*cos_angle,  1*gap+d1_length*sin_angle, dipole['D4'].enabled);
-                drawWire(ctx, -10, 2*gap, -10-d5_length*cos_angle,  2*gap+d1_length*sin_angle, dipole['D5'].enabled);
+                drawWire(ctx, -10,-1*gap, -10-d2_length*cos_angle, -1*gap+d2_length*sin_angle, dipole['D2'].enabled);
+                drawWire(ctx, -10, 0*gap, -10-d3_length*cos_angle,  0*gap+d3_length*sin_angle, dipole['D3'].enabled);
+                drawWire(ctx, -10, 1*gap, -10-d4_length*cos_angle,  1*gap+d4_length*sin_angle, dipole['D4'].enabled);
+                drawWire(ctx, -10, 2*gap, -10-d5_length*cos_angle,  2*gap+d5_length*sin_angle, dipole['D5'].enabled);
                 
                 drawWire(ctx, -10-d1_length*cos_angle, -2*gap+d1_length*sin_angle, -10-length*cos_angle - 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle, false); 
                 drawWire(ctx, -10-d2_length*cos_angle, -1*gap+d2_length*sin_angle, -10-length*cos_angle - 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle, false);
