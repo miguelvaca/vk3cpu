@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="fandipole.css">
     </head>
     <body>
-        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.6</header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.7</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -110,6 +110,8 @@
             [1]: Constantine A. Balanis, <b>"Antenna Theory 3rd Ed"</b> <i>, Wiley, 2005, pp. 465.</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[14-June-25] v0.7</b> <br>
+            * Move droop angle text location. Add a line and arc.<br>
             <b>[3-June-25] v0.5</b> <br>
             * Fix some layout issues.<br>
             <b>[3-June-25] v0.4</b> <br>
@@ -211,7 +213,11 @@
                     }
                 }
             }
-            
+            /*
+            function slider2value(val) {
+                return 2**val;
+            }
+            */
             function setGlobals() {
             
                 dipole['D1'] = {'length':length1_slider.value, 'enabled':length1_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
@@ -612,18 +618,8 @@
                 drawFrontDesign();
                 drawSideDesign();
             }
-/*
-            function drawWire(ctx, x1, y1, x2, y2, wireRadius, fillColor) {
-                var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
-                ctx.beginPath();
-                ctx.arc(x1, y1, wireRadius, angle, Math.PI+angle);
-                ctx.arc(x2, y2, wireRadius, Math.PI+angle, angle);
-                ctx.fillStyle = fillColor;
-                ctx.fill();
-            }
-*/
+
             function drawWire(ctx, x1, y1, x2, y2, enabled) {
-//                var angle = math.atan2(y1 - y2, x1 - x2) - Math.PI * 0.5;
                 ctx.beginPath();
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
@@ -651,6 +647,20 @@
                 ctx.lineTo(-gap, +3*gap);
                 ctx.lineTo(-gap, -3*gap); 
                 ctx.stroke();
+                
+                // Write the droop angle:
+                fctx.textAlign = "left";
+                ctx.fillText(angle_deg + '\u00B0', -3*gap, -2*gap - 4);
+
+                // Draw droop angle line and arc:
+                ctx.strokeStyle = "grey";
+                ctx.beginPath();
+                ctx.moveTo(-10, -2*gap);
+                ctx.lineTo(-40, -2*gap);
+                ctx.arc(-10, -2*gap, 30, Math.PI, Math.PI - angle_deg*Math.PI/180.0, true);
+                ctx.stroke();
+
+                // Write the included angle:
                 fctx.textAlign = "center";
                 ctx.fillText(180 - (2*angle_deg) + '\u00B0', 0, 3*gap+14);
                 
@@ -663,13 +673,14 @@
                 const d4_length = length * dipole['D4'].length / 22;
                 const d5_length = length * dipole['D5'].length / 22;
                 
-                // Draw right side:
+                // Draw right side - wire with circle:
                 drawWire(ctx, 10,-2*gap, 10+d1_length*cos_angle, -2*gap+d1_length*sin_angle, dipole['D1'].enabled);
                 drawWire(ctx, 10,-1*gap, 10+d2_length*cos_angle, -1*gap+d2_length*sin_angle, dipole['D2'].enabled);
                 drawWire(ctx, 10, 0*gap, 10+d3_length*cos_angle,  0*gap+d3_length*sin_angle, dipole['D3'].enabled);
                 drawWire(ctx, 10, 1*gap, 10+d4_length*cos_angle,  1*gap+d4_length*sin_angle, dipole['D4'].enabled);
                 drawWire(ctx, 10, 2*gap, 10+d5_length*cos_angle,  2*gap+d5_length*sin_angle, dipole['D5'].enabled);
                 
+                // Draw right side - stringer:
                 drawWire(ctx, 10+d1_length*cos_angle, -2*gap+d1_length*sin_angle, 10+length*cos_angle + 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle, false);
                 drawWire(ctx, 10+d2_length*cos_angle, -1*gap+d2_length*sin_angle, 10+length*cos_angle + 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle, false);
                 drawWire(ctx, 10+d3_length*cos_angle,  0*gap+d3_length*sin_angle, 10+length*cos_angle + 2*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 2*gap*cos_angle*cos_angle, false);
@@ -679,6 +690,7 @@
                 const radius = 4;
                 ctx.fillStyle = 'grey';
 
+                // Draw right triangle:
                 ctx.beginPath();
                 ctx.moveTo(10+length*cos_angle,  2*gap+length*sin_angle);
                 ctx.lineTo(10+length*cos_angle + 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle); 
@@ -686,20 +698,21 @@
                 ctx.lineTo(10+length*cos_angle,  2*gap+length*sin_angle);
                 ctx.fill();
                 
-                // Draw left side:
+                // Draw left side - wire with circle:
                 drawWire(ctx, -10,-2*gap, -10-d1_length*cos_angle, -2*gap+d1_length*sin_angle, dipole['D1'].enabled);
                 drawWire(ctx, -10,-1*gap, -10-d2_length*cos_angle, -1*gap+d2_length*sin_angle, dipole['D2'].enabled);
                 drawWire(ctx, -10, 0*gap, -10-d3_length*cos_angle,  0*gap+d3_length*sin_angle, dipole['D3'].enabled);
                 drawWire(ctx, -10, 1*gap, -10-d4_length*cos_angle,  1*gap+d4_length*sin_angle, dipole['D4'].enabled);
                 drawWire(ctx, -10, 2*gap, -10-d5_length*cos_angle,  2*gap+d5_length*sin_angle, dipole['D5'].enabled);
                 
+                // Draw left side - stringer:
                 drawWire(ctx, -10-d1_length*cos_angle, -2*gap+d1_length*sin_angle, -10-length*cos_angle - 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle, false); 
                 drawWire(ctx, -10-d2_length*cos_angle, -1*gap+d2_length*sin_angle, -10-length*cos_angle - 3*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 3*gap*cos_angle*cos_angle, false);
                 drawWire(ctx, -10-d3_length*cos_angle,  0*gap+d3_length*sin_angle, -10-length*cos_angle - 2*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 2*gap*cos_angle*cos_angle, false);
                 drawWire(ctx, -10-d4_length*cos_angle,  1*gap+d4_length*sin_angle, -10-length*cos_angle - 1*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 1*gap*cos_angle*cos_angle, false);
                 drawWire(ctx, -10-d5_length*cos_angle,  2*gap+d5_length*sin_angle, -10-length*cos_angle,  2*gap+length*sin_angle, false);
 
-                
+                // Draw left triangle:
                 ctx.beginPath();
                 ctx.moveTo(-10-length*cos_angle,  2*gap+length*sin_angle);
                 ctx.lineTo(-10-length*cos_angle - 4*gap*cos_angle*sin_angle, 2*gap+length*sin_angle - 4*gap*cos_angle*cos_angle); 
@@ -725,14 +738,7 @@
                     angle_deg = 0;
                 }
                 
-                fctx.font = angle_font;
-                fctx.textAlign = "left";
-                //if(angle_cb.checked) { fctx.font = angle_font; } else { fctx.font = hidden_font; }
-                fctx.fillText(angle_deg + '\u00B0', 10, 15);
-                fctx.font = normal_font;
-                
                 drawAntenna(fctx, afront_canvas.width*0.5, afront_canvas.height*0.3, afront_canvas.width*0.3, angle_deg);
-                //drawWire(fctx, afront_canvas.width*0.5, 10, );
             }
             
             const aside_canvas = document.getElementById("antennaSide2D");
