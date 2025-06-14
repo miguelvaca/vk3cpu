@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="fandipole.css">
     </head>
     <body>
-        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.7</header>
+        <header><a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Fan-Dipole Antenna Calculator 0.8</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -23,27 +23,27 @@
                 <div class="sliders">
                     <label for="length1_cb">D1:</label>
                     <input type="checkbox" id="length1_cb" checked>
-                    <input type="range" id="length1_slider" min="1.0" max="22.0" value="20.27" step="0.01">
+                    <input type="range" id="length1_slider" min="0.0" max="4.0" value="2.0" step="0.001">
                 </div>
                 <div class="sliders">
                     <label for="length2_cb">D2:</label>
                     <input type="checkbox" id="length2_cb" checked>
-                    <input type="range" id="length2_slider" min="1.0" max="22.0" value="14.27" step="0.01">
+                    <input type="range" id="length2_slider" min="0.0" max="4.0" value="2.0" step="0.001">
                 </div>
                 <div class="sliders">
                     <label for="length3_cb">D3:</label>
                     <input type="checkbox" id="length3_cb" >
-                    <input type="range" id="length3_slider" min="1.0" max="22.0" value="10.05" step="0.01">
+                    <input type="range" id="length3_slider" min="0.0" max="4.0" value="1.05" step="0.001">
                 </div>
                 <div class="sliders">
                     <label for="length4_slider">D4:</label>
                     <input type="checkbox" id="length4_cb" >
-                    <input type="range" id="length4_slider" min="1.0" max="22.0" value="6.91" step="0.01">
+                    <input type="range" id="length4_slider" min="0.0" max="4.0" value="0.91" step="0.001">
                 </div>
                 <div class="sliders">
                     <label for="length5_slider">D5:</label>
                     <input type="checkbox" id="length5_cb" >
-                    <input type="range" id="length5_slider" min="1.0" max="22.0" value="5.01" step="0.01">
+                    <input type="range" id="length5_slider" min="0.0" max="4.0" value="0.01" step="0.001">
                 </div>
             </div>
             <div id="antenna-front-container" class="antennaFront-container" style="position: relative;">
@@ -110,6 +110,8 @@
             [1]: Constantine A. Balanis, <b>"Antenna Theory 3rd Ed"</b> <i>, Wiley, 2005, pp. 465.</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[14-June-25] v0.8</b> <br>
+            * Modify slider range to allow for 160m to 10m operation.<br>
             <b>[14-June-25] v0.7</b> <br>
             * Move droop angle text location. Add a line and arc.<br>
             <b>[3-June-25] v0.5</b> <br>
@@ -213,18 +215,22 @@
                     }
                 }
             }
-            /*
+            
             function slider2value(val) {
-                return 2**val;
+                return 4.5*2.1**val;
             }
-            */
+            
+            function value2slider(val) {
+                return Math.log(val/4.5) * 1.3478;
+            }
+            
             function setGlobals() {
             
-                dipole['D1'] = {'length':length1_slider.value, 'enabled':length1_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
-                dipole['D2'] = {'length':length2_slider.value, 'enabled':length2_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
-                dipole['D3'] = {'length':length3_slider.value, 'enabled':length3_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
-                dipole['D4'] = {'length':length4_slider.value, 'enabled':length4_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
-                dipole['D5'] = {'length':length5_slider.value, 'enabled':length5_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                dipole['D1'] = {'length':slider2value(length1_slider.value), 'enabled':length1_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                dipole['D2'] = {'length':slider2value(length2_slider.value), 'enabled':length2_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                dipole['D3'] = {'length':slider2value(length3_slider.value), 'enabled':length3_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                dipole['D4'] = {'length':slider2value(length4_slider.value), 'enabled':length4_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
+                dipole['D5'] = {'length':slider2value(length5_slider.value), 'enabled':length5_cb.checked, 'Rr':[], 'Xm':[], 'Z':[] };
                 
                 dipole_count = 0;
                 for(var k in dipole) {
@@ -667,11 +673,11 @@
                 const cos_angle = Math.cos(angle_deg*Math.PI/180);
                 const sin_angle = Math.sin(angle_deg*Math.PI/180);
                 
-                const d1_length = length * dipole['D1'].length / 22;
-                const d2_length = length * dipole['D2'].length / 22;
-                const d3_length = length * dipole['D3'].length / 22;
-                const d4_length = length * dipole['D4'].length / 22;
-                const d5_length = length * dipole['D5'].length / 22;
+                const d1_length = length * ((value2slider(dipole['D1'].length) / 5) + 0.2);
+                const d2_length = length * ((value2slider(dipole['D2'].length) / 5) + 0.2);
+                const d3_length = length * ((value2slider(dipole['D3'].length) / 5) + 0.2);
+                const d4_length = length * ((value2slider(dipole['D4'].length) / 5) + 0.2);
+                const d5_length = length * ((value2slider(dipole['D5'].length) / 5) + 0.2);
                 
                 // Draw right side - wire with circle:
                 drawWire(ctx, 10,-2*gap, 10+d1_length*cos_angle, -2*gap+d1_length*sin_angle, dipole['D1'].enabled);
@@ -751,8 +757,9 @@
                 aside_canvas.height = win_height-2; 
                 sctx.clearRect(0, 0, win_width, win_height);
                 
-                const x_m = 100;
-                const x_ft = 160;
+                // const x_m = 100;
+                const x_m = win_width / 2;
+                const x_ft = x_m + 60;
                 const y_offset = 25;
                 const y_spacing = 15;
                 const places = 2;
@@ -760,24 +767,29 @@
                 
                 sctx.textAlign = "center";
                 sctx.font = emphasis_font;
-                sctx.fillText('Dipole Lengths', 85, 20);
+                sctx.fillText('Dipole Lengths', x_m, 20);
                 
                 sctx.textAlign = "right";
                 if(length1_cb.checked) { sctx.font = length1_font; } else { sctx.font = hidden_font; }
                 sctx.fillText((1.0 * dipole['D1'].length).toFixed(places) + ' m   D1 ', x_m, y_offset + y_spacing);
                 sctx.fillText((m_2_ft * dipole['D1'].length).toFixed(places) + ' ft', x_ft, y_offset + y_spacing);
+                
                 if(length2_cb.checked) { sctx.font = length2_font; } else { sctx.font = hidden_font; }
                 sctx.fillText((1.0 * dipole['D2'].length).toFixed(places) + ' m   D2 ', x_m, y_offset + 2*y_spacing);
                 sctx.fillText((m_2_ft * dipole['D2'].length).toFixed(places) + ' ft', x_ft, y_offset + 2*y_spacing);
+                
                 if(length3_cb.checked) { sctx.font = length3_font; } else { sctx.font = hidden_font; }
                 sctx.fillText((1.0 * dipole['D3'].length).toFixed(places) + ' m   D3 ', x_m, y_offset + 3*y_spacing);
                 sctx.fillText((m_2_ft * dipole['D3'].length).toFixed(places) + ' ft', x_ft, y_offset + 3*y_spacing);
+                
                 if(length4_cb.checked) { sctx.font = length4_font; } else { sctx.font = hidden_font; }
                 sctx.fillText((1.0 * dipole['D4'].length).toFixed(places) + ' m   D4 ', x_m, y_offset + 4*y_spacing);
                 sctx.fillText((m_2_ft * dipole['D4'].length).toFixed(places) + ' ft', x_ft, y_offset + 4*y_spacing);
+                
                 if(length5_cb.checked) { sctx.font = length5_font; } else { sctx.font = hidden_font; }
                 sctx.fillText((1.0 * dipole['D5'].length).toFixed(places) + ' m   D5 ', x_m, y_offset + 5*y_spacing);
                 sctx.fillText((m_2_ft * dipole['D5'].length).toFixed(places) + ' ft', x_ft, y_offset + 5*y_spacing);
+                
                 sctx.font = normal_font;
             }
             
