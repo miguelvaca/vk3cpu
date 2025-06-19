@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="magloop.css">
     </head>
     <body>
-        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V10.5</header>
+        <header>Miguel <a href="mailto:vk3cpu@gmail.com">VK3CPU</a> - Magloop Antenna Calculator V10.6</header>
         <section class="gridLayoutClass">
             <div class="chart-container" style="position: relative;">
                 <canvas id="chartCanvas" class="chartCanvasClass">
@@ -138,6 +138,8 @@
             [3]: F W Grover, <b>"Formulas and Tables for the Calculation of the Inductance of Coils of Polygonal Form"</b> <i>Scientific Papers of the Bureau of Standards, Vol 18, p753</i> <br>
             <br>
             <b><u>Change history:</u></b><br>
+            <b>[19-Jun-25] - V10.6</b> <br>
+            * Hide least-used chart parameters to reduce clutter. Keep top-4 only. (Tuning Cap, Vcap, Bandwidth and Efficiency)<br>
             <b>[26-Jan-25] - V10.5</b> <br>
             * Fixed an inductance calculation error that was affecting octagonal shaped loops. Thanks to Robin Davies G7VKQ for pointing it out, and to Colin Summers MM0OPX and Roland HB9VQQ who originally discovered the issue. <br>
             <b>[21-Dec-23] - V10.4</b> <br>
@@ -1546,6 +1548,7 @@
                     },
                     {
                         label: 'R-radiation (\u03A9)',
+                        hidden: true,
                         fill: false,
                         borderColor: 'red',
                         backgroundColor: 'red',
@@ -1556,6 +1559,7 @@
                     },
                     {
                         label: 'R-loop (\u03A9)',
+                        hidden: true,
                         fill: false,
                         borderColor: 'orange',
                         backgroundColor: 'orange',
@@ -1566,6 +1570,7 @@
                     },
                     {
                         label: 'Reactance (j\u03A9)',
+                        hidden: true,
                         fill: false,
                         borderColor: 'blue',
                         backgroundColor: 'blue',
@@ -1576,6 +1581,7 @@
                     },
                     {
                         label: 'Q',
+                        hidden: true,
                         fill: false,
                         borderColor: 'purple',
                         backgroundColor: 'purple',
@@ -1586,6 +1592,7 @@
                     },
                     {
                         label: 'I\u2092 (A)',
+                        hidden: true,
                         fill: false,
                         borderColor: 'rgb(0,255,255)',
                         backgroundColor: 'rgb(0,128,128)',
@@ -1596,6 +1603,7 @@
                     },
                     {
                         label: 'Perimeter (\u03BB)',
+                        hidden: true,
                         fill: false,
                         borderColor: 'rgb(130,130,130)',
                         backgroundColor: 'rgb(130,130,130)',
@@ -1606,6 +1614,7 @@
                     },
                     {
                         label: 'Skin depth (\u03BCm)',
+                        hidden: true,
                         fill: false,
                         borderColor: 'rgb(75,75,75)',
                         backgroundColor: 'rgb(75,75,75)',
@@ -1826,7 +1835,7 @@
                                 title: function(context) {
                                     var value = context[0].parsed.x;
                                     var lut = {0.1357:'2200', 0.1378:'2200', 0.472:'600', 0.479:'600', 1.8:'160', 1.875:'160', 3.5:'80', 3.8:'80', 5.3:'60', 5.4:'60', 7.0:'40', 7.3:'40', 10.1:'30', 10.15:'30', 14.0:'20', 14.35:'20', 18.068:'17', 18.168:'17', 21.0:'15', 21.45:'15', 
-                                    24.89:'12', 24.99:'12', 26.965:'11', 27.855:'11', 28.0:'10', 29.7:'10', 35.0:'', 40.0:'', 45.0:'', 50.0:'6', 52.0:'6', 54.0:'6', 69.9:'4', 70.5:'4', 144.0:'2', 146.0:'2', 148.0:'2', 420.0:'0.7', 430.0:'0.7', 440.0:'0.7', 450.0:'0.7'};
+                                    24.89:'12', 24.99:'12', 26.965:'CB 11', 27.855:'CB 11', 28.0:'10', 29.7:'10', 35.0:'', 40.0:'', 45.0:'', 50.0:'6', 52.0:'6', 54.0:'6', 69.9:'4', 70.5:'4', 144.0:'2', 146.0:'2', 148.0:'2', 420.0:'0.7', 430.0:'0.7', 440.0:'0.7', 450.0:'0.7'};
                                     var label = '' + value.toPrecision(4).toString() + ' MHz';
                                     if(lut[value]) {
                                         label += ' (';
