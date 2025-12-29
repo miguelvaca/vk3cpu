@@ -822,8 +822,64 @@
                 return pre + ' '.repeat(whitespace) + post;
             }
             
+            // Ham band definitions with frequency ranges in MHz
+            const hamBands = [
+                { name: '160m', start: 1.8, end: 2.0 },
+                { name: '80m', start: 3.5, end: 4.0 },
+                { name: '60m', start: 5.3, end: 5.4 },
+                { name: '40m', start: 7.0, end: 7.3 },
+                { name: '30m', start: 10.1, end: 10.15 },
+                { name: '20m', start: 14.0, end: 14.35 },
+                { name: '17m', start: 18.068, end: 18.168 },
+                { name: '15m', start: 21.0, end: 21.45 },
+                { name: '12m', start: 24.89, end: 24.99 },
+                { name: '10m', start: 28.0, end: 29.7 }
+            ];
+
+            // Custom plugin to draw ham bands
+            const hamBandPlugin = {
+                id: 'hamBandPlugin',
+                beforeDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    const chartArea = chart.chartArea;
+                    const xScale = chart.scales.x;
+                    
+                    ctx.save();
+                    
+                    // Draw ham bands as grey rectangles
+                    hamBands.forEach(band => {
+                        const xStart = xScale.getPixelForValue(band.start);
+                        const xEnd = xScale.getPixelForValue(band.end);
+                        
+                        // Only draw if band is visible in current x-axis range
+                        if (xEnd >= chartArea.left && xStart <= chartArea.right) {
+                            ctx.fillStyle = 'rgba(200, 200, 200, 0.3)';
+                            ctx.fillRect(
+                                Math.max(xStart, chartArea.left),
+                                chartArea.top,
+                                Math.min(xEnd, chartArea.right) - Math.max(xStart, chartArea.left),
+                                chartArea.bottom - chartArea.top
+                            );
+                            
+                            // Add band label at top of chart
+                            ctx.fillStyle = 'rgba(100, 100, 100, 0.8)';
+                            ctx.font = '10px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(
+                                band.name,
+                                (Math.max(xStart, chartArea.left) + Math.min(xEnd, chartArea.right)) / 2,
+                                chartArea.top + 10
+                            );
+                        }
+                    });
+                    
+                    ctx.restore();
+                }
+            };
+
             var myChart = new Chart(chartCanvasContext, {
                 type: 'line',
+                plugins: [hamBandPlugin],
                 data: {
                     datasets: [
                     {
